@@ -1,4 +1,4 @@
-package cz.metacentrum.registrarpersistence.entity;
+package cz.metacentrum.registrar.persistence.entity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;

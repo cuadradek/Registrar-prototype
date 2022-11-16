@@ -1,7 +1,7 @@
-package cz.metacentrum.registrarservice;
+package cz.metacentrum.registrar.service;
 
-import cz.metacentrum.registrarpersistence.entity.Form;
-import cz.metacentrum.registrarpersistence.repository.FormRepository;
+import cz.metacentrum.registrar.persistence.entity.Form;
+import cz.metacentrum.registrar.persistence.repository.FormRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

@@ -1,4 +1,4 @@
-package cz.metacentrum.registrarpersistence.entity;
+package cz.metacentrum.registrar.persistence.entity;
 
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
@@ -12,7 +12,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import java.util.Arrays;
 import java.util.List;
-import cz.metacentrum.registrarpersistence.entity.Form.FormType;
 
 @Entity
 public class FormItem {
@@ -54,7 +53,7 @@ public class FormItem {
 	@Enumerated(EnumType.STRING)
 	@ElementCollection
 	@CollectionTable(name = "form_item_form_types", joinColumns = @JoinColumn(name = "item_id"))
-	private List<FormType> formTypes = Arrays.asList(FormType.INITIAL,FormType.EXTENSION);
+	private List<Form.FormType> formTypes = Arrays.asList(Form.FormType.INITIAL, Form.FormType.EXTENSION);
 
 	@Column
 	private Integer hiddenDependencyItemId;
@@ -79,7 +78,7 @@ public class FormItem {
 
 	public FormItem(Long id, String shortname, Integer ordnum, boolean required, boolean updatable, Type type,
 					boolean preferFederationAttribute, String federationAttribute, String idmSourceAttribute,
-					String idmDestinationAttribute, String regex, List<FormType> formTypes,
+					String idmDestinationAttribute, String regex, List<Form.FormType> formTypes,
 					Integer hiddenDependencyItemId, Integer disabledDependencyItemId, Disabled disabled,
 					Hidden hidden, boolean useInTemplate, Integer templateDependencyItemId) {
 		this.id = id;
@@ -190,11 +189,11 @@ public class FormItem {
 		this.regex = regex;
 	}
 
-	public List<FormType> getFormTypes() {
+	public List<Form.FormType> getFormTypes() {
 		return formTypes;
 	}
 
-	public void setFormTypes(List<FormType> formTypes) {
+	public void setFormTypes(List<Form.FormType> formTypes) {
 		this.formTypes = formTypes;
 	}
 
