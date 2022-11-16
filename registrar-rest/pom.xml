@@ -7,23 +7,34 @@
 		<artifactId>registrar</artifactId>
 		<version>1.0-SNAPSHOT</version>
 	</parent>
-	<artifactId>registrar-service</artifactId>
+	<artifactId>registrar-rest</artifactId>
 	<version>1.0-SNAPSHOT</version>
-	<name>registrar-service</name>
-
+	<packaging>war</packaging>
+	<name>registrar-rest</name>
 	<properties>
 		<java.version>17</java.version>
 	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>cz.metacentrum</groupId>
-			<artifactId>registrar-persistence</artifactId>
-			<version>${project.parent.version}</version>
+			<artifactId>registrar-service</artifactId>
+			<version>1.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-autoconfigure</artifactId>
+			<artifactId>spring-boot-starter-tomcat</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 

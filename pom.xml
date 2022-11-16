@@ -21,5 +21,6 @@
     <modules>
         <module>registrar-persistence</module>
         <module>registrar-service</module>
+        <module>registrar-rest</module>
     </modules>
 </project>

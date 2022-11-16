@@ -7,7 +7,6 @@
 		<artifactId>registrar</artifactId>
 		<version>1.0-SNAPSHOT</version>
 	</parent>
-	<groupId>cz.metacentrum</groupId>
 	<artifactId>registrar-persistence</artifactId>
 	<version>1.0-SNAPSHOT</version>
 	<name>registrar-persistence</name>

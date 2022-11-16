@@ -31,18 +31,18 @@ public class AssignedFormModule {
 	private List<ModuleConfigOption> configOption;
 
 	@Column
-	private int order;
+	private int ordnum;
 
 	public AssignedFormModule() {
 	}
 
-	public AssignedFormModule(Long id, Form form, String moduleName, FormModule formModule, List<ModuleConfigOption> configOption, int order) {
+	public AssignedFormModule(Long id, Form form, String moduleName, FormModule formModule, List<ModuleConfigOption> configOption, int ordnum) {
 		this.id = id;
 		this.form = form;
 		this.moduleName = moduleName;
 		this.formModule = formModule;
 		this.configOption = configOption;
-		this.order = order;
+		this.ordnum = ordnum;
 	}
 
 	public Long getId() {
@@ -85,11 +85,11 @@ public class AssignedFormModule {
 		this.configOption = configOption;
 	}
 
-	public int getOrder() {
-		return order;
+	public int getOrdnum() {
+		return ordnum;
 	}
 
-	public void setOrder(int order) {
-		this.order = order;
+	public void setOrdnum(int ordnum) {
+		this.ordnum = ordnum;
 	}
 }

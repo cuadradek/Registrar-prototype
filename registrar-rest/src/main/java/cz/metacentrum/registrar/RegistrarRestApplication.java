@@ -1,13 +1,13 @@
-package cz.metacentrum.registrar.persistence;
+package cz.metacentrum.registrar;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class RegistrarPersistenceApplication {
+public class RegistrarRestApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(RegistrarPersistenceApplication.class, args);
+		SpringApplication.run(RegistrarRestApplication.class, args);
 	}
 
 }

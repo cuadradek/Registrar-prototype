@@ -23,7 +23,7 @@ public class FormItemData {
 	@Column
 	private String shortname;
 
-	@Column
+	@Column(name = "item_value")
 	private String value;
 
 	@Column

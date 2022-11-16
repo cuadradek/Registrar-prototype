@@ -21,8 +21,8 @@ public class FormServiceImpl implements FormService {
 	}
 
 	@Override
-	public void deleteForm(Form form) {
-		formRepository.deleteById(form.getId());
+	public void deleteForm(Long id) {
+		formRepository.deleteById(id);
 	}
 
 	@Override

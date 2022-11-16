@@ -5,6 +5,6 @@ import cz.metacentrum.registrar.persistence.entity.Form;
 public interface FormService {
 
 	Form createForm(Form form);
-	void deleteForm(Form form);
+	void deleteForm(Long id);
 	Form updateForm(Form form);
 }
