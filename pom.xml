@@ -17,4 +17,9 @@
         <version>2.7.5</version>
         <relativePath/>
     </parent>
+
+    <modules>
+        <module>registrar-persistence</module>
+        <module>registrar-service</module>
+    </modules>
 </project>
