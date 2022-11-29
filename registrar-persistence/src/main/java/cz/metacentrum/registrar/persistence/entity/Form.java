@@ -1,13 +1,16 @@
 package cz.metacentrum.registrar.persistence.entity;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -49,10 +52,11 @@ public class Form {
 
 	@ManyToMany
 	@JoinTable(name="form_nested_form", joinColumns=@JoinColumn(name="form_id"), inverseJoinColumns=@JoinColumn(name="nested_form_id"))
-	private List<Form> nestedForms;
+	private List<Form> nestedForms = new ArrayList<>();
 
-	@OneToMany(mappedBy = "form")
-	private List<ApprovalGroup> approvalGroup;
+	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+//	@OneToMany(mappedBy = "form", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	private List<ApprovalGroup> approvalGroups = new ArrayList<>();
 
 	@OneToMany(mappedBy = "form")
 	private List<AssignedFormModule> assignedModules;
@@ -60,7 +64,7 @@ public class Form {
 	public Form() {
 	}
 
-	public Form(Long id, UUID idmObject, UUID idmFormManagersGroup, String name, String redirectUrl, List<Form> redirectForms, List<Form> autosendForms, boolean canBeResubmitted, boolean autoApprove, List<Form> nestedForms, List<ApprovalGroup> approvalGroup, List<AssignedFormModule> assignedModules) {
+	public Form(Long id, UUID idmObject, UUID idmFormManagersGroup, String name, String redirectUrl, List<Form> redirectForms, List<Form> autosendForms, boolean canBeResubmitted, boolean autoApprove, List<Form> nestedForms, List<ApprovalGroup> approvalGroups, List<AssignedFormModule> assignedModules) {
 		this.id = id;
 		this.idmObject = idmObject;
 		this.idmFormManagersGroup = idmFormManagersGroup;
@@ -71,7 +75,7 @@ public class Form {
 		this.canBeResubmitted = canBeResubmitted;
 		this.autoApprove = autoApprove;
 		this.nestedForms = nestedForms;
-		this.approvalGroup = approvalGroup;
+		this.approvalGroups = approvalGroups;
 		this.assignedModules = assignedModules;
 	}
 
@@ -155,12 +159,12 @@ public class Form {
 		this.nestedForms = nestedForms;
 	}
 
-	public List<ApprovalGroup> getApprovalGroup() {
-		return approvalGroup;
+	public List<ApprovalGroup> getApprovalGroups() {
+		return approvalGroups;
 	}
 
-	public void setApprovalGroup(List<ApprovalGroup> approvalGroup) {
-		this.approvalGroup = approvalGroup;
+	public void setApprovalGroups(List<ApprovalGroup> approvalGroup) {
+		this.approvalGroups = approvalGroup;
 	}
 
 	public List<AssignedFormModule> getAssignedModules() {

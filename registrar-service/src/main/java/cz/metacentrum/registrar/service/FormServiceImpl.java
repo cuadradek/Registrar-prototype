@@ -60,6 +60,8 @@ public class FormServiceImpl implements FormService {
 					savedForm.setIdmFormManagersGroup(form.getIdmFormManagersGroup());
 					savedForm.setName(form.getName());
 					savedForm.setIdmObject(form.getIdmObject());
+					savedForm.setRedirectUrl(form.getRedirectUrl());
+					savedForm.setApprovalGroups(form.getApprovalGroups());
 					return formRepository.save(savedForm);
 				}).orElseThrow();
 	}

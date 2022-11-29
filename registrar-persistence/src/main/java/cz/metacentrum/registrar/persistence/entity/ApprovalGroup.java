@@ -4,8 +4,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import java.util.UUID;
 
 @Entity
@@ -26,20 +24,20 @@ public class ApprovalGroup {
 	@Column
 	private UUID idmGroup;
 
-	@ManyToOne
-	@JoinColumn(name = "form_id")
-	private Form form;
+//	@ManyToOne
+//	@JoinColumn(name = "form_id")
+//	@JsonIgnore // needed jackson dependency
+//	private Form form;
 
 	public ApprovalGroup() {
 	}
 
-	public ApprovalGroup(Long id, int level, boolean mfaRequired, int minApprovals, UUID idmGroup, Form form) {
+	public ApprovalGroup(Long id, int level, boolean mfaRequired, int minApprovals, UUID idmGroup) {
 		this.id = id;
 		this.level = level;
 		this.mfaRequired = mfaRequired;
 		this.minApprovals = minApprovals;
 		this.idmGroup = idmGroup;
-		this.form = form;
 	}
 
 	public Long getId() {
@@ -80,13 +78,5 @@ public class ApprovalGroup {
 
 	public void setIdmGroup(UUID idmGroup) {
 		this.idmGroup = idmGroup;
-	}
-
-	public Form getForm() {
-		return form;
-	}
-
-	public void setForm(Form form) {
-		this.form = form;
 	}
 }
