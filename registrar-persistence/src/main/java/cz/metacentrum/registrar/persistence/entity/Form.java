@@ -1,5 +1,7 @@
 package cz.metacentrum.registrar.persistence.entity;
 
+import org.springframework.lang.Nullable;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -34,6 +36,7 @@ public class Form {
 	private String name;
 
 	@Column
+	@Nullable
 	private String redirectUrl;
 
 	@ManyToMany
@@ -173,5 +176,23 @@ public class Form {
 
 	public void setAssignedModules(List<AssignedFormModule> assignedModules) {
 		this.assignedModules = assignedModules;
+	}
+
+	@Override
+	public String toString() {
+		return "Form{" +
+				"id=" + id +
+				", idmObject=" + idmObject +
+				", idmFormManagersGroup=" + idmFormManagersGroup +
+				", name='" + name + '\'' +
+				", redirectUrl='" + redirectUrl + '\'' +
+				", redirectForms=" + redirectForms +
+				", autosendForms=" + autosendForms +
+				", canBeResubmitted=" + canBeResubmitted +
+				", autoApprove=" + autoApprove +
+				", nestedForms=" + nestedForms +
+				", approvalGroups=" + approvalGroups +
+				", assignedModules=" + assignedModules +
+				'}';
 	}
 }

@@ -6,9 +6,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class FormServiceImpl implements FormService {
@@ -28,6 +30,22 @@ public class FormServiceImpl implements FormService {
 	public Optional<Form> getFormById(Long id) {
 		return formRepository.findById(id);
 //				.orElseThrow(() -> new FormNotFoundException(id));
+	}
+
+	@Override
+	public List<Form> getFormsByIds(Set<Long> ids) {
+		List<Form> forms = formRepository.getAllByIdIn(ids);
+
+		if (forms.size() != ids.size()) {
+			Set<Long> foundIds = forms.stream()
+					.map(Form::getId)
+					.collect(Collectors.toSet());
+			Set<Long> notFoundIds = new HashSet<>(ids);
+			notFoundIds.removeAll(foundIds);
+			throw new FormNotFoundException(notFoundIds);
+		}
+
+		return forms;
 	}
 
 	@Override
