@@ -24,7 +24,7 @@ public class FormDto {
 	@Nullable
 	String redirectUrl;
 	@Nullable
-	Set<Long> redirectFormsIds;
+	Set<Long> redirectFormsIds; // TODO: maybe FormNameDTO(id, name) to have its name also or use HATEOAS link to the form
 	@Nullable
 	Set<Long> autosendFormsIds;
 	@NotNull

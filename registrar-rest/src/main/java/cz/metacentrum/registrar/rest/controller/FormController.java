@@ -18,8 +18,11 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
 //@RequestMapping("/api")
@@ -89,7 +92,18 @@ public class FormController {
 
 	private FormDto convertToDto(Form form) {
 		FormDto formDto = modelMapper.map(form, FormDto.class);
+		formDto.setNestedFormsIds(getFormsIds(form.getNestedForms()));
+		formDto.setAutosendFormsIds(getFormsIds(form.getAutosendForms()));
+		formDto.setRedirectFormsIds(getFormsIds(form.getRedirectForms()));
 		return formDto;
+	}
+
+	private Set<Long> getFormsIds(List<Form> forms) {
+		if (forms == null) return new HashSet<>();
+		return forms
+				.stream()
+				.map(Form::getId)
+				.collect(Collectors.toSet());
 	}
 
 	private Form convertToEntity(FormDto formDto) {
