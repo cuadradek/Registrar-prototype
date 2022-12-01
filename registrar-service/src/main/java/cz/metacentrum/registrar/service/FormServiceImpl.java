@@ -1,6 +1,8 @@
 package cz.metacentrum.registrar.service;
 
 import cz.metacentrum.registrar.persistence.entity.Form;
+import cz.metacentrum.registrar.persistence.entity.FormItem;
+import cz.metacentrum.registrar.persistence.repository.FormItemRepository;
 import cz.metacentrum.registrar.persistence.repository.FormRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -16,10 +18,12 @@ import java.util.stream.Collectors;
 public class FormServiceImpl implements FormService {
 
 	private final FormRepository formRepository;
+	private final FormItemRepository formItemRepository;
 
 	@Autowired
-	public FormServiceImpl(FormRepository formRepository) {
+	public FormServiceImpl(FormRepository formRepository, FormItemRepository formItemRepository) {
 		this.formRepository = formRepository;
+		this.formItemRepository = formItemRepository;
 	}
 
 	@Override
@@ -82,5 +86,20 @@ public class FormServiceImpl implements FormService {
 					savedForm.setApprovalGroups(form.getApprovalGroups());
 					return formRepository.save(savedForm);
 				}).orElseThrow();
+	}
+
+	@Override
+	public List<FormItem> getFormItems(Long formId) {
+		Form form = getFormById(formId)
+				.orElseThrow(() -> new FormNotFoundException(formId));
+		return formItemRepository.getAllByForm(form);
+	}
+
+	@Override
+	public List<FormItem> createFormItems(Long formId, List<FormItem> formItems) {
+		Form form = getFormById(formId)
+				.orElseThrow(() -> new FormNotFoundException(formId));
+		formItems.forEach(formItem -> formItem.setForm(form));
+		return formItemRepository.saveAll(formItems);
 	}
 }

@@ -1,5 +1,8 @@
 package cz.metacentrum.registrar.persistence.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.springframework.lang.Nullable;
+
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
@@ -9,6 +12,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import java.util.Arrays;
 import java.util.List;
 
@@ -18,6 +22,11 @@ public class FormItem {
 	@Id
 	@GeneratedValue
 	private Long id;
+
+	@ManyToOne
+	@JoinColumn(name = "form_id")
+	@JsonIgnore
+	private Form form;
 
 	@Column
 	private String shortname;
@@ -38,15 +47,19 @@ public class FormItem {
 	private boolean preferFederationAttribute;
 
 	@Column
+	@Nullable
 	private String federationAttribute;
 
 	@Column
+	@Nullable
 	private String idmSourceAttribute;
 
 	@Column
+	@Nullable
 	private String idmDestinationAttribute;
 
 	@Column
+	@Nullable
 	private String regex;
 
 	@Enumerated(EnumType.STRING)
@@ -55,9 +68,11 @@ public class FormItem {
 	private List<Form.FormType> formTypes = Arrays.asList(Form.FormType.INITIAL, Form.FormType.EXTENSION);
 
 	@Column
+	@Nullable
 	private Integer hiddenDependencyItemId;
 
 	@Column
+	@Nullable
 	private Integer disabledDependencyItemId;
 
 	@Enumerated(EnumType.STRING)
@@ -70,17 +85,15 @@ public class FormItem {
 	private boolean useInTemplate;
 
 	@Column
+	@Nullable
 	private Integer templateDependencyItemId;
 
 	public FormItem() {
 	}
 
-	public FormItem(Long id, String shortname, Integer ordnum, boolean required, boolean updatable, Type type,
-					boolean preferFederationAttribute, String federationAttribute, String idmSourceAttribute,
-					String idmDestinationAttribute, String regex, List<Form.FormType> formTypes,
-					Integer hiddenDependencyItemId, Integer disabledDependencyItemId, Disabled disabled,
-					Hidden hidden, boolean useInTemplate, Integer templateDependencyItemId) {
+	public FormItem(Long id, Form form, String shortname, Integer ordnum, boolean required, boolean updatable, Type type, boolean preferFederationAttribute, String federationAttribute, String idmSourceAttribute, String idmDestinationAttribute, String regex, List<Form.FormType> formTypes, Integer hiddenDependencyItemId, Integer disabledDependencyItemId, Disabled disabled, Hidden hidden, boolean useInTemplate, Integer templateDependencyItemId) {
 		this.id = id;
+		this.form = form;
 		this.shortname = shortname;
 		this.ordnum = ordnum;
 		this.required = required;
@@ -106,6 +119,14 @@ public class FormItem {
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public Form getForm() {
+		return form;
+	}
+
+	public void setForm(Form form) {
+		this.form = form;
 	}
 
 	public String getShortname() {

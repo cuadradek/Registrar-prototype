@@ -1,6 +1,7 @@
 package cz.metacentrum.registrar.service;
 
 import cz.metacentrum.registrar.persistence.entity.Form;
+import cz.metacentrum.registrar.persistence.entity.FormItem;
 import org.springframework.lang.NonNull;
 
 import java.util.List;
@@ -15,4 +16,8 @@ public interface FormService {
 	Form createForm(Form form);
 	void deleteForm(Long id);
 	Form updateForm(Form form);
+
+	List<FormItem> getFormItems(Long formId);
+
+	List<FormItem> createFormItems(Long formId, List<FormItem> formItems);
 }
