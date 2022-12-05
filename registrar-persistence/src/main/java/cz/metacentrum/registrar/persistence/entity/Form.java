@@ -1,5 +1,7 @@
 package cz.metacentrum.registrar.persistence.entity;
 
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.springframework.lang.Nullable;
 
 import javax.persistence.CascadeType;
@@ -58,6 +60,7 @@ public class Form {
 	private List<Form> nestedForms = new ArrayList<>();
 
 	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	@Fetch(value = FetchMode.SUBSELECT)
 //	@OneToMany(mappedBy = "form", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	private List<ApprovalGroup> approvalGroups = new ArrayList<>();
 
