@@ -1,13 +1,16 @@
 package cz.metacentrum.registrar.service;
 
+import cz.metacentrum.registrar.persistence.entity.AssignedFormModule;
 import cz.metacentrum.registrar.persistence.entity.Form;
 import cz.metacentrum.registrar.persistence.entity.FormItem;
 import cz.metacentrum.registrar.persistence.entity.FormItemData;
+import cz.metacentrum.registrar.persistence.entity.FormModule;
 import cz.metacentrum.registrar.persistence.entity.Submission;
 import cz.metacentrum.registrar.persistence.repository.SubmissionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,6 +19,9 @@ public class SubmissionServiceImpl implements SubmissionService {
 
 	private final SubmissionRepository submissionRepository;
 	private final FormService formService;
+
+	// TODO change path based on IDM used
+	private static final String MODULE_PACKAGE_PATH = "cz.metacentrum.registrar.service.idm.perun.modules.";
 
 	@Autowired
 	public SubmissionServiceImpl(SubmissionRepository submissionRepository, FormService formService) {
@@ -48,12 +54,29 @@ public class SubmissionServiceImpl implements SubmissionService {
 
 	@Override
 	public Submission approveSubmission(Long id) {
+		//TODO: check if have rights to approve
 		Submission saved = submissionRepository.findById(id).orElseThrow();
 		if (saved.getFormState() != Form.FormState.SUBMITTED) {
 			// TODO throw exception
 		}
+		//TODO: beforeApprove of modules
 		saved.setFormState(Form.FormState.APPROVED);
+		//TODO: onApprove of modules
+		var modules = saved.getForm().getAssignedModules()
+				.stream()
+				.sorted()
+				.toList();
+		modules.forEach(assignedModule -> getModule(assignedModule).onApprove(saved));
 		return submissionRepository.save(saved);
+		//TODO: send notifications
+	}
+
+	private FormModule getModule(AssignedFormModule assignedModule) {
+		try {
+			return (FormModule) Class.forName(MODULE_PACKAGE_PATH + assignedModule.getModuleName()).getConstructor().newInstance();
+		} catch (InstantiationException | ClassNotFoundException | InvocationTargetException | IllegalAccessException | NoSuchMethodException e) {
+			throw new IllegalArgumentException("Non existing form module: " + assignedModule.getModuleName());
+		}
 	}
 
 	@Override

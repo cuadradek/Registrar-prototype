@@ -11,7 +11,7 @@ import javax.persistence.Transient;
 import java.util.List;
 
 @Entity
-public class AssignedFormModule {
+public class AssignedFormModule implements Comparable<AssignedFormModule> {
 	@Id
 	@GeneratedValue
 	private Long id;
@@ -90,5 +90,16 @@ public class AssignedFormModule {
 
 	public void setOrdnum(int ordnum) {
 		this.ordnum = ordnum;
+	}
+
+	@Override
+	public int compareTo(AssignedFormModule o) {
+		if (ordnum == o.ordnum) {
+			return 0;
+		}
+		if (ordnum < o.ordnum) {
+			return -1;
+		}
+		return 1;
 	}
 }
