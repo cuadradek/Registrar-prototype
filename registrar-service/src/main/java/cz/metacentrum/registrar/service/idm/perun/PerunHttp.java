@@ -2,10 +2,13 @@ package cz.metacentrum.registrar.service.idm.perun;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 public class PerunHttp {
 	public static final String MEMBERS_MANAGER = "membersManager";
@@ -25,6 +28,8 @@ public class PerunHttp {
 		this.client = WebClient.builder()
 				.baseUrl(perunUrl)
 				.defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+//				.defaultHeader(HttpHeaders.AUTHORIZATION, HttpHeaders.encodeBasicAuth(perunUser, perunPassword, null))
+				.defaultHeaders(headers -> headers.setBasicAuth(perunUser, perunPassword))
 				.defaultUriVariables(Collections.singletonMap("url", perunUrl))
 				.build();
 	}
@@ -39,12 +44,16 @@ public class PerunHttp {
 	public Member createMember(int userId, int voId) {
 		String actionUrl = "/json/" + MEMBERS_MANAGER + '/' + "createMember";
 		//vo, user
+		Map<String, String> bodyMap = new HashMap();
+		bodyMap.put("vo", String.valueOf(voId));
+		bodyMap.put("user", String.valueOf(userId));
 		Mono<Member> response = client.post()
 				.uri(uriBuilder -> uriBuilder
 						.path(actionUrl)
 						.queryParam("vo", voId)
 						.queryParam("user", userId)
 						.build())
+				.body(BodyInserters.fromValue(bodyMap))
 				.retrieve()
 				.bodyToMono(Member.class);
 		return response.block();

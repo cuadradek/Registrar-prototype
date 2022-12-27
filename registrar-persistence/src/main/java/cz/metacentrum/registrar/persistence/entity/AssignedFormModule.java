@@ -1,5 +1,7 @@
 package cz.metacentrum.registrar.persistence.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -18,6 +20,7 @@ public class AssignedFormModule implements Comparable<AssignedFormModule> {
 
 	@ManyToOne
 	@JoinColumn(name = "form_id")
+	@JsonIgnore
 	private Form form;
 
 	@Column

@@ -29,8 +29,6 @@ class InitialData {
 			module.setConfigOption(List.of(new ModuleConfigOption(module, "VO", "")));
 			form.setAssignedModules(List.of(module));
 			Form form1 = formService.createForm(form);
-			formService.createForm(form);
-
 
 			FormItem formItem = new FormItem(null, form1, "login", 0, true, false, FormItem.Type.TEXTFIELD,
 					false, null, "user:login", "user:login", null,

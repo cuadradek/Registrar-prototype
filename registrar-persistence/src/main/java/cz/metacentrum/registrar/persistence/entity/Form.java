@@ -64,7 +64,7 @@ public class Form {
 //	@OneToMany(mappedBy = "form", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	private List<ApprovalGroup> approvalGroups = new ArrayList<>();
 
-	@OneToMany(mappedBy = "form")
+	@OneToMany(mappedBy = "form", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
 	private List<AssignedFormModule> assignedModules;
 
 	public Form() {

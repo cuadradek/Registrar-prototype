@@ -36,7 +36,7 @@ public class FormDto {
 	@Nullable
 	List<ApprovalGroup> approvalGroups;
 	@NotNull(message = "assignModules must be specified")
-	List<AssignedFormModule> assignedModules;
+	List<AssignedFormModule> assignedModules;//TODO use AssignedFormModuleDTO instead
 
 	@Nullable
 	public Long getId() {
