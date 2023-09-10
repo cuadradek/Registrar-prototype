@@ -5,10 +5,10 @@
 	<parent>
 		<groupId>cz.metacentrum</groupId>
 		<artifactId>registrar</artifactId>
-		<version>1.0-SNAPSHOT</version>
+		<version>1.1-SNAPSHOT</version>
 	</parent>
 	<artifactId>registrar-service</artifactId>
-	<version>1.0-SNAPSHOT</version>
+	<version>1.1-SNAPSHOT</version>
 	<name>registrar-service</name>
 
 	<properties>

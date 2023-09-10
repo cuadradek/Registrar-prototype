@@ -42,9 +42,9 @@ public class RegistrarSecurityConfig {
 		http
 				.authorizeHttpRequests(
 						authorize -> authorize
-								.antMatchers("/test/**").hasAuthority("SCOPE_openid")
+								.requestMatchers("/test/**").hasAuthority("SCOPE_openid")
 								//if the request didn't match test/**, then try to match this:
-								.antMatchers("/forms/**").hasAuthority("SCOPE_REGISTRAR_API")
+								.requestMatchers("/forms/**").hasAuthority("SCOPE_REGISTRAR_API")
 								// if the request didn't match any ant matcher, then user needs to be at least authenticated
 								.anyRequest().authenticated()
 				)
