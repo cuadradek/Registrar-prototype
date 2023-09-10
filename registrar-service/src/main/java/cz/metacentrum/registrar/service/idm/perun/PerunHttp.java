@@ -8,7 +8,9 @@ import reactor.core.publisher.Mono;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public class PerunHttp {
 	public static final String MEMBERS_MANAGER = "membersManager";
@@ -57,5 +59,9 @@ public class PerunHttp {
 				.retrieve()
 				.bodyToMono(Member.class);
 		return response.block();
+	}
+
+	public List<UUID> getUserGroups() {
+		return List.of(UUID.randomUUID(), UUID.randomUUID());
 	}
 }
