@@ -58,6 +58,7 @@ public class PerunHttp {
 
 	public List<UUID> getUserGroups() {
 		//todo make actual request
-		return List.of(UUID.randomUUID(), UUID.randomUUID());
+		return List.of(UUID.randomUUID(), UUID.randomUUID(), UUID.fromString("13d64d76-2ca3-4cf8-b1f4-0befdbef69fc"),
+				UUID.fromString("13d64d76-2ca3-4cf8-b1f4-0befdbef69fc"));
 	}
 }

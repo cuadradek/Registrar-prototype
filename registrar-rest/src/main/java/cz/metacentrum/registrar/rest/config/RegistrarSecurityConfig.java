@@ -1,10 +1,13 @@
 package cz.metacentrum.registrar.rest.config;
 
+import cz.metacentrum.registrar.service.RoleService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -28,14 +31,21 @@ public class RegistrarSecurityConfig {
 	@Value("${spring.security.oauth2.resourceserver.opaquetoken.client-secret}")
 	private String clientSecret;
 
+	@Bean
+	public RoleHierarchy roleHierarchy() {
+		var hierarchy = new RoleHierarchyImpl();
+		hierarchy.setHierarchy("ROLE_ADMIN > ROLE_USER\n" +
+				"ROLE_USER > ROLE_GUEST");
+		return hierarchy;
+	}
 
-//	@Bean
-//	public MethodSecurityExpressionHandler createExpressionHandler() {
-//		DefaultMethodSecurityExpressionHandler expressionHandler =
-//				new DefaultMethodSecurityExpressionHandler();
+	@Bean
+	public MethodSecurityExpressionHandler createExpressionHandler(RoleHierarchy roleHierarchy) {
+		var expressionHandler = new DefaultMethodSecurityExpressionHandler();
+		expressionHandler.setRoleHierarchy(roleHierarchy);
 //		expressionHandler.setPermissionEvaluator(new RegistrarPermissionEvaluator());
-//		return expressionHandler;
-//	}
+		return expressionHandler;
+	}
 
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -63,9 +73,9 @@ public class RegistrarSecurityConfig {
 	}
 
 	@Bean
-	public OpaqueTokenIntrospector introspector() {
-		return new GoogleTokenIntrospector(introspectionUri);
-//		return new RegistrarTokenIntrospector(introspectionUri, clientId, clientSecret);
+	public OpaqueTokenIntrospector introspector(RoleService roleService) {
+		return new GoogleTokenIntrospector(introspectionUri, roleService);
+//		return new RegistrarTokenIntrospector(introspectionUri, clientId, clientSecret, roleService);
 //		return new SpringOpaqueTokenIntrospector(introspectionUri, clientId, clientSecret);
 //		return new NimbusOpaqueTokenIntrospector(introspectionUri, clientId, clientSecret);
 	}

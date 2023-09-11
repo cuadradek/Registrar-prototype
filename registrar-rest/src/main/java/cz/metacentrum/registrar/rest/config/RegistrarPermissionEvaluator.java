@@ -1,6 +1,8 @@
 package cz.metacentrum.registrar.rest.config;
 
+import cz.metacentrum.registrar.service.FormService;
 import cz.metacentrum.registrar.service.IdmApi;
+import cz.metacentrum.registrar.service.RoleService;
 import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -8,7 +10,6 @@ import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
 import java.util.HashSet;
-import java.util.Set;
 
 /**
  * 2 options how to use RegistrarPermissionEvaluator:
@@ -22,9 +23,13 @@ import java.util.Set;
 public class RegistrarPermissionEvaluator implements PermissionEvaluator {
 
 	private final IdmApi idmApi;
+	private final FormService formService;
+	private final RoleService roleService;
 
-	public RegistrarPermissionEvaluator(IdmApi idmApi) {
+	public RegistrarPermissionEvaluator(IdmApi idmApi, FormService formService, RoleService roleService) {
 		this.idmApi = idmApi;
+		this.formService = formService;
+		this.roleService = roleService;
 	}
 
 	public boolean hasRole(Long objectId, String permission) {
@@ -87,13 +92,13 @@ public class RegistrarPermissionEvaluator implements PermissionEvaluator {
 
 	private RegistrarPrincipal initRegistrarPrincipal(Authentication auth) {
 		RegistrarPrincipal principal = (RegistrarPrincipal) auth.getPrincipal();
-		if (principal.getIdmGroups() == null) {
-			// todo get this from IdmAPI implementation
-			principal.setIdmGroups(new HashSet<>(idmApi.getUserGroups(principal.getName())));
-			// todo get these from DB:
-			principal.setFormApprover(Set.of(1L, 2L, 3L));
-			principal.setFormManager(Set.of(1L, 2L, 3L));
+		if (principal.getIdmGroups() != null) {
+			return principal;
 		}
+
+		principal.setIdmGroups(new HashSet<>(idmApi.getUserGroups(principal.getName())));
+		principal.setFormApprover(new HashSet<>(formService.getFormsByIdmApprovalGroups(principal.getIdmGroups())));
+		principal.setFormManager(new HashSet<>(formService.getFormsByIdmManagersGroups(principal.getIdmGroups())));
 		return principal;
 	}
 

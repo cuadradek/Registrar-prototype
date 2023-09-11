@@ -5,7 +5,9 @@ import cz.metacentrum.registrar.persistence.entity.AssignedFormModule;
 import cz.metacentrum.registrar.persistence.entity.Form;
 import cz.metacentrum.registrar.persistence.entity.FormItem;
 import cz.metacentrum.registrar.persistence.entity.ModuleConfigOption;
+import cz.metacentrum.registrar.persistence.entity.Role;
 import cz.metacentrum.registrar.service.FormService;
+import cz.metacentrum.registrar.service.RoleService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,7 +19,7 @@ import java.util.UUID;
 class InitialData {
 
 	@Bean
-	CommandLineRunner initDatabase(FormService formService) {
+	CommandLineRunner initDatabase(FormService formService, RoleService roleService) {
 
 		return args -> {
 			Form form = new Form(null, UUID.fromString("13d64d76-2ca3-4cf8-b1f4-0befdbef69fc"), UUID.fromString("13d64d76-2ca3-4cf8-b1f4-0befdbef69fc"),
@@ -35,6 +37,11 @@ class InitialData {
 					List.of(Form.FormType.INITIAL, Form.FormType.EXTENSION),
 					null, null, FormItem.Disabled.NEVER, FormItem.Hidden.NEVER, false, null);
 			formService.createFormItems(1L, List.of(formItem));
+
+			var adminRole = new Role();
+			adminRole.setName("ADMIN");
+			adminRole.setAssignedUsers(List.of("114249895833464720724"));
+			roleService.createRole(adminRole);
 		};
 	}
 }

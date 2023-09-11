@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -101,5 +102,15 @@ public class FormServiceImpl implements FormService {
 				.orElseThrow(() -> new FormNotFoundException(formId));
 		formItems.forEach(formItem -> formItem.setForm(form));
 		return formItemRepository.saveAll(formItems);
+	}
+
+	@Override
+	public List<Long> getFormsByIdmApprovalGroups(Set<UUID> groupUUIDs) {
+		return formRepository.findIsByIdmApprovalGroups(groupUUIDs);
+	}
+
+	@Override
+	public List<Long> getFormsByIdmManagersGroups(Set<UUID> groupUUIDs) {
+		return formRepository.findIdsByIdmFormManagersGroup(groupUUIDs);
 	}
 }

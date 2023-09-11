@@ -1,5 +1,6 @@
 package cz.metacentrum.registrar.rest.config;
 
+import cz.metacentrum.registrar.service.RoleService;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
@@ -23,6 +24,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -35,8 +37,11 @@ public class GoogleTokenIntrospector implements OpaqueTokenIntrospector {
 	private final RestTemplate restTemplate = new RestTemplate();
 	private final String introspectionUri;
 
-	public GoogleTokenIntrospector(String introspectionUri) {
+	private final RoleService roleService;
+
+	public GoogleTokenIntrospector(String introspectionUri, RoleService roleService) {
 		this.introspectionUri = introspectionUri;
+		this.roleService = roleService;
 	}
 
 	@Override
@@ -90,6 +95,10 @@ public class GoogleTokenIntrospector implements OpaqueTokenIntrospector {
 				return scopes;
 			}
 		});
+		List<String> roles = roleService.getRolesByUserIdentifier((String) principalMap.get("sub"));
+		for (String role : roles) {
+			authorities.add(new SimpleGrantedAuthority("ROLE_" + role));
+		}
 		return authorities;
 	}
 }

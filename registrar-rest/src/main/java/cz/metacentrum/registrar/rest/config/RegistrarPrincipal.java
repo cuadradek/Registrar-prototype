@@ -4,6 +4,7 @@ import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.DefaultOAuth2AuthenticatedPrincipal;
 import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal;
+import org.springframework.security.oauth2.core.OAuth2TokenIntrospectionClaimAccessor;
 
 import java.util.Collection;
 import java.util.Map;
@@ -14,9 +15,8 @@ import java.util.UUID;
  * Check OAuth2IntrospectionAuthenticatedPrincipal and DefaultOAuth2AuthenticatedPrincipal
  */
 @Data
-public class RegistrarPrincipal implements OAuth2AuthenticatedPrincipal {
+public class RegistrarPrincipal implements OAuth2AuthenticatedPrincipal, OAuth2TokenIntrospectionClaimAccessor {
 	// DefaultOAuth2AuthenticatedPrincipal by default
-	// or we can pass it in constructor or OAuth2IntrospectionAuthenticatedPrincipal if we need more methods
 	private final OAuth2AuthenticatedPrincipal delegate;
 	private Set<UUID> idmGroups;
 	private Set<Long> formManager;
@@ -28,10 +28,6 @@ public class RegistrarPrincipal implements OAuth2AuthenticatedPrincipal {
 
 	public RegistrarPrincipal(String name, Map<String, Object> attributes, Collection<GrantedAuthority> authorities) {
 		this.delegate = new DefaultOAuth2AuthenticatedPrincipal(name, attributes, authorities);
-	}
-
-	public RegistrarPrincipal(OAuth2AuthenticatedPrincipal delegate) {
-		this.delegate = delegate;
 	}
 
 	@Override
@@ -47,5 +43,9 @@ public class RegistrarPrincipal implements OAuth2AuthenticatedPrincipal {
 	@Override
 	public String getName() {
 		return delegate.getName();
+	}
+
+	public Map<String, Object> getClaims() {
+		return this.getAttributes();
 	}
 }

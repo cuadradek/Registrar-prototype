@@ -7,6 +7,7 @@ import org.springframework.lang.NonNull;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 public interface FormService {
 
@@ -20,4 +21,7 @@ public interface FormService {
 	List<FormItem> getFormItems(Long formId);
 
 	List<FormItem> createFormItems(Long formId, List<FormItem> formItems);
+
+	List<Long> getFormsByIdmManagersGroups(Set<UUID> groupUUIDs);
+	List<Long> getFormsByIdmApprovalGroups(Set<UUID> groupUUIDs);
 }
