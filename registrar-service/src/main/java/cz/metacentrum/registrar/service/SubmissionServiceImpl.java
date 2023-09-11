@@ -8,6 +8,7 @@ import cz.metacentrum.registrar.persistence.entity.FormModule;
 import cz.metacentrum.registrar.persistence.entity.Submission;
 import cz.metacentrum.registrar.persistence.repository.SubmissionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.InvocationTargetException;
@@ -19,14 +20,16 @@ public class SubmissionServiceImpl implements SubmissionService {
 
 	private final SubmissionRepository submissionRepository;
 	private final FormService formService;
+	private final ApplicationContext context;
 
 	// TODO change path based on IDM used
 	private static final String MODULE_PACKAGE_PATH = "cz.metacentrum.registrar.service.idm.perun.modules.";
 
 	@Autowired
-	public SubmissionServiceImpl(SubmissionRepository submissionRepository, FormService formService) {
+	public SubmissionServiceImpl(SubmissionRepository submissionRepository, FormService formService, ApplicationContext context) {
 		this.submissionRepository = submissionRepository;
 		this.formService = formService;
+		this.context = context;
 	}
 
 	@Override
@@ -72,11 +75,12 @@ public class SubmissionServiceImpl implements SubmissionService {
 	}
 
 	private FormModule getModule(AssignedFormModule assignedModule) {
-		try {
-			return (FormModule) Class.forName(MODULE_PACKAGE_PATH + assignedModule.getModuleName()).getConstructor().newInstance();
-		} catch (InstantiationException | ClassNotFoundException | InvocationTargetException | IllegalAccessException | NoSuchMethodException e) {
-			throw new IllegalArgumentException("Non existing form module: " + assignedModule.getModuleName());
-		}
+		return context.getBean(assignedModule.getModuleName(), FormModule.class);
+//		try {
+//			return (FormModule) Class.forName(MODULE_PACKAGE_PATH + assignedModule.getModuleName()).getConstructor().newInstance();
+//		} catch (InstantiationException | ClassNotFoundException | InvocationTargetException | IllegalAccessException | NoSuchMethodException e) {
+//			throw new IllegalArgumentException("Non existing form module: " + assignedModule.getModuleName());
+//		}
 	}
 
 	@Override

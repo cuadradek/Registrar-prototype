@@ -2,6 +2,7 @@ package cz.metacentrum.registrar.service.idm.perun;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+@Component
 public class PerunHttp {
 	public static final String MEMBERS_MANAGER = "membersManager";
 
@@ -36,13 +38,6 @@ public class PerunHttp {
 				.build();
 	}
 
-	public static PerunHttp getInstance() {
-		if (instance == null) {
-			instance = new PerunHttp();
-		}
-		return instance;
-	}
-
 	public Member createMember(int userId, int voId) {
 		String actionUrl = "/json/" + MEMBERS_MANAGER + '/' + "createMember";
 		//vo, user
@@ -62,6 +57,7 @@ public class PerunHttp {
 	}
 
 	public List<UUID> getUserGroups() {
+		//todo make actual request
 		return List.of(UUID.randomUUID(), UUID.randomUUID());
 	}
 }

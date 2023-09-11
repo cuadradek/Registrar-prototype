@@ -1,6 +1,6 @@
 package cz.metacentrum.registrar.rest.config;
 
-import cz.metacentrum.registrar.service.idm.perun.PerunHttp;
+import cz.metacentrum.registrar.service.IdmApi;
 import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -20,6 +20,12 @@ import java.util.Set;
  */
 @Component
 public class RegistrarPermissionEvaluator implements PermissionEvaluator {
+
+	private final IdmApi idmApi;
+
+	public RegistrarPermissionEvaluator(IdmApi idmApi) {
+		this.idmApi = idmApi;
+	}
 
 	public boolean hasRole(Long objectId, String permission) {
 		if ((objectId == null) || permission == null) {
@@ -83,7 +89,7 @@ public class RegistrarPermissionEvaluator implements PermissionEvaluator {
 		RegistrarPrincipal principal = (RegistrarPrincipal) auth.getPrincipal();
 		if (principal.getIdmGroups() == null) {
 			// todo get this from IdmAPI implementation
-			principal.setIdmGroups(new HashSet<>(PerunHttp.getInstance().getUserGroups()));
+			principal.setIdmGroups(new HashSet<>(idmApi.getUserGroups(principal.getName())));
 			// todo get these from DB:
 			principal.setFormApprover(Set.of(1L, 2L, 3L));
 			principal.setFormManager(Set.of(1L, 2L, 3L));
