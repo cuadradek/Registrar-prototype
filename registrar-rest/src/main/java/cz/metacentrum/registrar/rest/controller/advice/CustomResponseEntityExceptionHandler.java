@@ -1,66 +1,52 @@
 package cz.metacentrum.registrar.rest.controller.advice;
 
 import cz.metacentrum.registrar.service.FormNotFoundException;
+import lombok.Data;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.security.access.AccessDeniedException;
 
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.Date;
+
+import java.time.Instant;
 
 @ControllerAdvice
 public class CustomResponseEntityExceptionHandler {
 
 	@ExceptionHandler(FormNotFoundException.class)
-	Object formNotFoundHandler(FormNotFoundException ex, HttpServletRequest httpRequest) {
-		ExceptionResponse response =  new ExceptionResponse(new Date(), HttpStatus.NOT_FOUND.value(),
+	public ResponseEntity<ExceptionResponse> formNotFoundHandler(FormNotFoundException ex, HttpServletRequest httpRequest) {
+		ExceptionResponse response =  new ExceptionResponse(HttpStatus.NOT_FOUND.value(),
 				ex.getMessage(), httpRequest.getRequestURI());
 		return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
 	}
 
+	@ExceptionHandler(AccessDeniedException.class)
+	public ResponseEntity<ExceptionResponse> accessDeniedExceptionHandler(Exception ex, HttpServletRequest httpRequest) {
+		ExceptionResponse response =  new ExceptionResponse(HttpStatus.FORBIDDEN.value(),
+				ex.getMessage(), httpRequest.getRequestURI());
+		return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+	}
+
+	@ExceptionHandler(Exception.class)
+	public ResponseEntity<ExceptionResponse> genericExceptionHandler(Exception ex, HttpServletRequest httpRequest) {
+		ExceptionResponse response =  new ExceptionResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(),
+				ex.getMessage(), httpRequest.getRequestURI());
+		return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+
+	@Data
 	private static class ExceptionResponse {
-		private Date timestamp;
+		private Instant timestamp;
 		private int status;
 		private String error;
 		private String path;
 
-		public ExceptionResponse(Date timestamp, int status, String error, String path) {
-			this.timestamp = timestamp;
+		public ExceptionResponse(int status, String error, String path) {
+			this.timestamp = Instant.now();
 			this.status = status;
 			this.error = error;
-			this.path = path;
-		}
-
-		public Date getTimestamp() {
-			return timestamp;
-		}
-
-		public void setTimestamp(Date timestamp) {
-			this.timestamp = timestamp;
-		}
-
-		public int getStatus() {
-			return status;
-		}
-
-		public void setStatus(int status) {
-			this.status = status;
-		}
-
-		public String getError() {
-			return error;
-		}
-
-		public void setError(String error) {
-			this.error = error;
-		}
-
-		public String getPath() {
-			return path;
-		}
-
-		public void setPath(String path) {
 			this.path = path;
 		}
 	}

@@ -29,7 +29,7 @@ public class TestController {
 		return principal;
 	}
 
-	@PreAuthorize("hasRole('ADMINa')")
+	@PreAuthorize("hasRole('ADMIN')")
 	@GetMapping("/admin")
 	public String admin(@AuthenticationPrincipal RegistrarPrincipal principal) {
 		return "Hello admin " + principal.getName();
