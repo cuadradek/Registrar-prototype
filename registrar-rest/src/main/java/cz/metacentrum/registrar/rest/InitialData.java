@@ -18,6 +18,8 @@ import java.util.UUID;
 @Configuration
 class InitialData {
 
+	private static final String EINFRA_LOGIN = "urn:perun:user:attribute-def:def:login-namespace:einfra";
+
 	@Bean
 	CommandLineRunner initDatabase(FormService formService, RoleService roleService) {
 
@@ -32,8 +34,8 @@ class InitialData {
 			form.setAssignedModules(List.of(module));
 			Form form1 = formService.createForm(form);
 
-			FormItem formItem = new FormItem(null, form1, "login", 0, true, false, FormItem.Type.TEXTFIELD,
-					false, null, "user:login", "user:login", null,
+			FormItem formItem = new FormItem(null, form1, "login", 0, true, false, FormItem.Type.USERNAME,
+					false, null, EINFRA_LOGIN, EINFRA_LOGIN, null,
 					List.of(Form.FormType.INITIAL, Form.FormType.EXTENSION),
 					null, null, FormItem.Disabled.NEVER, FormItem.Hidden.NEVER, false, null);
 			formService.createFormItems(1L, List.of(formItem));

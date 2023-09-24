@@ -1,0 +1,70 @@
+# maybe do change format to (but both should be fine):
+# form_item_modules:
+#   urn:perun:user:attribute-def:def:login-namespace:einfra:
+#     displayName: Login in E-infra
+
+#urn:perun:user:attribute-def:def:login-namespace:einfra:
+#  displayName: Login in E-infra
+#  sourceIdmAttributes:
+#    - urn:perun:user:attribute-def:def:login-namespace:einfra
+#  sourceFederationAttributes: []
+#  destinationAttribute: urn:perun:user:attribute-def:def:login-namespace:einfra
+#  label:
+#    - en:
+#      - Login
+#      - login
+#      - Username
+#  labelRegex:
+#    - en: /login/i
+#  includePolicy:
+#    - usernamePolicy
+#  help: any
+#  error: any
+#  itemTypes: USERNAME
+#  updatable: false
+#  regex: any
+#  disabled: any
+#  hidden: any
+#
+urn:perun:user:attribute-def:def:login-namespace:einfra_password:
+  displayName: Password in E-infra
+  sourceIdmAttributes: []
+  sourceFederationAttributes: []
+  destinationAttribute: urn:perun:user:attribute-def:def:login-namespace:einfra
+  label:
+    en:
+      - Password
+      - password
+    cs:
+      - heslo
+      - Heslo
+  labelRegex:
+    - en: /password/i
+    - cs: /heslo/i
+  includePolicy:
+    - passwordPolicy
+  itemTypes:
+    - PASSWORD
+  updatable:
+    - false
+
+urn:perun:user:attribute-def:def:login-namespace:einfra:
+  displayName: E-infra login
+  sourceIdmAttributes:
+    - urn:perun:user:attribute-def:def:login-namespace:einfra
+  destinationAttribute: urn:perun:user:attribute-def:def:login-namespace:einfra
+  itemTypes:
+    - USERNAME
+  updatable:
+    - false
+
+urn:perun:user:attribute-def:core:displayName:
+  displayName: Display name
+  sourceIdmAttributes:
+    - urn:perun:user:attribute-def:core:displayName
+  destinationAttribute: urn:perun:user:attribute-def:core:displayName
+  label:
+    en:
+      - Name
+      - name
+      - Full name

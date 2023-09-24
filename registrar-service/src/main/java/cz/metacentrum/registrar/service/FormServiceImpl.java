@@ -4,6 +4,7 @@ import cz.metacentrum.registrar.persistence.entity.Form;
 import cz.metacentrum.registrar.persistence.entity.FormItem;
 import cz.metacentrum.registrar.persistence.repository.FormItemRepository;
 import cz.metacentrum.registrar.persistence.repository.FormRepository;
+import cz.metacentrum.registrar.service.formitems.FormItemsLoader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
@@ -20,11 +21,13 @@ public class FormServiceImpl implements FormService {
 
 	private final FormRepository formRepository;
 	private final FormItemRepository formItemRepository;
+	private final FormItemsLoader formItemsLoader;
 
 	@Autowired
-	public FormServiceImpl(FormRepository formRepository, FormItemRepository formItemRepository) {
+	public FormServiceImpl(FormRepository formRepository, FormItemRepository formItemRepository, FormItemsLoader formItemsLoader) {
 		this.formRepository = formRepository;
 		this.formItemRepository = formItemRepository;
+		this.formItemsLoader = formItemsLoader;
 	}
 
 	@Override
@@ -100,7 +103,10 @@ public class FormServiceImpl implements FormService {
 	public List<FormItem> createFormItems(Long formId, List<FormItem> formItems) {
 		Form form = getFormById(formId)
 				.orElseThrow(() -> new FormNotFoundException(formId));
-		formItems.forEach(formItem -> formItem.setForm(form));
+		formItems.forEach(formItem -> {
+			formItemsLoader.validateItem(formItem);
+			formItem.setForm(form);
+		});
 		return formItemRepository.saveAll(formItems);
 	}
 

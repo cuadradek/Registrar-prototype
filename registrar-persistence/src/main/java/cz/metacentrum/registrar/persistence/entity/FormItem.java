@@ -284,7 +284,8 @@ public class FormItem {
 		/**
 		 * Standard HTML text field.
 		 */
-		TEXTFIELD
+		TEXTFIELD,
+		USERNAME
 	}
 
 	public enum Hidden {
