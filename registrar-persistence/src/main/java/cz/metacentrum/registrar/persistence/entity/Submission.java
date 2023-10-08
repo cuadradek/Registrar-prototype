@@ -1,5 +1,8 @@
 package cz.metacentrum.registrar.persistence.entity;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 import org.springframework.lang.NonNull;
@@ -21,6 +24,9 @@ import java.util.List;
 import java.util.Objects;
 
 @Entity
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class Submission {
 
 	@Id
@@ -57,103 +63,6 @@ public class Submission {
 
 	@Column
 	private LocalDateTime timestamp;
-
-	public Submission() {
-	}
-
-	public Submission(@Nullable Long id, @NonNull Form form, Form.FormType formType, Form.FormState formState, String extSourceName, String extSourceType, List<FormItemData> formData, int extSourceLoa, String submittedBy, LocalDateTime timestamp) {
-		this.id = id;
-		this.form = form;
-		this.formType = formType;
-		this.formState = formState;
-		this.extSourceName = extSourceName;
-		this.extSourceType = extSourceType;
-		this.formData = formData;
-		this.extSourceLoa = extSourceLoa;
-		this.submittedBy = submittedBy;
-		this.timestamp = timestamp;
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	@NonNull
-	public Form getForm() {
-		return form;
-	}
-
-	public void setForm(@NonNull Form form) {
-		this.form = form;
-	}
-
-	public Form.FormType getFormType() {
-		return formType;
-	}
-
-	public void setFormType(Form.FormType formType) {
-		this.formType = formType;
-	}
-
-	public Form.FormState getFormState() {
-		return formState;
-	}
-
-	public void setFormState(Form.FormState formState) {
-		this.formState = formState;
-	}
-
-	public String getExtSourceName() {
-		return extSourceName;
-	}
-
-	public void setExtSourceName(String extSourceName) {
-		this.extSourceName = extSourceName;
-	}
-
-	public String getExtSourceType() {
-		return extSourceType;
-	}
-
-	public void setExtSourceType(String extSourceType) {
-		this.extSourceType = extSourceType;
-	}
-
-	public int getExtSourceLoa() {
-		return extSourceLoa;
-	}
-
-	public void setExtSourceLoa(int extSourceLoa) {
-		this.extSourceLoa = extSourceLoa;
-	}
-
-	public List<FormItemData> getFormData() {
-		return formData;
-	}
-
-	public void setFormData(List<FormItemData> formData) {
-		this.formData = formData;
-	}
-
-	public String getSubmittedBy() {
-		return submittedBy;
-	}
-
-	public void setSubmittedBy(String submittedBy) {
-		this.submittedBy = submittedBy;
-	}
-
-	public LocalDateTime getTimestamp() {
-		return timestamp;
-	}
-
-	public void setTimestamp(LocalDateTime timestamp) {
-		this.timestamp = timestamp;
-	}
 
 	@Override
 	public boolean equals(Object o) {

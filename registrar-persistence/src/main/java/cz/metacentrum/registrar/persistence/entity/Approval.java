@@ -6,9 +6,16 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.time.LocalDateTime;
 
 @Entity
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class Approval {
 
 	public enum Decision { APPROVED, REJECTED }
@@ -34,73 +41,4 @@ public class Approval {
 
 	@Column
 	private String message;
-
-	public Approval() {
-	}
-
-	public Approval(Long id, int level, boolean mfa, Decision decision, String approvalBy, LocalDateTime timestamp, String message) {
-		this.id = id;
-		this.level = level;
-		this.mfa = mfa;
-		this.decision = decision;
-		this.approvalBy = approvalBy;
-		this.timestamp = timestamp;
-		this.message = message;
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public int getLevel() {
-		return level;
-	}
-
-	public void setLevel(int level) {
-		this.level = level;
-	}
-
-	public boolean isMfa() {
-		return mfa;
-	}
-
-	public void setMfa(boolean mfa) {
-		this.mfa = mfa;
-	}
-
-	public Decision getDecision() {
-		return decision;
-	}
-
-	public void setDecision(Decision decision) {
-		this.decision = decision;
-	}
-
-	public String getApprovalBy() {
-		return approvalBy;
-	}
-
-	public void setApprovalBy(String approvalBy) {
-		this.approvalBy = approvalBy;
-	}
-
-	public LocalDateTime getTimestamp() {
-		return timestamp;
-	}
-
-	public void setTimestamp(LocalDateTime timestamp) {
-		this.timestamp = timestamp;
-	}
-
-	public String getMessage() {
-		return message;
-	}
-
-	public void setMessage(String message) {
-		this.message = message;
-	}
 }

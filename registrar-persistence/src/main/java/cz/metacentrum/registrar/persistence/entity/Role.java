@@ -7,10 +7,16 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Entity
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class Role {
 
 	@Id
@@ -24,28 +30,4 @@ public class Role {
 	@CollectionTable(name = "roles_users", joinColumns = @JoinColumn(name = "role_id"))
 	@Column(name="user_id")
 	private List<String> assignedUsers;
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public List<String> getAssignedUsers() {
-		return assignedUsers;
-	}
-
-	public void setAssignedUsers(List<String> assignedUsers) {
-		this.assignedUsers = assignedUsers;
-	}
 }

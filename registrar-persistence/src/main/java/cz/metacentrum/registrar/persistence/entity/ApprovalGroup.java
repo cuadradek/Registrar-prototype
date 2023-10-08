@@ -4,9 +4,16 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.util.UUID;
 
 @Entity
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class ApprovalGroup {
 	@Id
 	@GeneratedValue
@@ -28,55 +35,4 @@ public class ApprovalGroup {
 //	@JoinColumn(name = "form_id")
 //	@JsonIgnore // needed jackson dependency
 //	private Form form;
-
-	public ApprovalGroup() {
-	}
-
-	public ApprovalGroup(Long id, int level, boolean mfaRequired, int minApprovals, UUID idmGroup) {
-		this.id = id;
-		this.level = level;
-		this.mfaRequired = mfaRequired;
-		this.minApprovals = minApprovals;
-		this.idmGroup = idmGroup;
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public int getLevel() {
-		return level;
-	}
-
-	public void setLevel(int level) {
-		this.level = level;
-	}
-
-	public boolean isMfaRequired() {
-		return mfaRequired;
-	}
-
-	public void setMfaRequired(boolean mfaRequired) {
-		this.mfaRequired = mfaRequired;
-	}
-
-	public int getMinApprovals() {
-		return minApprovals;
-	}
-
-	public void setMinApprovals(int minApprovals) {
-		this.minApprovals = minApprovals;
-	}
-
-	public UUID getIdmGroup() {
-		return idmGroup;
-	}
-
-	public void setIdmGroup(UUID idmGroup) {
-		this.idmGroup = idmGroup;
-	}
 }

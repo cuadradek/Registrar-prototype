@@ -10,9 +10,16 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Transient;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.util.List;
 
 @Entity
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class AssignedFormModule implements Comparable<AssignedFormModule> {
 	@Id
 	@GeneratedValue
@@ -34,66 +41,6 @@ public class AssignedFormModule implements Comparable<AssignedFormModule> {
 
 	@Column
 	private int ordnum;
-
-	public AssignedFormModule() {
-	}
-
-	public AssignedFormModule(Long id, Form form, String moduleName, FormModule formModule, List<ModuleConfigOption> configOption, int ordnum) {
-		this.id = id;
-		this.form = form;
-		this.moduleName = moduleName;
-		this.formModule = formModule;
-		this.configOption = configOption;
-		this.ordnum = ordnum;
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public Form getForm() {
-		return form;
-	}
-
-	public void setForm(Form form) {
-		this.form = form;
-	}
-
-	public String getModuleName() {
-		return moduleName;
-	}
-
-	public void setModuleName(String moduleName) {
-		this.moduleName = moduleName;
-	}
-
-	public FormModule getFormModule() {
-		return formModule;
-	}
-
-	public void setFormModule(FormModule formModule) {
-		this.formModule = formModule;
-	}
-
-	public List<ModuleConfigOption> getConfigOption() {
-		return configOption;
-	}
-
-	public void setConfigOption(List<ModuleConfigOption> configOption) {
-		this.configOption = configOption;
-	}
-
-	public int getOrdnum() {
-		return ordnum;
-	}
-
-	public void setOrdnum(int ordnum) {
-		this.ordnum = ordnum;
-	}
 
 	@Override
 	public int compareTo(AssignedFormModule o) {
