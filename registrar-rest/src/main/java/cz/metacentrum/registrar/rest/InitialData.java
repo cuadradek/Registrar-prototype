@@ -28,9 +28,8 @@ class InitialData {
 					"My First Form", null, null, null, false, false, null,
 					List.of(new ApprovalGroup(null, 0, false, 1, UUID.fromString("13d64d76-2ca3-4cf8-b1f4-0befdbef69fc"))),
 					null);
-			AssignedFormModule module = new AssignedFormModule(null, form, "addToVo", null,
-					List.of(), 0);
-			module.setConfigOption(List.of(new ModuleConfigOption(module, "VO", "")));
+			AssignedFormModule module = new AssignedFormModule(null, "addToVo", null, List.of(), 0);
+			module.setConfigOption(List.of(new ModuleConfigOption("VO", "")));
 			form.setAssignedModules(List.of(module));
 			Form form1 = formService.createForm(form);
 

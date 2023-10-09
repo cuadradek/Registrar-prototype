@@ -1,14 +1,11 @@
 package cz.metacentrum.registrar.persistence.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Transient;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -25,18 +22,14 @@ public class AssignedFormModule implements Comparable<AssignedFormModule> {
 	@GeneratedValue
 	private Long id;
 
-	@ManyToOne
-	@JoinColumn(name = "form_id")
-	@JsonIgnore
-	private Form form;
-
 	@Column
 	private String moduleName;
 
 	@Transient // possibly implement converter between formModule <-> formModuleName
 	private FormModule formModule;
 
-	@OneToMany(mappedBy = "assignedModule")
+	@ElementCollection
+	@CollectionTable(name="module_config_option")
 	private List<ModuleConfigOption> configOption;
 
 	@Column
@@ -44,12 +37,6 @@ public class AssignedFormModule implements Comparable<AssignedFormModule> {
 
 	@Override
 	public int compareTo(AssignedFormModule o) {
-		if (ordnum == o.ordnum) {
-			return 0;
-		}
-		if (ordnum < o.ordnum) {
-			return -1;
-		}
-		return 1;
+		return Integer.compare(ordnum, o.ordnum);
 	}
 }
