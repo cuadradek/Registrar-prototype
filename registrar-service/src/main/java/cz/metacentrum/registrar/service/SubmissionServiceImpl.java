@@ -1,24 +1,33 @@
 package cz.metacentrum.registrar.service;
 
+import cz.metacentrum.registrar.persistence.entity.Approval;
 import cz.metacentrum.registrar.persistence.entity.AssignedFormModule;
 import cz.metacentrum.registrar.persistence.entity.Form;
 import cz.metacentrum.registrar.persistence.entity.FormItem;
 import cz.metacentrum.registrar.persistence.entity.FormItemData;
 import cz.metacentrum.registrar.persistence.entity.FormModule;
 import cz.metacentrum.registrar.persistence.entity.Submission;
+import cz.metacentrum.registrar.persistence.entity.SubmittedForm;
+import cz.metacentrum.registrar.persistence.repository.ApprovalRepository;
+import cz.metacentrum.registrar.persistence.repository.FormItemRepository;
 import cz.metacentrum.registrar.persistence.repository.SubmissionRepository;
+import cz.metacentrum.registrar.persistence.repository.SubmittedFormRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.lang.reflect.InvocationTargetException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class SubmissionServiceImpl implements SubmissionService {
 
+	private final SubmittedFormRepository submittedFormRepository;
 	private final SubmissionRepository submissionRepository;
+	private final FormItemRepository formItemRepository;
+	private final ApprovalRepository approvalRepository;
 	private final FormService formService;
 	private final ApplicationContext context;
 
@@ -26,8 +35,11 @@ public class SubmissionServiceImpl implements SubmissionService {
 	private static final String MODULE_PACKAGE_PATH = "cz.metacentrum.registrar.service.idm.perun.modules.";
 
 	@Autowired
-	public SubmissionServiceImpl(SubmissionRepository submissionRepository, FormService formService, ApplicationContext context) {
+	public SubmissionServiceImpl(SubmittedFormRepository submittedFormRepository, SubmissionRepository submissionRepository, FormItemRepository formItemRepository, ApprovalRepository approvalRepository, FormService formService, ApplicationContext context) {
+		this.submittedFormRepository = submittedFormRepository;
 		this.submissionRepository = submissionRepository;
+		this.formItemRepository = formItemRepository;
+		this.approvalRepository = approvalRepository;
 		this.formService = formService;
 		this.context = context;
 	}
@@ -38,30 +50,42 @@ public class SubmissionServiceImpl implements SubmissionService {
 	}
 
 	@Override
-	public List<Submission> findSubmissionsByForm(Form form) {
-		return submissionRepository.findSubmittedFormsByForm(form);
+	public Optional<SubmittedForm> findSubmittedFormById(Long id) {
+		return submittedFormRepository.findById(id);
 	}
 
 	@Override
-	public List<Submission> findSubmissionsByFormAndState(Form form, Form.FormState state) {
-		return submissionRepository.findSubmittedFormsByFormAndFormState(form, state);
+	public List<SubmittedForm> findSubmittedFormsByForm(Form form) {
+		return submittedFormRepository.findSubmittedFormsByForm(form);
+	}
+
+	@Override
+	public List<SubmittedForm> findSubmittedFormsByFormAndState(Form form, Form.FormState state) {
+		return submittedFormRepository.findSubmittedFormsByFormAndFormState(form, state);
 	}
 
 	@Override
 	public Submission createSubmission(Submission submission) {
-		submission.setFormState(Form.FormState.SUBMITTED);
+		submission.getSubmittedForms().forEach(s -> {
+			s.setFormState(Form.FormState.SUBMITTED);
+			s.getFormData().forEach(d -> d.setFormItem(formItemRepository.getReferenceById(d.getFormItem().getId())));
+		});
 		//TODO fill the data like extSourceName, submittedBy...
 		//TODO check if all the required fields are submitted
 		return submissionRepository.save(submission);
 	}
 
 	@Override
-	public Submission approveSubmission(Long id) {
+	@Transactional
+	public SubmittedForm approveSubmittedForm(Long id) {
 		//TODO: check if have rights to approve
-		Submission saved = submissionRepository.findById(id).orElseThrow();
+		SubmittedForm saved = submittedFormRepository.findById(id).orElseThrow();
 		if (saved.getFormState() != Form.FormState.SUBMITTED) {
 			// TODO throw exception
 		}
+		Approval approval = new Approval(null, 0, false, saved, Approval.Decision.APPROVED,
+				"todo-id-of-approver", "todo-name-of-approver", LocalDateTime.now(), null);
+		approvalRepository.save(approval);
 		//TODO: beforeApprove of modules
 		saved.setFormState(Form.FormState.APPROVED);
 		//TODO: onApprove of modules
@@ -70,7 +94,7 @@ public class SubmissionServiceImpl implements SubmissionService {
 				.sorted()
 				.toList();
 		modules.forEach(assignedModule -> getModule(assignedModule).onApprove(saved));
-		return submissionRepository.save(saved);
+		return submittedFormRepository.save(saved);
 		//TODO: send notifications
 	}
 
@@ -84,19 +108,19 @@ public class SubmissionServiceImpl implements SubmissionService {
 	}
 
 	@Override
-	public Submission loadSubmission(Long formId) {
+	public SubmittedForm loadSubmission(Long formId) {
 		Form form = formService.getFormById(formId).orElseThrow();
-		Submission submission = new Submission();
-		submission.setForm(form);
+		SubmittedForm submittedForm = new SubmittedForm();
+		submittedForm.setForm(form);
 		// TODO: determine whether we want to load INITIAL or EXTENSION?
-		submission.setFormType(Form.FormType.INITIAL);
+		submittedForm.setFormType(Form.FormType.INITIAL);
 		List<FormItem> items = formService.getFormItems(formId);
 		List<FormItemData> itemDataList = items
 				.stream()
 				// TODO: prefill values
 				.map(formItem -> new FormItemData(null, formItem, formItem.getShortname(), null, null, null, false))
 				.toList();
-		submission.setFormData(itemDataList);
-		return submission;
+		submittedForm.setFormData(itemDataList);
+		return submittedForm;
 	}
 }

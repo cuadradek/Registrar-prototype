@@ -94,8 +94,9 @@ public class FormServiceImpl implements FormService {
 
 	@Override
 	public List<FormItem> getFormItems(Long formId) {
-		Form form = getFormById(formId)
-				.orElseThrow(() -> new FormNotFoundException(formId));
+//		Form form = getFormById(formId)
+//				.orElseThrow(() -> new FormNotFoundException(formId));
+		Form form = formRepository.getReferenceById(formId);
 		return formItemRepository.getAllByForm(form);
 	}
 

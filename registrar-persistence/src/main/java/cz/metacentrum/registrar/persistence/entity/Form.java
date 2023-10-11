@@ -14,8 +14,6 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,8 +28,6 @@ public class Form {
 
 	public enum FormType { INITIAL, EXTENSION }
 
-	public enum FlowType { PRE, AUTO, REDIRECT }
-
 	@Id
 	@GeneratedValue
 	private Long id;
@@ -45,17 +41,12 @@ public class Form {
 	@Column
 	private String name;
 
+	@Column(unique = true)
+	private String urlSuffix;
+
 	@Column
 	@Nullable
 	private String redirectUrl;
-
-	@ManyToMany
-	@JoinTable(name = "form_redirect_form", joinColumns=@JoinColumn(name = "form_id"), inverseJoinColumns=@JoinColumn(name = "redirect_form_id"))
-	private List<Form> redirectForms;
-
-	@ManyToMany
-	@JoinTable(name = "form_autosend_form", joinColumns=@JoinColumn(name = "form_id"), inverseJoinColumns=@JoinColumn(name = "autosend_form_id"))
-	private List<Form> autosendForms;
 
 	@Column
 	private boolean canBeResubmitted;
@@ -63,15 +54,11 @@ public class Form {
 	@Column
 	private boolean autoApprove;
 
-	@ManyToMany
-	@JoinTable(name="form_nested_form", joinColumns=@JoinColumn(name="form_id"), inverseJoinColumns=@JoinColumn(name="nested_form_id"))
-	private List<Form> nestedForms = new ArrayList<>();
-
-	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-	@Fetch(value = FetchMode.SUBSELECT)
-//	@OneToMany(mappedBy = "form", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	@OneToMany(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER, orphanRemoval = true) //todo: maybe fetchtype subselect
+	@JoinColumn(name = "form_id")
 	private List<ApprovalGroup> approvalGroups = new ArrayList<>();
 
-	@OneToMany(mappedBy = "form", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+	@OneToMany(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER, orphanRemoval = true) //todo: maybe fetchtype subselect
+	@JoinColumn(name = "form_id")
 	private List<AssignedFormModule> assignedModules;
 }

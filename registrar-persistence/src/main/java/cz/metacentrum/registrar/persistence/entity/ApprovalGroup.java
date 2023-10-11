@@ -30,9 +30,4 @@ public class ApprovalGroup {
 
 	@Column
 	private UUID idmGroup;
-
-//	@ManyToOne
-//	@JoinColumn(name = "form_id")
-//	@JsonIgnore // needed jackson dependency
-//	private Form form;
 }

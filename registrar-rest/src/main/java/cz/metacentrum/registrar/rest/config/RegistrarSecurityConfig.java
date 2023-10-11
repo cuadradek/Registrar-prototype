@@ -53,6 +53,7 @@ public class RegistrarSecurityConfig {
 				.authorizeHttpRequests(
 						authorize -> authorize
 								.requestMatchers("/submissions/**").permitAll()
+								.requestMatchers("/submitted-forms/**").permitAll()
 								.requestMatchers("/forms/**").permitAll()
 								.requestMatchers("/test/**").hasAuthority("SCOPE_openid")
 								//if the request didn't match test/**, then try to match this:

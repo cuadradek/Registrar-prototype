@@ -25,7 +25,7 @@ class InitialData {
 
 		return args -> {
 			Form form = new Form(null, UUID.fromString("13d64d76-2ca3-4cf8-b1f4-0befdbef69fc"), UUID.fromString("13d64d76-2ca3-4cf8-b1f4-0befdbef69fc"),
-					"My First Form", null, null, null, false, false, null,
+					"My First Form", "my-first-form", null, false, false,
 					List.of(new ApprovalGroup(null, 0, false, 1, UUID.fromString("13d64d76-2ca3-4cf8-b1f4-0befdbef69fc"))),
 					null);
 			AssignedFormModule module = new AssignedFormModule(null, "addToVo", null, List.of(), 0);
@@ -36,7 +36,7 @@ class InitialData {
 			FormItem formItem = new FormItem(null, form1, "login", 0, true, false, FormItem.Type.USERNAME,
 					false, null, EINFRA_LOGIN, EINFRA_LOGIN, null,
 					List.of(Form.FormType.INITIAL, Form.FormType.EXTENSION),
-					null, null, FormItem.Disabled.NEVER, FormItem.Hidden.NEVER, false, null);
+					null, null, FormItem.Disabled.NEVER, FormItem.Hidden.NEVER);
 			formService.createFormItems(1L, List.of(formItem));
 
 			var adminRole = new Role();

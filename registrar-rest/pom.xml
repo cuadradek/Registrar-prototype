@@ -41,11 +41,6 @@
 <!--			<version>8.19</version>-->
 <!--			<scope>runtime</scope>-->
 <!--		</dependency>-->
-		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-			<version>1.18.28</version>
-		</dependency>
 
 <!--		for building cache with expiry settings -->
 		<dependency>

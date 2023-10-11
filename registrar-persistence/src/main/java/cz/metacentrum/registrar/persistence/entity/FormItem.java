@@ -1,6 +1,7 @@
 package cz.metacentrum.registrar.persistence.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.FetchType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -29,7 +30,7 @@ public class FormItem {
 	@GeneratedValue
 	private Long id;
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "form_id")
 	@JsonIgnore
 	private Form form;
@@ -86,13 +87,6 @@ public class FormItem {
 
 	@Enumerated(EnumType.STRING)
 	private Hidden hidden = Hidden.NEVER;
-
-	@Column
-	private boolean useInTemplate;
-
-	@Column
-	@Nullable
-	private Integer templateDependencyItemId;
 
 	/**
 	 * Enumeration for types of application form items. For example text fields, checkboxes and so on.

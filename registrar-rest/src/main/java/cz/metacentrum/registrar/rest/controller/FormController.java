@@ -1,7 +1,9 @@
 package cz.metacentrum.registrar.rest.controller;
 
+import cz.metacentrum.registrar.persistence.entity.AssignedFlowForm;
 import cz.metacentrum.registrar.persistence.entity.Form;
 import cz.metacentrum.registrar.persistence.entity.FormItem;
+import cz.metacentrum.registrar.rest.controller.dto.AssignedFlowFormDto;
 import cz.metacentrum.registrar.rest.controller.dto.FormDto;
 import cz.metacentrum.registrar.service.FormNotFoundException;
 import cz.metacentrum.registrar.service.FormService;
@@ -9,7 +11,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -39,7 +40,7 @@ public class FormController {
 	}
 
 	@GetMapping("/forms")
-	List<Form> getAllForms() {
+	public List<Form> getAllForms() {
 		return formService.getAllForms();
 	}
 
@@ -111,9 +112,9 @@ public class FormController {
 
 	private FormDto convertToDto(Form form) {
 		FormDto formDto = modelMapper.map(form, FormDto.class);
-		formDto.setNestedFormsIds(getFormsIds(form.getNestedForms()));
-		formDto.setAutosendFormsIds(getFormsIds(form.getAutosendForms()));
-		formDto.setRedirectFormsIds(getFormsIds(form.getRedirectForms()));
+//		formDto.setNestedFormsIds(getFormsIds(form.getNestedForms()));
+//		formDto.setAutosendFormsIds(getFormsIds(form.getAutosendForms()));
+//		formDto.setRedirectFormsIds(getFormsIds(form.getRedirectForms()));
 		return formDto;
 	}
 
@@ -125,18 +126,39 @@ public class FormController {
 				.collect(Collectors.toSet());
 	}
 
+	private AssignedFlowForm convertToEntity(AssignedFlowFormDto dto) {
+		AssignedFlowForm assignedFlowForm = modelMapper.map(dto, AssignedFlowForm.class);
+		Form form = formService.getFormById(dto.getFlowFormId())
+				.orElseThrow(() -> new FormNotFoundException(dto.getFlowFormId()));
+		assignedFlowForm.setFlowForm(form);
+		return assignedFlowForm;
+	}
+
+	private AssignedFlowFormDto convertToDto(AssignedFlowForm assignedFlowForm) {
+		AssignedFlowFormDto dto = modelMapper.map(assignedFlowForm, AssignedFlowFormDto.class);
+		dto.setFlowFormId(assignedFlowForm.getFlowForm().getId());
+
+		return dto;
+	}
+
 	private Form convertToEntity(FormDto formDto) {
 		Form form = modelMapper.map(formDto, Form.class);
 
-		if (!CollectionUtils.isEmpty(formDto.getNestedFormsIds())) {
-			form.setNestedForms(formService.getFormsByIds(formDto.getNestedFormsIds()));
-		}
-		if (!CollectionUtils.isEmpty(formDto.getAutosendFormsIds())) {
-			form.setAutosendForms(formService.getFormsByIds(formDto.getAutosendFormsIds()));
-		}
-		if (!CollectionUtils.isEmpty(formDto.getRedirectFormsIds())) {
-			form.setRedirectForms(formService.getFormsByIds(formDto.getRedirectFormsIds()));
-		}
+//		if (!CollectionUtils.isEmpty(formDto.getAssignedFlowForms())) {
+//			form.setAssignedFlowForms(formDto.getAssignedFlowForms().stream()
+//					.map(this::convertToEntity)
+//					.collect(Collectors.toList()));
+//		}
+
+//		if (!CollectionUtils.isEmpty(formDto.getNestedFormsIds())) {
+//			form.setNestedForms(formService.getFormsByIds(formDto.getNestedFormsIds()));
+//		}
+//		if (!CollectionUtils.isEmpty(formDto.getAutosendFormsIds())) {
+//			form.setAutosendForms(formService.getFormsByIds(formDto.getAutosendFormsIds()));
+//		}
+//		if (!CollectionUtils.isEmpty(formDto.getRedirectFormsIds())) {
+//			form.setRedirectForms(formService.getFormsByIds(formDto.getRedirectFormsIds()));
+//		}
 
 		return form;
 	}
