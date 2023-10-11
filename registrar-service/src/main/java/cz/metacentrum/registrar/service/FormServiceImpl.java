@@ -8,6 +8,7 @@ import cz.metacentrum.registrar.service.formitems.FormItemsLoader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
 import java.util.List;
@@ -17,6 +18,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class FormServiceImpl implements FormService {
 
 	private final FormRepository formRepository;
@@ -31,13 +33,8 @@ public class FormServiceImpl implements FormService {
 	}
 
 	@Override
-	// TODO return optional or exception or null????
-//	exception:
-//	optional: vyhoda, ze nebudem mat vsade checked exception boiler plate kod
-//	null:
 	public Optional<Form> getFormById(Long id) {
 		return formRepository.findById(id);
-//				.orElseThrow(() -> new FormNotFoundException(id));
 	}
 
 	@Override
@@ -72,24 +69,13 @@ public class FormServiceImpl implements FormService {
 			formRepository.deleteById(id);
 		} catch (EmptyResultDataAccessException ex) {
 			throw new FormNotFoundException(id);
-//			System.out.println(LocalDateTime.now());
-//			throw ex;
 		}
 	}
 
 	@Override
 	public Form updateForm(Form form) {
-		return formRepository.findById(form.getId())
-				.map(savedForm -> {
-					savedForm.setAutoApprove(form.isAutoApprove());
-					savedForm.setCanBeResubmitted(form.isCanBeResubmitted());
-					savedForm.setIdmFormManagersGroup(form.getIdmFormManagersGroup());
-					savedForm.setName(form.getName());
-					savedForm.setIdmObject(form.getIdmObject());
-					savedForm.setRedirectUrl(form.getRedirectUrl());
-					savedForm.setApprovalGroups(form.getApprovalGroups());
-					return formRepository.save(savedForm);
-				}).orElseThrow();
+		formRepository.findById(form.getId()).orElseThrow(() -> new FormNotFoundException(form.getId()));
+		return formRepository.save(form);
 	}
 
 	@Override

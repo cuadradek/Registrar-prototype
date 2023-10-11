@@ -5,6 +5,8 @@ import jakarta.persistence.FetchType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.lang.Nullable;
 
 import jakarta.persistence.CollectionTable;
@@ -32,6 +34,7 @@ public class FormItem {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "form_id")
+	@OnDelete(action = OnDeleteAction.CASCADE) //this add ON DELETE CASCADE to table definition
 	@JsonIgnore
 	private Form form;
 
@@ -71,7 +74,9 @@ public class FormItem {
 
 	@Enumerated(EnumType.STRING)
 	@ElementCollection
-	@CollectionTable(name = "form_item_form_types", joinColumns = @JoinColumn(name = "item_id"))
+	@CollectionTable(name = "form_item_form_types")
+	@JoinColumn(name = "item_id")
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	private List<Form.FormType> formTypes = Arrays.asList(Form.FormType.INITIAL, Form.FormType.EXTENSION);
 
 	@Column

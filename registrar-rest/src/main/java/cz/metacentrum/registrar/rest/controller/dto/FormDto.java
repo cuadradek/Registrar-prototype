@@ -9,35 +9,30 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 @Data
 public class FormDto {
 	@Nullable
-	Long id;
+	private Long id;
 	@NotNull
-	UUID idmObject;
+	private UUID idmObject;
 	@NotNull
-	UUID idmFormManagersGroup;
+	private UUID idmFormManagersGroup;
 	@NotBlank
 	@Size(min = 3, max = 30)
-	String name;
+	private String name;
 	@NotBlank
 	@Size(min = 3, max = 30)
 	private String urlSuffix;
 	@Nullable
-	String redirectUrl;
-	@Nullable
-	Set<AssignedFlowFormDto> assignedFlowForms;
+	private String redirectUrl;
 	@NotNull
 	boolean canBeResubmitted;
 	@NotNull
 	boolean autoApprove;
 	@Nullable
-	Set<Long> nestedFormsIds;
-	@Nullable
-	List<ApprovalGroup> approvalGroups;
+	private List<ApprovalGroup> approvalGroups;
 	@NotNull(message = "assignModules must be specified")
-	List<AssignedFormModule> assignedModules;//TODO use AssignedFormModuleDTO instead
+	private List<AssignedFormModule> assignedModules;
 }

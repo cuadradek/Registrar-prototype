@@ -5,6 +5,7 @@ import cz.metacentrum.registrar.persistence.entity.Form;
 import cz.metacentrum.registrar.persistence.entity.FormItem;
 import cz.metacentrum.registrar.rest.controller.dto.AssignedFlowFormDto;
 import cz.metacentrum.registrar.rest.controller.dto.FormDto;
+import cz.metacentrum.registrar.rest.controller.dto.ShortFormDto;
 import cz.metacentrum.registrar.service.FormNotFoundException;
 import cz.metacentrum.registrar.service.FormService;
 import org.modelmapper.ModelMapper;
@@ -40,56 +41,34 @@ public class FormController {
 	}
 
 	@GetMapping("/forms")
-	public List<Form> getAllForms() {
-		return formService.getAllForms();
+	public List<ShortFormDto> getAllForms() {
+		return formService.getAllForms().stream()
+				.map(f -> convertToDto(f, ShortFormDto.class))
+				.collect(Collectors.toList());
 	}
 
 	@GetMapping("/forms/{id}")
-//	/customers/{customerId}/accounts/{accountId}
-//	http://api.example.com/user-management/users/admin - singular
-	public ResponseEntity<Form> getFormById(@PathVariable Long id) {
+	public FormDto getFormById(@PathVariable Long id) {
 		Optional<Form> formData = formService.getFormById(id);
-		return formData
-				.map(form -> new ResponseEntity<>(form, HttpStatus.OK))
+		return formData.map(this::convertToDto)
 				.orElseThrow(() -> new FormNotFoundException(id));
-//				.orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
-//		return new ResponseEntity<>(formService.getFormById(id), HttpStatus.OK);
-//		catch (Exception e) {
-//			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-//		}
 	}
 
-//	@PostMapping("/forms")
-//	public ResponseEntity<Form> createForm(final @RequestBody Form form) {
-//		return new ResponseEntity<>(formService.createForm(form), HttpStatus.CREATED);
-////		catch (Exception e) {
-////      return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-////    }
-//	}
-
-	// TODO: advice na zahrnutie message pri Validated chybe do response (momentalne sa vrati len 400 Bad request a nic detailnejsie)
 	@PostMapping("/forms")
 	public ResponseEntity<FormDto> createForm(final @RequestBody @Validated FormDto formDTO) {
 		Form form = formService.createForm(convertToEntity(formDTO));
 		return new ResponseEntity<>(convertToDto(form), HttpStatus.CREATED);
-//		catch (Exception e) {
-//      return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-//    }
 	}
 
 	@PutMapping("/forms")
-	public ResponseEntity<FormDto> updateForm(final @RequestBody @Validated FormDto formDTO) {
+	public FormDto updateForm(final @RequestBody @Validated FormDto formDTO) {
 		Form form = formService.updateForm(convertToEntity(formDTO));
-		return new ResponseEntity<>(convertToDto(form), HttpStatus.OK);
+		return convertToDto(form);
 	}
 
 	@DeleteMapping("/forms/{id}")
-	public ResponseEntity<Void> deleteForm(@PathVariable Long id) {
+	public void deleteForm(@PathVariable Long id) {
 		formService.deleteForm(id);
-		return ResponseEntity.noContent().build();
-//		catch (Exception e) {
-//      return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-//    }
 	}
 
 	@GetMapping("/forms/{id}/items")
@@ -108,6 +87,10 @@ public class FormController {
 	public ResponseEntity<List<FormItem>> createFormItems(final @PathVariable Long id,
 														  final @RequestBody @Validated List<FormItem> formItems) {
 		return new ResponseEntity<>(formService.createFormItems(id, formItems), HttpStatus.CREATED);
+	}
+
+	private <T> T convertToDto(Form form, Class<T> tClass) {
+		return modelMapper.map(form, tClass);
 	}
 
 	private FormDto convertToDto(Form form) {

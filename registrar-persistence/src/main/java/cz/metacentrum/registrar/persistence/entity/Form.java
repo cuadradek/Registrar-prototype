@@ -3,8 +3,6 @@ package cz.metacentrum.registrar.persistence.entity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 import org.springframework.lang.Nullable;
 
 import jakarta.persistence.CascadeType;
@@ -54,11 +52,13 @@ public class Form {
 	@Column
 	private boolean autoApprove;
 
-	@OneToMany(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER, orphanRemoval = true) //todo: maybe fetchtype subselect
+	// these 2 collections can be lazy for now
+	// if we are getting all forms - we are returning ShortFormDTO which wouldn't query n+1 for these
+	@OneToMany(cascade = {CascadeType.ALL}, fetch = FetchType.LAZY, orphanRemoval = true)
 	@JoinColumn(name = "form_id")
 	private List<ApprovalGroup> approvalGroups = new ArrayList<>();
 
-	@OneToMany(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER, orphanRemoval = true) //todo: maybe fetchtype subselect
+	@OneToMany(cascade = {CascadeType.ALL}, fetch = FetchType.LAZY, orphanRemoval = true)
 	@JoinColumn(name = "form_id")
 	private List<AssignedFormModule> assignedModules;
 }
