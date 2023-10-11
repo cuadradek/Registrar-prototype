@@ -4,6 +4,7 @@ import cz.metacentrum.registrar.service.FormNotFoundException;
 import lombok.Data;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.security.access.AccessDeniedException;
@@ -23,10 +24,17 @@ public class CustomResponseEntityExceptionHandler {
 	}
 
 	@ExceptionHandler(AccessDeniedException.class)
-	public ResponseEntity<ExceptionResponse> accessDeniedExceptionHandler(Exception ex, HttpServletRequest httpRequest) {
+	public ResponseEntity<ExceptionResponse> accessDeniedExceptionHandler(AccessDeniedException ex, HttpServletRequest httpRequest) {
 		ExceptionResponse response =  new ExceptionResponse(HttpStatus.FORBIDDEN.value(),
 				ex.getMessage(), httpRequest.getRequestURI());
 		return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+	}
+
+	@ExceptionHandler(MethodArgumentNotValidException.class)
+	public ResponseEntity<ExceptionResponse> methodArgumentNotValidExceptionHandler(MethodArgumentNotValidException ex, HttpServletRequest httpRequest) {
+		ExceptionResponse response =  new ExceptionResponse(HttpStatus.FORBIDDEN.value(),
+				ex.getMessage(), httpRequest.getRequestURI());
+		return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 	}
 
 	@ExceptionHandler(Exception.class)
