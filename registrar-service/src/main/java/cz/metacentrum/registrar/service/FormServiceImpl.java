@@ -83,17 +83,24 @@ public class FormServiceImpl implements FormService {
 //		Form form = getFormById(formId)
 //				.orElseThrow(() -> new FormNotFoundException(formId));
 		Form form = formRepository.getReferenceById(formId);
-		return formItemRepository.getAllByForm(form);
+		return formItemRepository.getAllByFormAndIsDeleted(form, false);
 	}
 
 	@Override
-	public List<FormItem> createFormItems(Long formId, List<FormItem> formItems) {
-		Form form = getFormById(formId)
-				.orElseThrow(() -> new FormNotFoundException(formId));
+	public List<FormItem> setFormItems(Long formId, List<FormItem> formItems) {
+		Form form = getFormById(formId).orElseThrow(() -> new FormNotFoundException(formId));
+		var existingItemsIds = getFormItems(formId).stream().map(FormItem::getId).collect(Collectors.toSet());
+
 		formItems.forEach(formItem -> {
+			if (formItem.getId() != null && !existingItemsIds.contains(formItem.getId())) {
+				throw new IllegalArgumentException("Cannot change form item from different form!");
+			}
 			formItemsLoader.validateItem(formItem);
 			formItem.setForm(form);
 		});
+
+		//possibly hard delete formItems marked as deleted if such formItem is not used in any submitted form
+
 		return formItemRepository.saveAll(formItems);
 	}
 

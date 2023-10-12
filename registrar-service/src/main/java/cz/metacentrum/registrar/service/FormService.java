@@ -20,7 +20,7 @@ public interface FormService {
 
 	List<FormItem> getFormItems(Long formId);
 
-	List<FormItem> createFormItems(Long formId, List<FormItem> formItems);
+	List<FormItem> setFormItems(Long formId, List<FormItem> formItems);
 
 	List<Long> getFormsByIdmManagersGroups(Set<UUID> groupUUIDs);
 	List<Long> getFormsByIdmApprovalGroups(Set<UUID> groupUUIDs);

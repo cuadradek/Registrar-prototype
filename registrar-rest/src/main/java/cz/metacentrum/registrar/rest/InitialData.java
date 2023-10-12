@@ -36,8 +36,8 @@ class InitialData {
 			FormItem formItem = new FormItem(null, form1, "login", 0, true, false, FormItem.Type.USERNAME,
 					false, null, EINFRA_LOGIN, EINFRA_LOGIN, null,
 					List.of(Form.FormType.INITIAL, Form.FormType.EXTENSION),
-					null, null, FormItem.Disabled.NEVER, FormItem.Hidden.NEVER);
-			formService.createFormItems(1L, List.of(formItem));
+					null, null, FormItem.Disabled.NEVER, FormItem.Hidden.NEVER, false);
+			formService.setFormItems(1L, List.of(formItem));
 
 			var adminRole = new Role();
 			adminRole.setName("ADMIN");

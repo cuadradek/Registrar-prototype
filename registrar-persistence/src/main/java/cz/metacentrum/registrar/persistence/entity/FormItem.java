@@ -5,6 +5,9 @@ import jakarta.persistence.FetchType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.lang.Nullable;
@@ -36,6 +39,7 @@ public class FormItem {
 	@JoinColumn(name = "form_id")
 	@OnDelete(action = OnDeleteAction.CASCADE) //this add ON DELETE CASCADE to table definition
 	@JsonIgnore
+	@ToString.Exclude //JsonIgnore and Exclude from toString to avoid n+1 query (toString used while logging which we don't need tbh)
 	private Form form;
 
 	@Column
@@ -73,9 +77,10 @@ public class FormItem {
 	private String regex;
 
 	@Enumerated(EnumType.STRING)
-	@ElementCollection
+	@ElementCollection(fetch = FetchType.EAGER)
 	@CollectionTable(name = "form_item_form_types")
 	@JoinColumn(name = "item_id")
+	@Fetch(FetchMode.SUBSELECT)
 	@OnDelete(action = OnDeleteAction.CASCADE)
 	private List<Form.FormType> formTypes = Arrays.asList(Form.FormType.INITIAL, Form.FormType.EXTENSION);
 
@@ -92,6 +97,8 @@ public class FormItem {
 
 	@Enumerated(EnumType.STRING)
 	private Hidden hidden = Hidden.NEVER;
+
+	private boolean isDeleted; //soft delete to keep form_item.id as foreign key in form_item_data
 
 	/**
 	 * Enumeration for types of application form items. For example text fields, checkboxes and so on.

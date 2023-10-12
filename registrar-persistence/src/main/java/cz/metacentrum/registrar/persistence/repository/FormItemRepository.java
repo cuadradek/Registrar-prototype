@@ -10,5 +10,5 @@ import java.util.List;
 
 @Repository
 public interface FormItemRepository extends JpaRepository<FormItem, Long> {
-	List<FormItem> getAllByForm(Form form);
+	List<FormItem> getAllByFormAndIsDeleted(Form form, boolean deleted);
 }

@@ -72,21 +72,14 @@ public class FormController {
 	}
 
 	@GetMapping("/forms/{id}/items")
-	public ResponseEntity<List<FormItem>> getFormItems(final @PathVariable Long id) {
-		return new ResponseEntity<>(formService.getFormItems(id), HttpStatus.OK);
+	public List<FormItem> getFormItems(final @PathVariable Long id) {
+		return formService.getFormItems(id);
 	}
 
-	@PostMapping("/forms/{id}/items")
-	// TODO, atm only for adding form items to the form
-	// for also updating, deleting, creating at once:
-	// 1. use POST, PUT, DELETE - but 3 separate request needed (we prefer one transaction)
-	// 2. have form items as a part of FormDTO
-	// 3. use PATCH ??
-	// 4. google REST API replacing collections / subresources
-	// 5. just use POST for adding, DELETE for removing, PUT for replacing the whole collection?
-	public ResponseEntity<List<FormItem>> createFormItems(final @PathVariable Long id,
-														  final @RequestBody @Validated List<FormItem> formItems) {
-		return new ResponseEntity<>(formService.createFormItems(id, formItems), HttpStatus.CREATED);
+	@PutMapping("/forms/{id}/items")
+	public List<FormItem> setFormItems(final @PathVariable Long id,
+									   final @RequestBody @Validated List<FormItem> formItems) {
+		return formService.setFormItems(id, formItems);
 	}
 
 	private <T> T convertToDto(Form form, Class<T> tClass) {
