@@ -1,7 +1,9 @@
 package cz.metacentrum.registrar.service;
 
+import cz.metacentrum.registrar.persistence.entity.AssignedFlowForm;
 import cz.metacentrum.registrar.persistence.entity.Form;
 import cz.metacentrum.registrar.persistence.entity.FormItem;
+import cz.metacentrum.registrar.persistence.repository.FlowFormRepository;
 import cz.metacentrum.registrar.persistence.repository.FormItemRepository;
 import cz.metacentrum.registrar.persistence.repository.FormRepository;
 import cz.metacentrum.registrar.service.formitems.FormItemsLoader;
@@ -23,12 +25,14 @@ public class FormServiceImpl implements FormService {
 
 	private final FormRepository formRepository;
 	private final FormItemRepository formItemRepository;
+	private final FlowFormRepository flowFormRepository;
 	private final FormItemsLoader formItemsLoader;
 
 	@Autowired
-	public FormServiceImpl(FormRepository formRepository, FormItemRepository formItemRepository, FormItemsLoader formItemsLoader) {
+	public FormServiceImpl(FormRepository formRepository, FormItemRepository formItemRepository, FlowFormRepository flowFormRepository, FormItemsLoader formItemsLoader) {
 		this.formRepository = formRepository;
 		this.formItemRepository = formItemRepository;
+		this.flowFormRepository = flowFormRepository;
 		this.formItemsLoader = formItemsLoader;
 	}
 
@@ -107,6 +111,39 @@ public class FormServiceImpl implements FormService {
 	@Override
 	public List<Long> getFormsByIdmApprovalGroups(Set<UUID> groupUUIDs) {
 		return formRepository.findIsByIdmApprovalGroups(groupUUIDs);
+	}
+
+	@Override
+	public List<AssignedFlowForm> getAssignedFlowForms(Long mainFormId) {
+		Form mainForm = formRepository.getReferenceById(mainFormId);
+		return flowFormRepository.getAllByMainForm(mainForm);
+	}
+
+	@Override
+	public List<AssignedFlowForm> setAssignedFlowForms(Long mainFormId, List<AssignedFlowForm> assignedFlowForms) {
+		Form mainForm = getFormById(mainFormId).orElseThrow(() -> new FormNotFoundException(mainFormId));
+		var existingFlowsIds = getAssignedFlowForms(mainFormId).stream().map(AssignedFlowForm::getId).collect(Collectors.toSet());
+		var updatingItemsIds = assignedFlowForms.stream().map(AssignedFlowForm::getId).collect(Collectors.toSet());
+
+		assignedFlowForms.forEach(assignedFlowForm -> {
+			if (assignedFlowForm.getId() != null && !existingFlowsIds.contains(assignedFlowForm.getId())) {
+				throw new IllegalArgumentException("Cannot change flow assignment for different main form!");
+			}
+//			TODO: check self-assignment, multiple assignments to 1 form, ...
+			if (mainFormId.equals(assignedFlowForm.getFlowForm().getId())) {
+				throw new IllegalArgumentException("Cannot create self flow-assignment!");
+			}
+			assignedFlowForm.setMainForm(mainForm);
+		});
+
+		// delete flow assignments missing in input list
+		// (possibly change this - add transient "forDelete" to AssignedFlowForm and delete only assignments marked with this flag)
+		existingFlowsIds.removeAll(updatingItemsIds);
+		if (!existingFlowsIds.isEmpty()) {
+			flowFormRepository.deleteAllById(existingFlowsIds);
+		}
+
+		return flowFormRepository.saveAll(assignedFlowForms);
 	}
 
 	@Override

@@ -82,15 +82,28 @@ public class FormController {
 		return formService.setFormItems(id, formItems);
 	}
 
+	@GetMapping("/forms/{id}/flow-forms")
+	public List<AssignedFlowFormDto> getAssignedFlowForms(final @PathVariable Long id) {
+		return formService.getAssignedFlowForms(id).stream()
+				.map(this::convertToDto)
+				.collect(Collectors.toList());
+	}
+
+	@PutMapping("/forms/{id}/flow-forms")
+	public List<AssignedFlowFormDto> setAssignedFlowForms(final @PathVariable Long id,
+														  final @RequestBody @Validated List<AssignedFlowFormDto> flowForms) {
+		var entities = flowForms.stream().map(this::convertToEntity).collect(Collectors.toList());
+		return formService.setAssignedFlowForms(id, entities).stream()
+				.map(this::convertToDto)
+				.collect(Collectors.toList());
+	}
+
 	private <T> T convertToDto(Form form, Class<T> tClass) {
 		return modelMapper.map(form, tClass);
 	}
 
 	private FormDto convertToDto(Form form) {
 		FormDto formDto = modelMapper.map(form, FormDto.class);
-//		formDto.setNestedFormsIds(getFormsIds(form.getNestedForms()));
-//		formDto.setAutosendFormsIds(getFormsIds(form.getAutosendForms()));
-//		formDto.setRedirectFormsIds(getFormsIds(form.getRedirectForms()));
 		return formDto;
 	}
 

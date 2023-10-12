@@ -1,20 +1,21 @@
 package cz.metacentrum.registrar.persistence.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import java.util.Arrays;
 import java.util.List;
@@ -37,21 +38,23 @@ public class AssignedFlowForm {
 	@Column
 	private int ordnum;
 
-	@OneToOne
+	@ManyToOne
+	@JoinColumn(name = "flow_form_id")
 	private Form flowForm;
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "main_form_id")
-	@JsonIgnore
 	private Form mainForm;
 
 	@Enumerated(EnumType.STRING)
-	@ElementCollection
+	@ElementCollection(fetch = FetchType.EAGER)
+	@Fetch(FetchMode.SUBSELECT)
 	@CollectionTable(name = "flow_form_form_types", joinColumns = @JoinColumn(name = "assigned_flow_form_id"))
 	private List<Form.FormType> ifFlowFormType = Arrays.asList(Form.FormType.INITIAL, Form.FormType.EXTENSION);
 
 	@Enumerated(EnumType.STRING)
-	@ElementCollection
+	@ElementCollection(fetch = FetchType.EAGER)
+	@Fetch(FetchMode.SUBSELECT)
 	@CollectionTable(name = "main_form_form_types", joinColumns = @JoinColumn(name = "assigned_flow_form_id"))
 	private List<Form.FormType> ifMainFlowType = Arrays.asList(Form.FormType.INITIAL, Form.FormType.EXTENSION);
 }
