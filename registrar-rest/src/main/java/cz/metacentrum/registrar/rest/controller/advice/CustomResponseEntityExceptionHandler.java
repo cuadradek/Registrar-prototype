@@ -1,5 +1,6 @@
 package cz.metacentrum.registrar.rest.controller.advice;
 
+import cz.metacentrum.registrar.rest.controller.exception.ValidationException;
 import cz.metacentrum.registrar.service.FormNotFoundException;
 import lombok.Data;
 import org.springframework.http.HttpStatus;
@@ -33,6 +34,13 @@ public class CustomResponseEntityExceptionHandler {
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	public ResponseEntity<ExceptionResponse> methodArgumentNotValidExceptionHandler(MethodArgumentNotValidException ex, HttpServletRequest httpRequest) {
 		ExceptionResponse response =  new ExceptionResponse(HttpStatus.FORBIDDEN.value(),
+				ex.getMessage(), httpRequest.getRequestURI());
+		return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+	}
+
+	@ExceptionHandler(ValidationException.class)
+	public ResponseEntity<ExceptionResponse> genericExceptionHandler(ValidationException ex, HttpServletRequest httpRequest) {
+		ExceptionResponse response =  new ExceptionResponse(HttpStatus.BAD_REQUEST.value(),
 				ex.getMessage(), httpRequest.getRequestURI());
 		return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 	}

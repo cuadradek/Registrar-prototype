@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class SubmissionServiceImpl implements SubmissionService {
@@ -70,8 +71,9 @@ public class SubmissionServiceImpl implements SubmissionService {
 			s.setFormState(Form.FormState.SUBMITTED);
 			s.getFormData().forEach(d -> d.setFormItem(formItemRepository.getReferenceById(d.getFormItem().getId())));
 		});
+		submission.setTimestamp(LocalDateTime.now());
 		//TODO fill the data like extSourceName, submittedBy...
-		//TODO check if all the required fields are submitted
+		//TODO check if all the required fields are submitted, if all data belong to that form
 		return submissionRepository.save(submission);
 	}
 
@@ -122,5 +124,15 @@ public class SubmissionServiceImpl implements SubmissionService {
 				.toList();
 		submittedForm.setFormData(itemDataList);
 		return submittedForm;
+	}
+
+	@Override
+	public List<SubmittedForm> getSubmittedFormsBySubmitterId(String submitterId) {
+		return submissionRepository
+				.getAllBySubmittedById(submitterId)
+				.stream()
+				.map(Submission::getSubmittedForms)
+				.flatMap(List::stream)
+				.collect(Collectors.toList());
 	}
 }

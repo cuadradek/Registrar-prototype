@@ -17,4 +17,6 @@ public interface SubmissionService {
 	SubmittedForm approveSubmittedForm(Long id);
 
 	SubmittedForm loadSubmission(Long formId);
+
+	List<SubmittedForm> getSubmittedFormsBySubmitterId(String submitterId);
 }

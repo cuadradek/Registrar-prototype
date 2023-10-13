@@ -9,6 +9,8 @@ import cz.metacentrum.registrar.rest.config.RegistrarPrincipal;
 import cz.metacentrum.registrar.rest.controller.dto.FormItemDataDto;
 import cz.metacentrum.registrar.rest.controller.dto.SubmissionDto;
 import cz.metacentrum.registrar.rest.controller.dto.SubmittedFormDto;
+import cz.metacentrum.registrar.rest.controller.dto.SubmittedFormSimpleDto;
+import cz.metacentrum.registrar.rest.controller.exception.ValidationException;
 import cz.metacentrum.registrar.service.FormNotFoundException;
 import cz.metacentrum.registrar.service.FormService;
 import cz.metacentrum.registrar.service.SubmissionService;
@@ -23,14 +25,15 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
-//@RequestMapping("/api")
 public class SubmissionController {
 
 	private final SubmissionService submissionService;
@@ -45,54 +48,56 @@ public class SubmissionController {
 	}
 
 	@GetMapping("/submissions/{id}")
-	public ResponseEntity<SubmissionDto> getSubmissionById(@PathVariable Long id) {
+	public SubmissionDto getSubmissionById(@PathVariable Long id) {
 		Optional<Submission> submission = submissionService.findSubmissionById(id);
 		return submission
-				.map(s -> new ResponseEntity<>(convertToDto(s), HttpStatus.OK))
+				.map(this::convertToDto)
 				.orElseThrow(() -> new FormNotFoundException(id));
 	}
 
 	@GetMapping("/submitted-forms/{id}")
-	public ResponseEntity<SubmittedFormDto> getSubmittedFormById(@PathVariable Long id) {
+	public SubmittedFormDto getSubmittedFormById(@PathVariable Long id) {
 		Optional<SubmittedForm> submittedForm = submissionService.findSubmittedFormById(id);
 		return submittedForm
-				.map(s -> new ResponseEntity<>(convertToDto(s), HttpStatus.OK))
+				.map(this::convertToDto)
 				.orElseThrow(() -> new FormNotFoundException(id));
 	}
 
-//	// TODO better generate / load endpoint
-//	// TODO endpoint for callers submissions - is ?submittedby=xy enough?
-//	@GetMapping("/submissions")
-//	ResponseEntity<List<SubmissionDto>> getSubmissions(@RequestParam Long formId,
-//													   @RequestParam(required = false) Form.FormState state,
-//													   @RequestParam(required = false) Boolean generate) {
-//		if (generate != null) {
-//			return new ResponseEntity<>(List.of(convertToDto(submissionService.loadSubmission(formId))), HttpStatus.OK);
-//		}
-//
-//		Form form = formService.getFormById(formId)
-//				.orElseThrow(() -> new FormNotFoundException(formId));
-//		if (state == null) {
-//			return new ResponseEntity<>(submissionService.findSubmittedFormsByForm(form)
-//					.stream()
-//					.map(this::convertToDto)
-//					.toList(),
-//					HttpStatus.OK);
-//		} else {
-//			return new ResponseEntity<>(submissionService.findSubmittedFormsByFormAndState(form, state)
-//					.stream()
-//					.map(this::convertToDto)
-//					.toList(),
-//					HttpStatus.OK);
-//		}
-//	}
-//
+	@GetMapping("/submitted-forms")
+	public List<SubmittedFormSimpleDto> getSubmittedForms(@RequestParam(required = false) String submittedBy,
+														  @RequestParam(required = false) Long formId,
+														  @RequestParam(required = false) Form.FormState state) {
+		if (submittedBy == null && formId == null) {
+			throw new ValidationException("submittedBy or formId parameter has to be present!");
+		}
+
+		List<SubmittedForm> submittedForms = new ArrayList<>();
+		if (submittedBy != null) {
+			submittedForms = submissionService.getSubmittedFormsBySubmitterId(submittedBy);
+		}
+		if (formId != null) {
+			Form form = formService.getFormById(formId).orElseThrow(() -> new FormNotFoundException(formId));
+			if (state == null) {
+				submittedForms = submissionService.findSubmittedFormsByForm(form);
+			} else {
+				submittedForms = submissionService.findSubmittedFormsByFormAndState(form, state);
+			}
+		}
+
+		return submittedForms.stream()
+				.map(s -> modelMapper.map(s, SubmittedFormSimpleDto.class))
+				.collect(Collectors.toList());
+	}
+
 	@PostMapping("/submissions")
 	public ResponseEntity<SubmissionDto> createSubmission(final @RequestBody @Validated SubmissionDto submissionDto,
 														  @AuthenticationPrincipal RegistrarPrincipal principal) {
 		if (principal != null) {
 			submissionDto.setSubmittedById(principal.getName());
 			submissionDto.setSubmittedByName(principal.getName());
+		} else {
+			submissionDto.setSubmittedByName("TEST NAME");
+			submissionDto.setSubmittedById("test15310121@perun");
 		}
 		Submission submission = submissionService.createSubmission(convertToEntity(submissionDto));
 		return new ResponseEntity<>(convertToDto(submission), HttpStatus.CREATED);
