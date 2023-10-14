@@ -1,6 +1,7 @@
 package cz.metacentrum.registrar.service;
 
 import cz.metacentrum.registrar.persistence.entity.Approval;
+import cz.metacentrum.registrar.persistence.entity.ApprovalGroup;
 import cz.metacentrum.registrar.persistence.entity.AssignedFormModule;
 import cz.metacentrum.registrar.persistence.entity.Form;
 import cz.metacentrum.registrar.persistence.entity.FormItem;
@@ -12,17 +13,24 @@ import cz.metacentrum.registrar.persistence.repository.ApprovalRepository;
 import cz.metacentrum.registrar.persistence.repository.FormItemRepository;
 import cz.metacentrum.registrar.persistence.repository.SubmissionRepository;
 import cz.metacentrum.registrar.persistence.repository.SubmittedFormRepository;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class SubmissionServiceImpl implements SubmissionService {
 
 	private final SubmittedFormRepository submittedFormRepository;
@@ -78,35 +86,101 @@ public class SubmissionServiceImpl implements SubmissionService {
 	}
 
 	@Override
-	@Transactional
 	public SubmittedForm approveSubmittedForm(Long id) {
-		//TODO: check if have rights to approve
 		SubmittedForm saved = submittedFormRepository.findById(id).orElseThrow();
+		List<ApprovalGroup> principalsApprovalGroups = getPrincipalsApprovalGroups(saved);
+
 		if (saved.getFormState() != Form.FormState.SUBMITTED) {
-			// TODO throw exception
+			throw new IllegalArgumentException("Form needs to be in SUBMITTED state!");
 		}
-		Approval approval = new Approval(null, 0, false, saved, Approval.Decision.APPROVED,
-				"todo-id-of-approver", "todo-name-of-approver", LocalDateTime.now(), null);
-		approvalRepository.save(approval);
-		//TODO: beforeApprove of modules
-		saved.setFormState(Form.FormState.APPROVED);
-		//TODO: onApprove of modules
-		var modules = saved.getForm().getAssignedModules()
+
+		createApprovals(saved, principalsApprovalGroups, Approval.Decision.APPROVED, null);
+
+		var modules = getModules(saved);
+		modules.forEach(assignedModule -> assignedModule.beforeApprove(saved));
+
+		if (tryToApprove(saved, principalsApprovalGroups)) {
+			saved.setFormState(Form.FormState.APPROVED);
+			modules.forEach(assignedModule -> assignedModule.onApprove(saved));
+			return submittedFormRepository.save(saved);
+		}
+
+		return saved;
+	}
+
+	private List<ApprovalGroup> getPrincipalsApprovalGroups(SubmittedForm saved) {
+		Set<UUID> idmGroups = new HashSet<>();//todo these are from Principal object
+		idmGroups.add(saved.getForm().getApprovalGroups().get(0).getIdmGroup());//todo remove this
+		var principalsApprovalGroups = saved.getForm()
+				.getApprovalGroups()
+				.stream()
+				.filter(g -> idmGroups.contains(g.getIdmGroup()))
+				.collect(Collectors.toList());
+		if (principalsApprovalGroups.isEmpty()) {
+			throw new IllegalArgumentException("You are not authorized to approve this form!");
+		}
+		return principalsApprovalGroups;
+	}
+
+	private boolean tryToApprove(SubmittedForm saved, List<ApprovalGroup> approvalGroups) {
+		var lastApprovalGroup = saved.getForm().getApprovalGroups()
+				.stream()
+				.sorted(Comparator.reverseOrder())
+				.findFirst()
+				.get();
+		var approvalsCount = approvalRepository.findApprovalByLevelAndSubmittedFormAndDecision(
+				lastApprovalGroup.getLevel(), saved, Approval.Decision.APPROVED).size();
+		return lastApprovalGroup.getMinApprovals() <= approvalsCount;
+	}
+
+	private void createApprovals(SubmittedForm saved, List<ApprovalGroup> approvalGroups, Approval.Decision decision, @Nullable String message) {
+		//todo get principal's mfa, get id, name
+		boolean principalMfa = false;
+		String principalId = "defaultId";
+		String principalName = "defaultName";
+		approvalGroups.forEach(approvalGroup -> {
+			if (approvalGroup.isMfaRequired() && !principalMfa) {
+				throw new IllegalArgumentException("You need to be authenticated using multi-factor authentication to approve or reject this form!");
+			}
+			Approval approval = new Approval(null, approvalGroup.getLevel(), principalMfa, saved, decision,
+					principalId, principalName, LocalDateTime.now(), message);
+			approvalRepository.save(approval);
+			}
+		);
+	}
+
+	@Override
+	public SubmittedForm rejectSubmittedForm(Long id, String message) {
+		SubmittedForm saved = submittedFormRepository.findById(id).orElseThrow();
+		List<ApprovalGroup> principalsApprovalGroups = getPrincipalsApprovalGroups(saved);
+
+		if (saved.getFormState() != Form.FormState.SUBMITTED) {
+			throw new IllegalArgumentException("Form needs to be in SUBMITTED state!");
+		}
+
+		createApprovals(saved, principalsApprovalGroups, Approval.Decision.REJECTED, message);
+
+		var modules = getModules(saved);
+		modules.forEach(assignedModule -> assignedModule.onReject(saved));
+
+		saved.setFormState(Form.FormState.REJECTED);
+		return submittedFormRepository.save(saved);
+	}
+
+	private List<FormModule> getModules(SubmittedForm forms) {
+		return forms.getForm().getAssignedModules()
 				.stream()
 				.sorted()
+				.map(this::getModule)
 				.toList();
-		modules.forEach(assignedModule -> getModule(assignedModule).onApprove(saved));
-		return submittedFormRepository.save(saved);
-		//TODO: send notifications
 	}
 
 	private FormModule getModule(AssignedFormModule assignedModule) {
-		return context.getBean(assignedModule.getModuleName(), FormModule.class);
-//		try {
-//			return (FormModule) Class.forName(MODULE_PACKAGE_PATH + assignedModule.getModuleName()).getConstructor().newInstance();
-//		} catch (InstantiationException | ClassNotFoundException | InvocationTargetException | IllegalAccessException | NoSuchMethodException e) {
-//			throw new IllegalArgumentException("Non existing form module: " + assignedModule.getModuleName());
-//		}
+		try {
+			return context.getBean(assignedModule.getModuleName(), FormModule.class);
+		} catch (BeansException ex) {
+			throw new IllegalArgumentException("Non existing form module: " + assignedModule.getModuleName());
+		}
 	}
 
 	@Override

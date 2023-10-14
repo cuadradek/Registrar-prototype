@@ -15,6 +15,7 @@ public interface SubmissionService {
 	Submission createSubmission(Submission submission);
 
 	SubmittedForm approveSubmittedForm(Long id);
+	SubmittedForm rejectSubmittedForm(Long id, String message);
 
 	SubmittedForm loadSubmission(Long formId);
 

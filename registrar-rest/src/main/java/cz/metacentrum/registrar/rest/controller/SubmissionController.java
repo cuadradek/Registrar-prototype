@@ -104,9 +104,16 @@ public class SubmissionController {
 	}
 
 	@PutMapping("/submitted-forms/{id}/approve")
-	public ResponseEntity<SubmittedFormDto> approveSubmittedForm(final @PathVariable Long id) {
+	public SubmittedFormDto approveSubmittedForm(final @PathVariable Long id) {
 		SubmittedForm submittedForm = submissionService.approveSubmittedForm(id);
-		return new ResponseEntity<>(convertToDto(submittedForm), HttpStatus.CREATED);
+		return convertToDto(submittedForm);
+	}
+
+	@PutMapping("/submitted-forms/{id}/reject")
+	public SubmittedFormDto rejectSubmittedForm(final @PathVariable Long id,
+												@RequestParam(required = false) String message) {
+		SubmittedForm submittedForm = submissionService.rejectSubmittedForm(id, message);
+		return convertToDto(submittedForm);
 	}
 
 	private SubmissionDto convertToDto(Submission submission) {

@@ -29,10 +29,6 @@ public class AssignedFormModule implements Comparable<AssignedFormModule> {
 	@Column
 	private String moduleName;
 
-	@Transient // possibly implement converter between formModule <-> formModuleName
-	@JsonIgnore
-	private FormModule formModule;
-
 	@ElementCollection(fetch = FetchType.EAGER)
 	@CollectionTable(name="module_config_option")
 	@Fetch(FetchMode.SUBSELECT)

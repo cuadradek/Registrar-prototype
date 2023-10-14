@@ -14,7 +14,7 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ApprovalGroup {
+public class ApprovalGroup implements Comparable<ApprovalGroup> {
 	@Id
 	@GeneratedValue
 	private Long id;
@@ -30,4 +30,9 @@ public class ApprovalGroup {
 
 	@Column
 	private UUID idmGroup;
+
+	@Override
+	public int compareTo(ApprovalGroup o) {
+		return Integer.compare(level, o.level);
+	}
 }
