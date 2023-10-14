@@ -124,10 +124,7 @@ public class FormController {
 	}
 
 	private AssignedFlowFormDto convertToDto(AssignedFlowForm assignedFlowForm) {
-		AssignedFlowFormDto dto = modelMapper.map(assignedFlowForm, AssignedFlowFormDto.class);
-		dto.setFlowFormId(assignedFlowForm.getFlowForm().getId());
-
-		return dto;
+		return modelMapper.map(assignedFlowForm, AssignedFlowFormDto.class);
 	}
 
 	private Form convertToEntity(FormDto formDto) {

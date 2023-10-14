@@ -24,6 +24,9 @@ public class AssignedFlowFormDto {
 	@NotNull
 	private Long flowFormId;
 
+	@Nullable
+	private String flowFormName;
+
 	@NotEmpty
 	private List<Form.FormType> ifFlowFormType;
 
