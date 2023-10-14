@@ -4,7 +4,6 @@ import cz.metacentrum.registrar.persistence.entity.ApprovalGroup;
 import cz.metacentrum.registrar.persistence.entity.AssignedFormModule;
 import cz.metacentrum.registrar.persistence.entity.Form;
 import cz.metacentrum.registrar.persistence.entity.FormItem;
-import cz.metacentrum.registrar.persistence.entity.ModuleConfigOption;
 import cz.metacentrum.registrar.persistence.entity.Role;
 import cz.metacentrum.registrar.service.FormService;
 import cz.metacentrum.registrar.service.RoleService;
@@ -13,6 +12,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Configuration
@@ -28,8 +28,7 @@ class InitialData {
 					"My First Form", "my-first-form", null, false, false,
 					List.of(new ApprovalGroup(null, 0, false, 1, UUID.fromString("13d64d76-2ca3-4cf8-b1f4-0befdbef69fc"))),
 					null);
-			AssignedFormModule module = new AssignedFormModule(null, "addToVo", List.of(), 0);
-			module.setConfigOption(List.of(new ModuleConfigOption("VO", "")));
+			AssignedFormModule module = new AssignedFormModule(null, "addToVo", Map.of("VO", "1"), 0);
 			form.setAssignedModules(List.of(module));
 			Form form1 = formService.createForm(form);
 

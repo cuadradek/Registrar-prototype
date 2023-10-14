@@ -1,6 +1,5 @@
 package cz.metacentrum.registrar.persistence.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
@@ -8,14 +7,14 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
-import jakarta.persistence.Transient;
+import jakarta.persistence.MapKeyColumn;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 
-import java.util.List;
+import java.util.Map;
 
 @Entity
 @Data
@@ -30,9 +29,11 @@ public class AssignedFormModule implements Comparable<AssignedFormModule> {
 	private String moduleName;
 
 	@ElementCollection(fetch = FetchType.EAGER)
-	@CollectionTable(name="module_config_option")
+	@CollectionTable(name="module_config_options")
 	@Fetch(FetchMode.SUBSELECT)
-	private List<ModuleConfigOption> configOption;
+	@MapKeyColumn(name = "config_option_name")
+	@Column(name = "config_option_value")
+	private Map<String, String> configOptions;
 
 	@Column
 	private int ordnum;
