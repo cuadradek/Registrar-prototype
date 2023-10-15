@@ -74,6 +74,8 @@ public class PerunHttp {
 			return response.block();
 		} catch (WebClientRequestException ex) {
 			return null;
+		} catch (WebClientResponseException ex) {
+			return null;
 		}
 	}
 
@@ -84,7 +86,7 @@ public class PerunHttp {
 	}
 
 	public User getUserByIdentificator(String userIdentificator) {
-		String actionUrl = "/json/" + USERS_MANAGER + '/' + "getMemberByUser";
+		String actionUrl = "/json/" + USERS_MANAGER + '/' + "getUserByExtSourceNameAndExtLogin";
 		try {
 			Mono<User> response = client.get()
 					.uri(uriBuilder -> uriBuilder
@@ -96,6 +98,8 @@ public class PerunHttp {
 					.bodyToMono(User.class);
 			return response.block();
 		} catch (WebClientRequestException ex) {
+			return null;
+		} catch (Exception ex) {
 			return null;
 		}
 	}
