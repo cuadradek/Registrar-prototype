@@ -138,8 +138,9 @@ public class SubmissionServiceImpl implements SubmissionService {
 
 	private List<AssignedFlowForm> getAssignedFlowForms(Submission submission) {
 		return submission.getSubmittedForms().stream()
-				.map(s -> formService.getAssignedFlowForms(s.getForm().getId()))
-				.flatMap(List::stream)
+				.flatMap(s -> formService.getAssignedFlowForms(s.getForm().getId())
+						.stream()
+						.filter(f -> f.getIfMainFlowType().contains(s.getFormType())))
 				.collect(Collectors.toList());
 	}
 
@@ -159,7 +160,7 @@ public class SubmissionServiceImpl implements SubmissionService {
 
 		if (tryToApprove(saved, principalsApprovalGroups)) {
 			saved.setFormState(Form.FormState.APPROVED);
-			modules.forEach(assignedModule -> assignedModule.getFormModule().onApprove(saved));
+			modules.forEach(assignedModule -> assignedModule.getFormModule().onApprove(saved, assignedModule.getConfigOptions()));
 			return submittedFormRepository.save(saved);
 		}
 
@@ -260,7 +261,8 @@ public class SubmissionServiceImpl implements SubmissionService {
 		return loadSubmission(List.of(form));
 	}
 
-	private List<SubmittedForm> loadSubmittedForm(Form form) {
+	@Override
+	public List<SubmittedForm> loadSubmittedForm(Form form) {
 		SubmittedForm submittedForm = new SubmittedForm();
 		submittedForm.setForm(form);
 		boolean isOpen = submittedFormRepository.findSubmittedFormsByForm(form)

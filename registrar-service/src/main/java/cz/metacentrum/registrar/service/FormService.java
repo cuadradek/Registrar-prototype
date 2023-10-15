@@ -23,6 +23,8 @@ public interface FormService {
 
 	List<FormItem> setFormItems(Long formId, List<FormItem> formItems);
 
+	List<Form> getFormsByIdmObject(UUID idmObject);
+
 	List<Long> getFormsByIdmManagersGroups(Set<UUID> groupUUIDs);
 	List<Long> getFormsByIdmApprovalGroups(Set<UUID> groupUUIDs);
 

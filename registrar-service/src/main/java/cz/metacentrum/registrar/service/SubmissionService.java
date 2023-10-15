@@ -26,5 +26,7 @@ public interface SubmissionService {
 
 	Submission loadSubmission(Form form);
 
+	List<SubmittedForm> loadSubmittedForm(Form form);
+
 	List<SubmittedForm> getSubmittedFormsBySubmitterId(String submitterId);
 }

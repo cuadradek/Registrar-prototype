@@ -7,13 +7,21 @@ import cz.metacentrum.registrar.service.idm.perun.PerunHttp;
 import cz.metacentrum.registrar.service.idm.perun.User;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Map;
 
 @Component
 public class AddToVo extends PerunFormModule {
 
+	private static final String VO = "VO";
+
 	public AddToVo(PerunHttp perunHttp) {
 		super(perunHttp);
+	}
+
+	@Override
+	public Map<String, String> getConfigOptions() {
+		return Map.of(VO, "");
 	}
 
 	@Override
@@ -22,7 +30,7 @@ public class AddToVo extends PerunFormModule {
 	}
 
 	@Override
-	public SubmittedForm onApprove(SubmittedForm submittedForm) {
+	public SubmittedForm onApprove(SubmittedForm submittedForm, Map<String, String> configOptions) {
 		// TODO: getCurrentUser, getVoByUUID
 		if (submittedForm.getFormType() == Form.FormType.INITIAL) {
 //			perunHttp.createMember(1, 1);
@@ -38,12 +46,12 @@ public class AddToVo extends PerunFormModule {
 	}
 
 	@Override
-	public SubmittedForm onLoad(SubmittedForm submittedForm, Map<String, String> configOptions) {
+	public List<SubmittedForm> onLoad(SubmittedForm submittedForm, Map<String, String> configOptions) {
 		User user = perunHttp.getUserByIdentificator("TODO_GET_PRINCIPALS");
 		if (user == null) {
 			submittedForm.setFormType(Form.FormType.INITIAL);
 		} else {
-			Member member = perunHttp.getMemberByUserAndVo(user.getId(), Integer.parseInt(configOptions.get("VO")));
+			Member member = perunHttp.getMemberByUserAndVo(user.getId(), Integer.parseInt(configOptions.get(VO)));
 			if (member == null) {
 				submittedForm.setFormType(Form.FormType.INITIAL);
 			} else {
@@ -52,6 +60,6 @@ public class AddToVo extends PerunFormModule {
 				submittedForm.setFormType(Form.FormType.EXTENSION);
 			}
 		}
-		return submittedForm;
+		return List.of(submittedForm);
 	}
 }
