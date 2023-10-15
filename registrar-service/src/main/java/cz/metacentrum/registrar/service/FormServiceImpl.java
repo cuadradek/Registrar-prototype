@@ -147,6 +147,11 @@ public class FormServiceImpl implements FormService {
 	}
 
 	@Override
+	public Optional<Form> getFormByUrlSuffix(String urlSuffix) {
+		return formRepository.getFormByUrlSuffix(urlSuffix);
+	}
+
+	@Override
 	public List<Long> getFormsByIdmManagersGroups(Set<UUID> groupUUIDs) {
 		return formRepository.findIdsByIdmFormManagersGroup(groupUUIDs);
 	}

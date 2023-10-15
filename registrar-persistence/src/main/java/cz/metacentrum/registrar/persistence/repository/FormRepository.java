@@ -6,11 +6,13 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
 @Repository
 public interface FormRepository extends JpaRepository<Form, Long> {
+	Optional<Form> getFormByUrlSuffix(String urlSuffix);
 	List<Form> getAllByIdIn(Set<Long> ids);
 	@Query("SELECT f.id FROM Form f WHERE f.idmFormManagersGroup IN ?1")
 	List<Long> findIdsByIdmFormManagersGroup(Set<UUID> groupUUIDs);

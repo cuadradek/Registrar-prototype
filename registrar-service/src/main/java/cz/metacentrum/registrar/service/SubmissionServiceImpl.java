@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -39,6 +40,7 @@ public class SubmissionServiceImpl implements SubmissionService {
 	private final ApprovalRepository approvalRepository;
 	private final FormService formService;
 	private final ApplicationContext context;
+	private static final Set<Form.FormState> OPEN_FORM_STATES = Set.of(Form.FormState.SUBMITTED, Form.FormState.VERIFIED);
 
 	// TODO change path based on IDM used
 	private static final String MODULE_PACKAGE_PATH = "cz.metacentrum.registrar.service.idm.perun.modules.";
@@ -96,12 +98,12 @@ public class SubmissionServiceImpl implements SubmissionService {
 
 		createApprovals(saved, principalsApprovalGroups, Approval.Decision.APPROVED, null);
 
-		var modules = getModules(saved);
-		modules.forEach(assignedModule -> assignedModule.beforeApprove(saved));
+		var modules = getModules(saved.getForm());
+		modules.forEach(assignedModule -> assignedModule.getFormModule().beforeApprove(saved));
 
 		if (tryToApprove(saved, principalsApprovalGroups)) {
 			saved.setFormState(Form.FormState.APPROVED);
-			modules.forEach(assignedModule -> assignedModule.onApprove(saved));
+			modules.forEach(assignedModule -> assignedModule.getFormModule().onApprove(saved));
 			return submittedFormRepository.save(saved);
 		}
 
@@ -160,44 +162,60 @@ public class SubmissionServiceImpl implements SubmissionService {
 
 		createApprovals(saved, principalsApprovalGroups, Approval.Decision.REJECTED, message);
 
-		var modules = getModules(saved);
-		modules.forEach(assignedModule -> assignedModule.onReject(saved));
+		var modules = getModules(saved.getForm());
+		modules.forEach(assignedModule -> assignedModule.getFormModule().onReject(saved));
 
 		saved.setFormState(Form.FormState.REJECTED);
 		return submittedFormRepository.save(saved);
 	}
 
-	private List<FormModule> getModules(SubmittedForm forms) {
-		return forms.getForm().getAssignedModules()
+	private List<AssignedFormModule> getModules(Form form) {
+		return form.getAssignedModules()
 				.stream()
 				.sorted()
-				.map(this::getModule)
+				.map(this::setModule)
 				.toList();
 	}
 
-	private FormModule getModule(AssignedFormModule assignedModule) {
+	private AssignedFormModule setModule(AssignedFormModule assignedModule) {
 		try {
-			return context.getBean(assignedModule.getModuleName(), FormModule.class);
+			FormModule formModule = context.getBean(assignedModule.getModuleName(), FormModule.class);
+			assignedModule.setFormModule(formModule);
+			return assignedModule;
 		} catch (BeansException ex) {
 			throw new IllegalArgumentException("Non existing form module: " + assignedModule.getModuleName());
 		}
 	}
 
 	@Override
-	public SubmittedForm loadSubmission(Long formId) {
-		Form form = formService.getFormById(formId).orElseThrow();
+	public Submission loadSubmission(Form form) {
 		SubmittedForm submittedForm = new SubmittedForm();
 		submittedForm.setForm(form);
-		// TODO: determine whether we want to load INITIAL or EXTENSION?
+		boolean isOpen = submittedFormRepository.findSubmittedFormsByForm(form)
+				.stream()
+				.anyMatch(s -> OPEN_FORM_STATES.contains(s.getFormState()));
+		if (isOpen) {
+			throw new IllegalArgumentException("There is already submitted form for form + " + form.getId());
+		}
+
 		submittedForm.setFormType(Form.FormType.INITIAL);
-		List<FormItem> items = formService.getFormItems(formId);
+		var modules = getModules(form);
+		modules.forEach(m -> m.getFormModule().onLoad(submittedForm, m.getConfigOptions()));
+
+		List<FormItem> items = formService.getFormItems(form.getId());
 		List<FormItemData> itemDataList = items
 				.stream()
 				// TODO: prefill values
 				.map(formItem -> new FormItemData(null, formItem, formItem.getShortname(), null, null, null, false))
 				.toList();
 		submittedForm.setFormData(itemDataList);
-		return submittedForm;
+
+		List<SubmittedForm> submittedForms = new ArrayList<>();
+		submittedForms.add(submittedForm);
+
+		Submission submission = new Submission();
+		submission.setSubmittedForms(submittedForms);
+		return submission;
 	}
 
 	@Override

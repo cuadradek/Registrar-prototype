@@ -28,4 +28,6 @@ public interface FormService {
 
 	List<AssignedFlowForm> getAssignedFlowForms(Long mainFormId);
 	List<AssignedFlowForm> setAssignedFlowForms(Long mainFormId, List<AssignedFlowForm> assignedFlowForms);
+
+	Optional<Form> getFormByUrlSuffix(String urlSuffix);
 }

@@ -3,9 +3,6 @@ package cz.metacentrum.registrar.service.idm.perun;
 import lombok.Data;
 
 @Data
-public class Member {
+public class User {
 	private int id;
-	private int userId;
-	private int voId;
-	private MemberStatus status;
 }

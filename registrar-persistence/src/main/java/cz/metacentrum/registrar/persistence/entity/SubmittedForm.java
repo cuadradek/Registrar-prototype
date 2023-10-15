@@ -1,5 +1,6 @@
 package cz.metacentrum.registrar.persistence.entity;
 
+import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -28,6 +29,9 @@ public class SubmittedForm {
 	@GeneratedValue
 	@Nullable
 	private Long id;
+
+	@Column
+	private Integer stepOrder;
 
 	@NonNull
 	@ManyToOne

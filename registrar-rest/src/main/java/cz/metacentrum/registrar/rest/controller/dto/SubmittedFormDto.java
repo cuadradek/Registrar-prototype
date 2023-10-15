@@ -19,6 +19,9 @@ public class SubmittedFormDto {
 	private Long id;
 
 	@NotNull
+	private int stepOrder;
+
+	@NotNull
 	private Long formId;
 
 	@NotNull

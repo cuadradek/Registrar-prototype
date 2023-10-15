@@ -11,4 +11,8 @@ public class FormNotFoundException extends RuntimeException {
 	public FormNotFoundException(Set<Long> ids) {
 		super("Could not find forms " + ids);
 	}
+
+	public FormNotFoundException(String message) {
+		super("Could not find form: " + message);
+	}
 }
