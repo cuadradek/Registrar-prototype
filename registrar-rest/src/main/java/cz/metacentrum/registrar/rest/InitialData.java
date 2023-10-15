@@ -1,6 +1,7 @@
 package cz.metacentrum.registrar.rest;
 
 import cz.metacentrum.registrar.persistence.entity.ApprovalGroup;
+import cz.metacentrum.registrar.persistence.entity.AssignedFlowForm;
 import cz.metacentrum.registrar.persistence.entity.AssignedFormModule;
 import cz.metacentrum.registrar.persistence.entity.Form;
 import cz.metacentrum.registrar.persistence.entity.FormItem;
@@ -24,24 +25,52 @@ class InitialData {
 	CommandLineRunner initDatabase(FormService formService, RoleService roleService) {
 
 		return args -> {
-			Form form = new Form(null, UUID.fromString("13d64d76-2ca3-4cf8-b1f4-0befdbef69fc"), UUID.fromString("13d64d76-2ca3-4cf8-b1f4-0befdbef69fc"),
-					"My First Form", "my-first-form", null, false, false,
-					List.of(new ApprovalGroup(null, 0, false, 1, UUID.fromString("13d64d76-2ca3-4cf8-b1f4-0befdbef69fc"))),
-					null);
-			AssignedFormModule module = new AssignedFormModule(null, "addToVo", null, Map.of("VO", "1"), 0);
-			form.setAssignedModules(List.of(module));
-			Form form1 = formService.createForm(form);
-
-			FormItem formItem = new FormItem(null, form1, "login", 0, true, false, FormItem.Type.USERNAME,
-					false, null, EINFRA_LOGIN, EINFRA_LOGIN, null,
-					List.of(Form.FormType.INITIAL, Form.FormType.EXTENSION),
-					null, null, FormItem.Disabled.NEVER, FormItem.Hidden.NEVER, false);
-			formService.setFormItems(1L, List.of(formItem));
+			Form firstForm = createFirstForm(formService);
+			Form secondForm = createSecondForm(formService);
+			var flowForm = new AssignedFlowForm(null, AssignedFlowForm.FlowType.AUTO, 0, secondForm, firstForm,
+					List.of(Form.FormType.INITIAL), List.of(Form.FormType.INITIAL));
+			formService.setAssignedFlowForms(firstForm.getId(), List.of(flowForm));
 
 			var adminRole = new Role();
 			adminRole.setName("ADMIN");
 			adminRole.setAssignedUsers(List.of("114249895833464720724"));
 			roleService.createRole(adminRole);
 		};
+	}
+
+	private Form createSecondForm(FormService formService) {
+		Form form = new Form(null, UUID.fromString("13d64d76-2ca3-4cf8-b1f4-0befdbef69fc"), UUID.fromString("13d64d76-2ca3-4cf8-b1f4-0befdbef69fc"),
+				"My Second Form", "my-second-form", null, false, false,
+				List.of(new ApprovalGroup(null, 0, false, 1, UUID.fromString("13d64d76-2ca3-4cf8-b1f4-0befdbef69fc"))),
+				null);
+		AssignedFormModule module = new AssignedFormModule(null, "addToVo", null, Map.of("VO", "2"), 0);
+		form.setAssignedModules(List.of(module));
+		Form form1 = formService.createForm(form);
+
+		FormItem formItem = new FormItem(null, form1, "login", 0, true, false, FormItem.Type.USERNAME,
+				false, null, EINFRA_LOGIN, EINFRA_LOGIN, null,
+				List.of(Form.FormType.INITIAL, Form.FormType.EXTENSION),
+				null, null, FormItem.Disabled.NEVER, FormItem.Hidden.NEVER, false);
+		formService.setFormItems(1L, List.of(formItem));
+
+		return form1;
+	}
+
+	private Form createFirstForm(FormService formService) {
+		Form form = new Form(null, UUID.fromString("13d64d76-2ca3-4cf8-b1f4-0befdbef69fc"), UUID.fromString("13d64d76-2ca3-4cf8-b1f4-0befdbef69fc"),
+				"My First Form", "my-first-form", null, false, false,
+				List.of(new ApprovalGroup(null, 0, false, 1, UUID.fromString("13d64d76-2ca3-4cf8-b1f4-0befdbef69fc"))),
+				null);
+		AssignedFormModule module = new AssignedFormModule(null, "addToVo", null, Map.of("VO", "1"), 0);
+		form.setAssignedModules(List.of(module));
+		Form form1 = formService.createForm(form);
+
+		FormItem formItem = new FormItem(null, form1, "login", 0, true, false, FormItem.Type.USERNAME,
+				false, null, EINFRA_LOGIN, EINFRA_LOGIN, null,
+				List.of(Form.FormType.INITIAL, Form.FormType.EXTENSION),
+				null, null, FormItem.Disabled.NEVER, FormItem.Hidden.NEVER, false);
+		formService.setFormItems(1L, List.of(formItem));
+
+		return form1;
 	}
 }

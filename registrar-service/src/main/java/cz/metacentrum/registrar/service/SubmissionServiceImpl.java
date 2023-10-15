@@ -2,36 +2,44 @@ package cz.metacentrum.registrar.service;
 
 import cz.metacentrum.registrar.persistence.entity.Approval;
 import cz.metacentrum.registrar.persistence.entity.ApprovalGroup;
+import cz.metacentrum.registrar.persistence.entity.AssignedFlowForm;
 import cz.metacentrum.registrar.persistence.entity.AssignedFormModule;
 import cz.metacentrum.registrar.persistence.entity.Form;
 import cz.metacentrum.registrar.persistence.entity.FormItem;
 import cz.metacentrum.registrar.persistence.entity.FormItemData;
 import cz.metacentrum.registrar.persistence.entity.FormModule;
 import cz.metacentrum.registrar.persistence.entity.Submission;
+import cz.metacentrum.registrar.persistence.entity.SubmissionResult;
 import cz.metacentrum.registrar.persistence.entity.SubmittedForm;
 import cz.metacentrum.registrar.persistence.repository.ApprovalRepository;
 import cz.metacentrum.registrar.persistence.repository.FormItemRepository;
 import cz.metacentrum.registrar.persistence.repository.SubmissionRepository;
 import cz.metacentrum.registrar.persistence.repository.SubmittedFormRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.lang.Nullable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
-@Transactional
+@Slf4j
+@Transactional(propagation = Propagation.REQUIRED)
 public class SubmissionServiceImpl implements SubmissionService {
 
 	private final SubmittedFormRepository submittedFormRepository;
@@ -55,6 +63,10 @@ public class SubmissionServiceImpl implements SubmissionService {
 		this.context = context;
 	}
 
+	private SubmissionService getSelf() {
+		return context.getBean(SubmissionService.class);
+	}
+
 	@Override
 	public Optional<Submission> findSubmissionById(Long id) {
 		return submissionRepository.findById(id);
@@ -76,7 +88,7 @@ public class SubmissionServiceImpl implements SubmissionService {
 	}
 
 	@Override
-	public Submission createSubmission(Submission submission) {
+	public SubmissionResult createSubmission(Submission submission) {
 		submission.getSubmittedForms().forEach(s -> {
 			s.setFormState(Form.FormState.SUBMITTED);
 			s.getFormData().forEach(d -> d.setFormItem(formItemRepository.getReferenceById(d.getFormItem().getId())));
@@ -84,7 +96,51 @@ public class SubmissionServiceImpl implements SubmissionService {
 		submission.setTimestamp(LocalDateTime.now());
 		//TODO fill the data like extSourceName, submittedBy...
 		//TODO check if all the required fields are submitted, if all data belong to that form
-		return submissionRepository.save(submission);
+
+		var flowForms = getAssignedFlowForms(submission);
+		var autoFlowForms = flowForms.stream()
+				.filter(a -> a.getFlowType() == AssignedFlowForm.FlowType.AUTO)
+				.collect(Collectors.toMap(AssignedFlowForm::getFlowForm, Function.identity()));
+		var redirectFlowForms = flowForms.stream()
+				.filter(a -> a.getFlowType() == AssignedFlowForm.FlowType.REDIRECT)
+				.map(AssignedFlowForm::getFlowForm)
+				.collect(Collectors.toSet());
+
+		autoFlowForms.values().forEach(a -> getSelf().submitAutoForm(submission, a));
+
+		Submission saved = submissionRepository.save(submission);
+		SubmissionResult result = new SubmissionResult();
+		result.setSubmission(saved);
+		if (!redirectFlowForms.isEmpty()) {
+			try {
+				Submission redirectSubmission = loadSubmission(redirectFlowForms);
+				result.setRedirectSubmission(redirectSubmission);
+			} catch (Exception ex) {
+				String message = "Error during redirecting.";
+				log.error(message, ex);
+				result.addMessage(message);
+			}
+		}
+		result.addMessage("Successfully submitted"); // todo use this default only if custom form message is missing
+		return result;
+	}
+
+	@Override
+	@Async
+	public void submitAutoForm(Submission submission, AssignedFlowForm a) {
+		Submission autoSubmission = loadSubmission(a.getFlowForm());
+		autoSubmission.setSubmittedById(submission.getSubmittedById());
+		autoSubmission.setSubmittedByName(submission.getSubmittedByName());
+		autoSubmission.getSubmittedForms().forEach(s -> s.setSubmission(autoSubmission));
+		//todo try to fill values
+		createSubmission(autoSubmission);
+	}
+
+	private List<AssignedFlowForm> getAssignedFlowForms(Submission submission) {
+		return submission.getSubmittedForms().stream()
+				.map(s -> formService.getAssignedFlowForms(s.getForm().getId()))
+				.flatMap(List::stream)
+				.collect(Collectors.toList());
 	}
 
 	@Override
@@ -188,7 +244,23 @@ public class SubmissionServiceImpl implements SubmissionService {
 	}
 
 	@Override
+	public Submission loadSubmission(Collection<Form> forms) {
+		List<SubmittedForm> submittedForms = forms.stream()
+				.map(this::loadSubmittedForm)
+				.flatMap(List::stream)
+				.collect(Collectors.toList());
+
+		Submission submission = new Submission();
+		submission.setSubmittedForms(submittedForms);
+		return submission;
+	}
+
+	@Override
 	public Submission loadSubmission(Form form) {
+		return loadSubmission(List.of(form));
+	}
+
+	private List<SubmittedForm> loadSubmittedForm(Form form) {
 		SubmittedForm submittedForm = new SubmittedForm();
 		submittedForm.setForm(form);
 		boolean isOpen = submittedFormRepository.findSubmittedFormsByForm(form)
@@ -212,10 +284,7 @@ public class SubmissionServiceImpl implements SubmissionService {
 
 		List<SubmittedForm> submittedForms = new ArrayList<>();
 		submittedForms.add(submittedForm);
-
-		Submission submission = new Submission();
-		submission.setSubmittedForms(submittedForms);
-		return submission;
+		return submittedForms;
 	}
 
 	@Override

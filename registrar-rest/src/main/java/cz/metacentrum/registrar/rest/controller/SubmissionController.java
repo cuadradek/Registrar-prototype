@@ -4,10 +4,12 @@ import cz.metacentrum.registrar.persistence.entity.Form;
 import cz.metacentrum.registrar.persistence.entity.FormItem;
 import cz.metacentrum.registrar.persistence.entity.FormItemData;
 import cz.metacentrum.registrar.persistence.entity.Submission;
+import cz.metacentrum.registrar.persistence.entity.SubmissionResult;
 import cz.metacentrum.registrar.persistence.entity.SubmittedForm;
 import cz.metacentrum.registrar.rest.config.RegistrarPrincipal;
 import cz.metacentrum.registrar.rest.controller.dto.FormItemDataDto;
 import cz.metacentrum.registrar.rest.controller.dto.SubmissionDto;
+import cz.metacentrum.registrar.rest.controller.dto.SubmissionResultDto;
 import cz.metacentrum.registrar.rest.controller.dto.SubmittedFormDto;
 import cz.metacentrum.registrar.rest.controller.dto.SubmittedFormSimpleDto;
 import cz.metacentrum.registrar.rest.controller.exception.ValidationException;
@@ -108,8 +110,8 @@ public class SubmissionController {
 	}
 
 	@PostMapping("/submissions")
-	public ResponseEntity<SubmissionDto> createSubmission(final @RequestBody @Validated SubmissionDto submissionDto,
-														  @AuthenticationPrincipal RegistrarPrincipal principal) {
+	public SubmissionResultDto createSubmission(final @RequestBody @Validated SubmissionDto submissionDto,
+											 @AuthenticationPrincipal RegistrarPrincipal principal) {
 		if (principal != null) {
 			submissionDto.setSubmittedById(principal.getName());
 			submissionDto.setSubmittedByName(principal.getName());
@@ -117,8 +119,13 @@ public class SubmissionController {
 			submissionDto.setSubmittedByName("TEST NAME");
 			submissionDto.setSubmittedById("test15310121@perun");
 		}
-		Submission submission = submissionService.createSubmission(convertToEntity(submissionDto));
-		return new ResponseEntity<>(convertToDto(submission), HttpStatus.CREATED);
+		SubmissionResult result = submissionService.createSubmission(convertToEntity(submissionDto));
+		SubmissionResultDto resultDto = modelMapper.map(result, SubmissionResultDto.class);
+		resultDto.setSubmission(convertToDto(result.getSubmission()));
+		if (result.getRedirectSubmission() != null) {
+			resultDto.setRedirectSubmission(convertToDto(result.getRedirectSubmission()));
+		}
+		return resultDto;
 	}
 
 	@PutMapping("/submitted-forms/{id}/approve")
