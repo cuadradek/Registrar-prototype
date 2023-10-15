@@ -4,13 +4,25 @@ import cz.metacentrum.registrar.persistence.entity.AssignedFlowForm;
 import cz.metacentrum.registrar.persistence.entity.Form;
 import cz.metacentrum.registrar.persistence.entity.FormItem;
 import cz.metacentrum.registrar.rest.controller.dto.AssignedFlowFormDto;
+import cz.metacentrum.registrar.rest.controller.dto.ExceptionResponse;
 import cz.metacentrum.registrar.rest.controller.dto.FormDto;
 import cz.metacentrum.registrar.rest.controller.dto.ShortFormDto;
 import cz.metacentrum.registrar.service.FormNotFoundException;
 import cz.metacentrum.registrar.service.FormService;
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.servers.Server;
+import io.swagger.v3.oas.annotations.servers.ServerVariable;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -19,6 +31,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashSet;
@@ -28,7 +41,16 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
-//@RequestMapping("/api")
+@OpenAPIDefinition(
+		info = @Info(title = "Registrar application"),
+		servers = @Server(description = "my server", url = "{scheme}://{server}:{port}", variables = {
+				@ServerVariable(name = "scheme", allowableValues = {"http", "https"}, defaultValue = "http"),
+				@ServerVariable(name = "server", defaultValue = "localhost"),
+				@ServerVariable(name = "port", defaultValue = "8080"),
+		})
+)
+@Tag(name = "Form service", description = "endpoints for managing forms")
+@RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 public class FormController {
 
 	private final FormService formService;
@@ -40,6 +62,10 @@ public class FormController {
 		this.modelMapper = modelMapper;
 	}
 
+	@Operation(summary = "Get all forms")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200")
+	})
 	@GetMapping("/forms")
 	public List<ShortFormDto> getAllForms() {
 		return formService.getAllForms().stream()
@@ -47,6 +73,12 @@ public class FormController {
 				.collect(Collectors.toList());
 	}
 
+	@Operation(summary = "Get form by its id")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200"),
+			@ApiResponse(responseCode = "404", description = "Form not found",
+					content = @Content(schema = @Schema(implementation = ExceptionResponse.class)))
+	})
 	@GetMapping("/forms/{id}")
 	public FormDto getFormById(@PathVariable Long id) {
 		Optional<Form> formData = formService.getFormById(id);

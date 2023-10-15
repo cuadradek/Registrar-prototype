@@ -52,6 +52,8 @@ public class RegistrarSecurityConfig {
 		http
 				.authorizeHttpRequests(
 						authorize -> authorize
+								.requestMatchers("/swagger-ui/**").permitAll()
+								.requestMatchers("/v3/api-docs/**").permitAll()
 								.requestMatchers("/submissions/**").permitAll()
 								.requestMatchers("/submitted-forms/**").permitAll()
 								.requestMatchers("/forms/**").permitAll()
