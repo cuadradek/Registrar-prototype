@@ -6,7 +6,6 @@ import cz.metacentrum.registrar.persistence.entity.FormItemData;
 import cz.metacentrum.registrar.persistence.entity.Submission;
 import cz.metacentrum.registrar.persistence.entity.SubmissionResult;
 import cz.metacentrum.registrar.persistence.entity.SubmittedForm;
-import cz.metacentrum.registrar.rest.config.RegistrarPrincipal;
 import cz.metacentrum.registrar.rest.controller.dto.FormItemDataDto;
 import cz.metacentrum.registrar.rest.controller.dto.SubmissionDto;
 import cz.metacentrum.registrar.rest.controller.dto.SubmissionResultDto;
@@ -18,9 +17,6 @@ import cz.metacentrum.registrar.service.FormService;
 import cz.metacentrum.registrar.service.SubmissionService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -110,15 +106,7 @@ public class SubmissionController {
 	}
 
 	@PostMapping("/submissions")
-	public SubmissionResultDto createSubmission(final @RequestBody @Validated SubmissionDto submissionDto,
-											 @AuthenticationPrincipal RegistrarPrincipal principal) {
-		if (principal != null) {
-			submissionDto.setSubmittedById(principal.getName());
-			submissionDto.setSubmittedByName(principal.getName());
-		} else {
-			submissionDto.setSubmittedByName("TEST NAME");
-			submissionDto.setSubmittedById("test15310121@perun");
-		}
+	public SubmissionResultDto createSubmission(final @RequestBody @Validated SubmissionDto submissionDto) {
 		SubmissionResult result = submissionService.createSubmission(convertToEntity(submissionDto));
 		SubmissionResultDto resultDto = modelMapper.map(result, SubmissionResultDto.class);
 		resultDto.setSubmission(convertToDto(result.getSubmission()));

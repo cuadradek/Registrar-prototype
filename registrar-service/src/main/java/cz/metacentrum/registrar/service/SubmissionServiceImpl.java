@@ -48,19 +48,21 @@ public class SubmissionServiceImpl implements SubmissionService {
 	private final ApprovalRepository approvalRepository;
 	private final FormService formService;
 	private final ApplicationContext context;
+	private final PrincipalService principalService;
 	private static final Set<Form.FormState> OPEN_FORM_STATES = Set.of(Form.FormState.SUBMITTED, Form.FormState.VERIFIED);
 
 	// TODO change path based on IDM used
 	private static final String MODULE_PACKAGE_PATH = "cz.metacentrum.registrar.service.idm.perun.modules.";
 
 	@Autowired
-	public SubmissionServiceImpl(SubmittedFormRepository submittedFormRepository, SubmissionRepository submissionRepository, FormItemRepository formItemRepository, ApprovalRepository approvalRepository, FormService formService, ApplicationContext context) {
+	public SubmissionServiceImpl(SubmittedFormRepository submittedFormRepository, SubmissionRepository submissionRepository, FormItemRepository formItemRepository, ApprovalRepository approvalRepository, FormService formService, ApplicationContext context, PrincipalService principalService) {
 		this.submittedFormRepository = submittedFormRepository;
 		this.submissionRepository = submissionRepository;
 		this.formItemRepository = formItemRepository;
 		this.approvalRepository = approvalRepository;
 		this.formService = formService;
 		this.context = context;
+		this.principalService = principalService;
 	}
 
 	private SubmissionService getSelf() {
@@ -89,11 +91,14 @@ public class SubmissionServiceImpl implements SubmissionService {
 
 	@Override
 	public SubmissionResult createSubmission(Submission submission) {
+		RegistrarPrincipal principal = principalService.getPrincipal();
 		submission.getSubmittedForms().forEach(s -> {
 			s.setFormState(Form.FormState.SUBMITTED);
 			s.getFormData().forEach(d -> d.setFormItem(formItemRepository.getReferenceById(d.getFormItem().getId())));
 		});
 		submission.setTimestamp(LocalDateTime.now());
+		submission.setSubmittedById(principal.getId());
+		submission.setSubmittedByName(principal.getName());
 		//TODO fill the data like extSourceName, submittedBy...
 		//TODO check if all the required fields are submitted, if all data belong to that form
 
@@ -193,16 +198,13 @@ public class SubmissionServiceImpl implements SubmissionService {
 	}
 
 	private void createApprovals(SubmittedForm saved, List<ApprovalGroup> approvalGroups, Approval.Decision decision, @Nullable String message) {
-		//todo get principal's mfa, get id, name
-		boolean principalMfa = false;
-		String principalId = "defaultId";
-		String principalName = "defaultName";
+		RegistrarPrincipal principal = principalService.getPrincipal();
 		approvalGroups.forEach(approvalGroup -> {
-			if (approvalGroup.isMfaRequired() && !principalMfa) {
+			if (approvalGroup.isMfaRequired() && !principal.isMfa()) {
 				throw new IllegalArgumentException("You need to be authenticated using multi-factor authentication to approve or reject this form!");
 			}
-			Approval approval = new Approval(null, approvalGroup.getLevel(), principalMfa, saved, decision,
-					principalId, principalName, LocalDateTime.now(), message);
+			Approval approval = new Approval(null, approvalGroup.getLevel(), principal.isMfa(), saved, decision,
+					principal.getId(), principal.getName(), LocalDateTime.now(), message);
 			approvalRepository.save(approval);
 			}
 		);

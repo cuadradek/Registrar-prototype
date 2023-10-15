@@ -1,4 +1,4 @@
-package cz.metacentrum.registrar.rest.config;
+package cz.metacentrum.registrar.service;
 
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
@@ -43,6 +43,15 @@ public class RegistrarPrincipal implements OAuth2AuthenticatedPrincipal, OAuth2T
 	@Override
 	public String getName() {
 		return delegate.getName();
+	}
+
+	public String getId() {
+		return (String) this.getAttributes().get("sub");
+	}
+
+	public boolean isMfa() {
+		Object mfa = this.getAttributes().get("mfa");
+		return mfa != null && Boolean.parseBoolean((String) mfa);
 	}
 
 	public Map<String, Object> getClaims() {

@@ -3,6 +3,7 @@ package cz.metacentrum.registrar.service.idm.perun.modules;
 import cz.metacentrum.registrar.persistence.entity.Form;
 import cz.metacentrum.registrar.persistence.entity.SubmittedForm;
 import cz.metacentrum.registrar.service.FormService;
+import cz.metacentrum.registrar.service.PrincipalService;
 import cz.metacentrum.registrar.service.SubmissionService;
 import cz.metacentrum.registrar.service.idm.perun.Member;
 import cz.metacentrum.registrar.service.idm.perun.PerunHttp;
@@ -20,11 +21,13 @@ public class AddToGroup extends PerunFormModule {
 	private static final String GROUP = "GROUP";
 	private final FormService formService;
 	private final SubmissionService submissionService;
+	private final PrincipalService principalService;
 
-	public AddToGroup(PerunHttp perunHttp, FormService formService, SubmissionService submissionService) {
+	public AddToGroup(PerunHttp perunHttp, FormService formService, SubmissionService submissionService, PrincipalService principalService) {
 		super(perunHttp);
 		this.formService = formService;
 		this.submissionService = submissionService;
+		this.principalService = principalService;
 	}
 
 	@Override
@@ -39,7 +42,7 @@ public class AddToGroup extends PerunFormModule {
 
 	@Override
 	public SubmittedForm onApprove(SubmittedForm submittedForm, Map<String, String> configOptions) {
-		User user = perunHttp.getUserByIdentificator("TODO_GET_PRINCIPALS");
+		User user = perunHttp.getUserByIdentificator(principalService.getPrincipal().getId());
 		Member member = perunHttp.getMemberByUserAndVo(user.getId(), Integer.parseInt(configOptions.get(GROUP)));
 		// TODO: getCurrentUser, getVoByUUID
 		if (submittedForm.getFormType() == Form.FormType.INITIAL) {
@@ -58,7 +61,7 @@ public class AddToGroup extends PerunFormModule {
 	@Override
 	public List<SubmittedForm> onLoad(SubmittedForm submittedForm, Map<String, String> configOptions) {
 		List<SubmittedForm> loadedForms = new ArrayList<>();
-		User user = perunHttp.getUserByIdentificator("TODO_GET_PRINCIPALS");
+		User user = perunHttp.getUserByIdentificator(principalService.getPrincipal().getId());
 		Member member = null;
 		if (user == null) {
 			submittedForm.setFormType(Form.FormType.INITIAL);

@@ -2,6 +2,7 @@ package cz.metacentrum.registrar.rest.config;
 
 import cz.metacentrum.registrar.service.FormService;
 import cz.metacentrum.registrar.service.IdmApi;
+import cz.metacentrum.registrar.service.RegistrarPrincipal;
 import cz.metacentrum.registrar.service.RoleService;
 import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.Authentication;

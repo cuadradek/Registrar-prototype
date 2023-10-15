@@ -1,5 +1,6 @@
 package cz.metacentrum.registrar.rest.config;
 
+import cz.metacentrum.registrar.service.RegistrarPrincipal;
 import cz.metacentrum.registrar.service.RoleService;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.GrantedAuthority;

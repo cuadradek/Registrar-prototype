@@ -1,7 +1,7 @@
 package cz.metacentrum.registrar.rest.controller;
 
 import cz.metacentrum.registrar.persistence.entity.Form;
-import cz.metacentrum.registrar.rest.config.RegistrarPrincipal;
+import cz.metacentrum.registrar.service.RegistrarPrincipal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

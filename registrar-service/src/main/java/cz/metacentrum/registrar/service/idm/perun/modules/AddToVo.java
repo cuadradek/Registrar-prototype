@@ -2,6 +2,7 @@ package cz.metacentrum.registrar.service.idm.perun.modules;
 
 import cz.metacentrum.registrar.persistence.entity.Form;
 import cz.metacentrum.registrar.persistence.entity.SubmittedForm;
+import cz.metacentrum.registrar.service.PrincipalService;
 import cz.metacentrum.registrar.service.idm.perun.Member;
 import cz.metacentrum.registrar.service.idm.perun.PerunHttp;
 import cz.metacentrum.registrar.service.idm.perun.User;
@@ -14,9 +15,11 @@ import java.util.Map;
 public class AddToVo extends PerunFormModule {
 
 	private static final String VO = "VO";
+	private final PrincipalService principalService;
 
-	public AddToVo(PerunHttp perunHttp) {
+	public AddToVo(PerunHttp perunHttp, PrincipalService principalService) {
 		super(perunHttp);
+		this.principalService = principalService;
 	}
 
 	@Override
@@ -47,7 +50,7 @@ public class AddToVo extends PerunFormModule {
 
 	@Override
 	public List<SubmittedForm> onLoad(SubmittedForm submittedForm, Map<String, String> configOptions) {
-		User user = perunHttp.getUserByIdentificator("TODO_GET_PRINCIPALS");
+		User user = perunHttp.getUserByIdentificator(principalService.getPrincipal().getId());
 		if (user == null) {
 			submittedForm.setFormType(Form.FormType.INITIAL);
 		} else {
