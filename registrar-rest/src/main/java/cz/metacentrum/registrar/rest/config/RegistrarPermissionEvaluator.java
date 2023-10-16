@@ -2,11 +2,11 @@ package cz.metacentrum.registrar.rest.config;
 
 import cz.metacentrum.registrar.service.FormService;
 import cz.metacentrum.registrar.service.IdmApi;
+import cz.metacentrum.registrar.service.PrincipalService;
 import cz.metacentrum.registrar.service.RegistrarPrincipal;
 import cz.metacentrum.registrar.service.RoleService;
 import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
@@ -26,11 +26,13 @@ public class RegistrarPermissionEvaluator implements PermissionEvaluator {
 	private final IdmApi idmApi;
 	private final FormService formService;
 	private final RoleService roleService;
+	private final PrincipalService principalService;
 
-	public RegistrarPermissionEvaluator(IdmApi idmApi, FormService formService, RoleService roleService) {
+	public RegistrarPermissionEvaluator(IdmApi idmApi, FormService formService, RoleService roleService, PrincipalService principalService) {
 		this.idmApi = idmApi;
 		this.formService = formService;
 		this.roleService = roleService;
+		this.principalService = principalService;
 	}
 
 	public boolean hasRole(Long objectId, String permission) {
@@ -38,7 +40,7 @@ public class RegistrarPermissionEvaluator implements PermissionEvaluator {
 			return false;
 		}
 
-		RegistrarPrincipal principal = initRegistrarPrincipal(SecurityContextHolder.getContext().getAuthentication());
+		RegistrarPrincipal principal = initRegistrarPrincipal();
 		if ("FORM_MANAGER".equals(permission)) {
 			return principal.getFormManager().contains(objectId);
 		} else if ("FORM_APPROVER".equals(permission)) {
@@ -56,7 +58,7 @@ public class RegistrarPermissionEvaluator implements PermissionEvaluator {
 		}
 
 		Long id = (Long) targetId;
-		RegistrarPrincipal principal = initRegistrarPrincipal(auth);
+		RegistrarPrincipal principal = initRegistrarPrincipal();
 		if ("FORM_MANAGER".equals(permission)) {
 			return principal.getFormManager().contains(id);
 		} else if ("FORM_APPROVER".equals(permission)) {
@@ -75,7 +77,7 @@ public class RegistrarPermissionEvaluator implements PermissionEvaluator {
 		String targetType = targetDomainObject.getClass().getSimpleName().toUpperCase();
 
 		Long id = (Long) targetDomainObject;
-		RegistrarPrincipal principal = initRegistrarPrincipal(auth);
+		RegistrarPrincipal principal = initRegistrarPrincipal();
 		if ("FORM_MANAGER".equals(permission)) {
 			return principal.getFormManager().contains(id);
 		} else if ("FORM_APPROVER".equals(permission)) {
@@ -86,18 +88,18 @@ public class RegistrarPermissionEvaluator implements PermissionEvaluator {
 	}
 
 	private boolean hasPrivilege(Authentication auth, String targetType, String permission) {
-		RegistrarPrincipal principal = initRegistrarPrincipal(auth);
+		RegistrarPrincipal principal = initRegistrarPrincipal();
 
 		return false;
 	}
 
-	private RegistrarPrincipal initRegistrarPrincipal(Authentication auth) {
-		RegistrarPrincipal principal = (RegistrarPrincipal) auth.getPrincipal();
+	private RegistrarPrincipal initRegistrarPrincipal() {
+		RegistrarPrincipal principal = principalService.getPrincipal();
 		if (principal.getIdmGroups() != null) {
 			return principal;
 		}
 
-		principal.setIdmGroups(new HashSet<>(idmApi.getUserGroups(principal.getName())));
+		principal.setIdmGroups(new HashSet<>(idmApi.getUserGroups(principal.getId())));
 		principal.setFormApprover(new HashSet<>(formService.getFormsByIdmApprovalGroups(principal.getIdmGroups())));
 		principal.setFormManager(new HashSet<>(formService.getFormsByIdmManagersGroups(principal.getIdmGroups())));
 		return principal;
