@@ -1,6 +1,7 @@
 package cz.metacentrum.registrar.rest.controller;
 
 import cz.metacentrum.registrar.persistence.entity.AssignedFlowForm;
+import cz.metacentrum.registrar.persistence.entity.AssignedFormModule;
 import cz.metacentrum.registrar.persistence.entity.Form;
 import cz.metacentrum.registrar.persistence.entity.FormItem;
 import cz.metacentrum.registrar.rest.controller.dto.AssignedFlowFormDto;
@@ -131,6 +132,17 @@ public class FormController {
 		return formService.setAssignedFlowForms(id, entities).stream()
 				.map(this::convertToDto)
 				.collect(Collectors.toList());
+	}
+
+	@GetMapping("/forms/{id}/modules")
+	public List<AssignedFormModule> getAssignedModules(final @PathVariable Long id) {
+		return formService.getAssignedModules(id);
+	}
+
+	@PutMapping("/forms/{id}/modules")
+	public List<AssignedFormModule> setAssignedModules(final @PathVariable Long id,
+														final @RequestBody @Validated List<AssignedFormModule> modules) {
+		return formService.setAssignedModules(id, modules);
 	}
 
 	private <T> T convertToDto(Form form, Class<T> tClass) {

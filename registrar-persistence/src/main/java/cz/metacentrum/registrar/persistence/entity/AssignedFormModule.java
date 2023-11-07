@@ -8,6 +8,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapKeyColumn;
 import jakarta.persistence.Transient;
 import lombok.AllArgsConstructor;
@@ -29,6 +31,11 @@ public class AssignedFormModule implements Comparable<AssignedFormModule> {
 
 	@Column
 	private String moduleName;
+
+	@ManyToOne
+	@JoinColumn(name = "form_id")
+	@JsonIgnore
+	private Form form;
 
 	@Transient
 	@JsonIgnore

@@ -229,7 +229,7 @@ public class SubmissionServiceImpl implements SubmissionService {
 	}
 
 	private List<AssignedFormModule> getModules(Form form) {
-		return form.getAssignedModules()
+		return formService.getAssignedModules(form.getId())
 				.stream()
 				.sorted()
 				.map(this::setModule)

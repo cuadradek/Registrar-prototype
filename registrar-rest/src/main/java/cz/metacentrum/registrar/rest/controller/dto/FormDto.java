@@ -33,6 +33,4 @@ public class FormDto {
 	boolean autoApprove;
 	@Nullable
 	private List<ApprovalGroup> approvalGroups;
-	@NotNull(message = "assignModules must be specified")
-	private List<AssignedFormModule> assignedModules;
 }

@@ -83,7 +83,7 @@ public class AddToGroup extends PerunFormModule {
 			//get VO and its UUID
 			var forms = formService.getFormsByIdmObject(UUID.randomUUID());
 			var voForm = forms.stream().filter(
-					f -> f.getAssignedModules().stream().anyMatch(
+					f -> formService.getAssignedModules(f.getId()).stream().anyMatch(
 							a -> a.getModuleName().equals("addToVo") && a.getConfigOptions().get("VO").equals("VO_ID_TODO")
 					)).findFirst();
 			if (voForm.isPresent()) {

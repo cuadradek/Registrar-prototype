@@ -41,11 +41,10 @@ class InitialData {
 	private Form createSecondForm(FormService formService) {
 		Form form = new Form(null, UUID.fromString("13d64d76-2ca3-4cf8-b1f4-0befdbef69fc"), UUID.fromString("13d64d76-2ca3-4cf8-b1f4-0befdbef69fc"),
 				"My Second Form", "my-second-form", null, false, false,
-				List.of(new ApprovalGroup(null, 0, false, 1, UUID.fromString("13d64d76-2ca3-4cf8-b1f4-0befdbef69fc"))),
-				null);
-		AssignedFormModule module = new AssignedFormModule(null, "addToVo", null, Map.of("VO", "2"), 0);
-		form.setAssignedModules(List.of(module));
+				List.of(new ApprovalGroup(null, 0, false, 1, UUID.fromString("13d64d76-2ca3-4cf8-b1f4-0befdbef69fc"))));
 		Form form1 = formService.createForm(form);
+		AssignedFormModule module = new AssignedFormModule(null, "addToVo", form1, null, Map.of("VO", "2"), 0);
+		formService.setAssignedModules(form1.getId(), List.of(module));
 
 		FormItem formItem = new FormItem(null, form1, "login", 0, true, false, FormItem.Type.USERNAME,
 				false, null, EINFRA_LOGIN, EINFRA_LOGIN, null,
@@ -59,11 +58,10 @@ class InitialData {
 	private Form createFirstForm(FormService formService) {
 		Form form = new Form(null, UUID.fromString("13d64d76-2ca3-4cf8-b1f4-0befdbef69fc"), UUID.fromString("13d64d76-2ca3-4cf8-b1f4-0befdbef69fc"),
 				"My First Form", "my-first-form", null, false, false,
-				List.of(new ApprovalGroup(null, 0, false, 1, UUID.fromString("13d64d76-2ca3-4cf8-b1f4-0befdbef69fc"))),
-				null);
-		AssignedFormModule module = new AssignedFormModule(null, "addToVo", null, Map.of("VO", "1"), 0);
-		form.setAssignedModules(List.of(module));
+				List.of(new ApprovalGroup(null, 0, false, 1, UUID.fromString("13d64d76-2ca3-4cf8-b1f4-0befdbef69fc"))));
 		Form form1 = formService.createForm(form);
+		AssignedFormModule module = new AssignedFormModule(null, "addToVo", form1, null, Map.of("VO", "1"), 0);
+		formService.setAssignedModules(form1.getId(), List.of(module));
 
 		FormItem formItem = new FormItem(null, form1, "login", 0, true, false, FormItem.Type.USERNAME,
 				false, null, EINFRA_LOGIN, EINFRA_LOGIN, null,

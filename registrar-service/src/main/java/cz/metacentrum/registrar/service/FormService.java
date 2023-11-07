@@ -1,6 +1,7 @@
 package cz.metacentrum.registrar.service;
 
 import cz.metacentrum.registrar.persistence.entity.AssignedFlowForm;
+import cz.metacentrum.registrar.persistence.entity.AssignedFormModule;
 import cz.metacentrum.registrar.persistence.entity.Form;
 import cz.metacentrum.registrar.persistence.entity.FormItem;
 import org.springframework.lang.NonNull;
@@ -32,4 +33,8 @@ public interface FormService {
 	List<AssignedFlowForm> setAssignedFlowForms(Long mainFormId, List<AssignedFlowForm> assignedFlowForms);
 
 	Optional<Form> getFormByUrlSuffix(String urlSuffix);
+
+	List<AssignedFormModule> getAssignedModules(Long formId);
+
+	List<AssignedFormModule> setAssignedModules(Long formId, List<AssignedFormModule> modules);
 }

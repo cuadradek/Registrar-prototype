@@ -1,10 +1,12 @@
 package cz.metacentrum.registrar.service;
 
 import cz.metacentrum.registrar.persistence.entity.AssignedFlowForm;
+import cz.metacentrum.registrar.persistence.entity.AssignedFormModule;
 import cz.metacentrum.registrar.persistence.entity.Form;
 import cz.metacentrum.registrar.persistence.entity.FormItem;
 import cz.metacentrum.registrar.persistence.repository.FlowFormRepository;
 import cz.metacentrum.registrar.persistence.repository.FormItemRepository;
+import cz.metacentrum.registrar.persistence.repository.FormModuleRepository;
 import cz.metacentrum.registrar.persistence.repository.FormRepository;
 import cz.metacentrum.registrar.service.formitems.FormItemsLoader;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,13 +29,16 @@ public class FormServiceImpl implements FormService {
 	private final FormItemRepository formItemRepository;
 	private final FlowFormRepository flowFormRepository;
 	private final FormItemsLoader formItemsLoader;
+	private final FormModuleRepository formModulesRepository;
 
 	@Autowired
-	public FormServiceImpl(FormRepository formRepository, FormItemRepository formItemRepository, FlowFormRepository flowFormRepository, FormItemsLoader formItemsLoader) {
+	public FormServiceImpl(FormRepository formRepository, FormItemRepository formItemRepository, FlowFormRepository flowFormRepository,
+						   FormItemsLoader formItemsLoader, FormModuleRepository formModulesRepository) {
 		this.formRepository = formRepository;
 		this.formItemRepository = formItemRepository;
 		this.flowFormRepository = flowFormRepository;
 		this.formItemsLoader = formItemsLoader;
+		this.formModulesRepository = formModulesRepository;
 	}
 
 	@Override
@@ -149,6 +154,35 @@ public class FormServiceImpl implements FormService {
 	@Override
 	public Optional<Form> getFormByUrlSuffix(String urlSuffix) {
 		return formRepository.getFormByUrlSuffix(urlSuffix);
+	}
+
+	@Override
+	public List<AssignedFormModule> getAssignedModules(Long formId) {
+		Form form = formRepository.getReferenceById(formId);
+		return formModulesRepository.getAllByForm(form);
+	}
+
+	@Override
+	public List<AssignedFormModule> setAssignedModules(Long formId, List<AssignedFormModule> modules) {
+		Form form = getFormById(formId).orElseThrow(() -> new FormNotFoundException(formId));
+		var existingModulesIds = getAssignedModules(formId).stream().map(AssignedFormModule::getId).collect(Collectors.toSet());
+		var updatingModulesIds = modules.stream().map(AssignedFormModule::getId).collect(Collectors.toSet());
+
+		modules.forEach(assignedModule -> {
+			if (assignedModule.getId() != null && !existingModulesIds.contains(assignedModule.getId())) {
+				throw new IllegalArgumentException("Cannot change assignment for different form!");
+			}
+			assignedModule.setForm(form);
+		});
+
+		// delete assigned modules missing in input list
+		// (possibly change this - add transient "forDelete" to AssignedFormModule and delete only assignments marked with this flag)
+		existingModulesIds.removeAll(updatingModulesIds);
+		if (!existingModulesIds.isEmpty()) {
+			formModulesRepository.deleteAllById(existingModulesIds);
+		}
+
+		return formModulesRepository.saveAll(modules);
 	}
 
 	@Override

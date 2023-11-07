@@ -57,8 +57,4 @@ public class Form {
 	@OneToMany(cascade = {CascadeType.ALL}, fetch = FetchType.LAZY, orphanRemoval = true)
 	@JoinColumn(name = "form_id")
 	private List<ApprovalGroup> approvalGroups = new ArrayList<>();
-
-	@OneToMany(cascade = {CascadeType.ALL}, fetch = FetchType.LAZY, orphanRemoval = true)
-	@JoinColumn(name = "form_id")
-	private List<AssignedFormModule> assignedModules;
 }
