@@ -174,9 +174,9 @@ public class SubmissionServiceImpl implements SubmissionService {
 
 	private List<ApprovalGroup> getPrincipalsApprovalGroups(SubmittedForm saved) {
 		Set<UUID> idmGroups = new HashSet<>();//todo these are from Principal object
-		idmGroups.add(saved.getForm().getApprovalGroups().get(0).getIdmGroup());//todo remove this
-		var principalsApprovalGroups = saved.getForm()
-				.getApprovalGroups()
+		List<ApprovalGroup> approvalGroups = formService.getApprovalGroups(saved.getForm().getId());
+		idmGroups.add(approvalGroups.get(0).getIdmGroup());//todo remove this
+		var principalsApprovalGroups = approvalGroups
 				.stream()
 				.filter(g -> idmGroups.contains(g.getIdmGroup()))
 				.collect(Collectors.toList());
@@ -187,7 +187,7 @@ public class SubmissionServiceImpl implements SubmissionService {
 	}
 
 	private boolean tryToApprove(SubmittedForm saved, List<ApprovalGroup> approvalGroups) {
-		var lastApprovalGroup = saved.getForm().getApprovalGroups()
+		var lastApprovalGroup = formService.getApprovalGroups(saved.getForm().getId())
 				.stream()
 				.sorted(Comparator.reverseOrder())
 				.findFirst()

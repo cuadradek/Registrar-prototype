@@ -5,16 +5,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.lang.Nullable;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToMany;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -51,10 +45,4 @@ public class Form {
 
 	@Column
 	private boolean autoApprove;
-
-	// these 2 collections can be lazy for now
-	// if we are getting all forms - we are returning ShortFormDTO which wouldn't query n+1 for these
-	@OneToMany(cascade = {CascadeType.ALL}, fetch = FetchType.LAZY, orphanRemoval = true)
-	@JoinColumn(name = "form_id")
-	private List<ApprovalGroup> approvalGroups = new ArrayList<>();
 }

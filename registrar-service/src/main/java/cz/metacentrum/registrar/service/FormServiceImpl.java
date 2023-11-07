@@ -1,9 +1,11 @@
 package cz.metacentrum.registrar.service;
 
+import cz.metacentrum.registrar.persistence.entity.ApprovalGroup;
 import cz.metacentrum.registrar.persistence.entity.AssignedFlowForm;
 import cz.metacentrum.registrar.persistence.entity.AssignedFormModule;
 import cz.metacentrum.registrar.persistence.entity.Form;
 import cz.metacentrum.registrar.persistence.entity.FormItem;
+import cz.metacentrum.registrar.persistence.repository.ApprovalGroupRepository;
 import cz.metacentrum.registrar.persistence.repository.FlowFormRepository;
 import cz.metacentrum.registrar.persistence.repository.FormItemRepository;
 import cz.metacentrum.registrar.persistence.repository.FormModuleRepository;
@@ -30,15 +32,17 @@ public class FormServiceImpl implements FormService {
 	private final FlowFormRepository flowFormRepository;
 	private final FormItemsLoader formItemsLoader;
 	private final FormModuleRepository formModulesRepository;
+	private final ApprovalGroupRepository approvalGroupRepository;
 
 	@Autowired
 	public FormServiceImpl(FormRepository formRepository, FormItemRepository formItemRepository, FlowFormRepository flowFormRepository,
-						   FormItemsLoader formItemsLoader, FormModuleRepository formModulesRepository) {
+						   FormItemsLoader formItemsLoader, FormModuleRepository formModulesRepository, ApprovalGroupRepository approvalGroupRepository) {
 		this.formRepository = formRepository;
 		this.formItemRepository = formItemRepository;
 		this.flowFormRepository = flowFormRepository;
 		this.formItemsLoader = formItemsLoader;
 		this.formModulesRepository = formModulesRepository;
+		this.approvalGroupRepository = approvalGroupRepository;
 	}
 
 	@Override
@@ -183,6 +187,35 @@ public class FormServiceImpl implements FormService {
 		}
 
 		return formModulesRepository.saveAll(modules);
+	}
+
+	@Override
+	public List<ApprovalGroup> getApprovalGroups(Long formId) {
+		Form form = formRepository.getReferenceById(formId);
+		return approvalGroupRepository.getAllByForm(form);
+	}
+
+	@Override
+	public List<ApprovalGroup> setApprovalGroups(Long formId, List<ApprovalGroup> groups) {
+		Form form = getFormById(formId).orElseThrow(() -> new FormNotFoundException(formId));
+		var existingGroupsIds = getApprovalGroups(formId).stream().map(ApprovalGroup::getId).collect(Collectors.toSet());
+		var updatingGroupsIds = groups.stream().map(ApprovalGroup::getId).collect(Collectors.toSet());
+
+		groups.forEach(approvalGroup -> {
+			if (approvalGroup.getId() != null && !existingGroupsIds.contains(approvalGroup.getId())) {
+				throw new IllegalArgumentException("Cannot change assignment for different form!");
+			}
+			approvalGroup.setForm(form);
+		});
+
+		// delete approval groups missing in input list
+		// (possibly change this - add transient "forDelete" to ApprovalGroup and delete only groups marked with this flag)
+		existingGroupsIds.removeAll(updatingGroupsIds);
+		if (!existingGroupsIds.isEmpty()) {
+			approvalGroupRepository.deleteAllById(existingGroupsIds);
+		}
+
+		return approvalGroupRepository.saveAll(groups);
 	}
 
 	@Override

@@ -1,5 +1,6 @@
 package cz.metacentrum.registrar.rest.controller;
 
+import cz.metacentrum.registrar.persistence.entity.ApprovalGroup;
 import cz.metacentrum.registrar.persistence.entity.AssignedFlowForm;
 import cz.metacentrum.registrar.persistence.entity.AssignedFormModule;
 import cz.metacentrum.registrar.persistence.entity.Form;
@@ -7,7 +8,6 @@ import cz.metacentrum.registrar.persistence.entity.FormItem;
 import cz.metacentrum.registrar.rest.controller.dto.AssignedFlowFormDto;
 import cz.metacentrum.registrar.rest.controller.dto.ExceptionResponse;
 import cz.metacentrum.registrar.rest.controller.dto.FormDto;
-import cz.metacentrum.registrar.rest.controller.dto.ShortFormDto;
 import cz.metacentrum.registrar.service.FormNotFoundException;
 import cz.metacentrum.registrar.service.FormService;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
@@ -69,9 +69,9 @@ public class FormController {
 			@ApiResponse(responseCode = "200")
 	})
 	@GetMapping("/forms")
-	public List<ShortFormDto> getAllForms() {
+	public List<FormDto> getAllForms() {
 		return formService.getAllForms().stream()
-				.map(f -> convertToDto(f, ShortFormDto.class))
+				.map(this::convertToDto)
 				.collect(Collectors.toList());
 	}
 
@@ -141,8 +141,19 @@ public class FormController {
 
 	@PutMapping("/forms/{id}/modules")
 	public List<AssignedFormModule> setAssignedModules(final @PathVariable Long id,
-														final @RequestBody @Validated List<AssignedFormModule> modules) {
+													   final @RequestBody @Validated List<AssignedFormModule> modules) {
 		return formService.setAssignedModules(id, modules);
+	}
+
+	@GetMapping("/forms/{id}/approval-groups")
+	public List<ApprovalGroup> getApprovalGroups(final @PathVariable Long id) {
+		return formService.getApprovalGroups(id);
+	}
+
+	@PutMapping("/forms/{id}/approval-groups")
+	public List<ApprovalGroup> setApprovalGroups(final @PathVariable Long id,
+												 final @RequestBody @Validated List<ApprovalGroup> groups) {
+		return formService.setApprovalGroups(id, groups);
 	}
 
 	private <T> T convertToDto(Form form, Class<T> tClass) {

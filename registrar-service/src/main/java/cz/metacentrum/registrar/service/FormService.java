@@ -1,5 +1,6 @@
 package cz.metacentrum.registrar.service;
 
+import cz.metacentrum.registrar.persistence.entity.ApprovalGroup;
 import cz.metacentrum.registrar.persistence.entity.AssignedFlowForm;
 import cz.metacentrum.registrar.persistence.entity.AssignedFormModule;
 import cz.metacentrum.registrar.persistence.entity.Form;
@@ -37,4 +38,8 @@ public interface FormService {
 	List<AssignedFormModule> getAssignedModules(Long formId);
 
 	List<AssignedFormModule> setAssignedModules(Long formId, List<AssignedFormModule> modules);
+
+	List<ApprovalGroup> getApprovalGroups(Long formId);
+
+	List<ApprovalGroup> setApprovalGroups(Long formId, List<ApprovalGroup> groups);
 }

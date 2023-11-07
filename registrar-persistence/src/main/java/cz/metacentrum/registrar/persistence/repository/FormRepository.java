@@ -16,7 +16,8 @@ public interface FormRepository extends JpaRepository<Form, Long> {
 	List<Form> getAllByIdIn(Set<Long> ids);
 	@Query("SELECT f.id FROM Form f WHERE f.idmFormManagersGroup IN ?1")
 	List<Long> findIdsByIdmFormManagersGroup(Set<UUID> groupUUIDs);
-	@Query("SELECT f.id FROM Form f JOIN f.approvalGroups a WHERE a.idmGroup IN ?1")
+//	@Query("SELECT f.id FROM Form f JOIN f.approvalGroups a WHERE a.idmGroup IN ?1")
+	@Query("SELECT f.id FROM ApprovalGroup a JOIN a.form f WHERE a.idmGroup IN ?1")
 //	@Query("SELECT f.id FROM Form f JOIN ApprovalGroup a WHERE a.idmGroup IN ?1")
 	List<Long> findIsByIdmApprovalGroups(Set<UUID> groupUUIDs);
 
