@@ -59,7 +59,7 @@ class InitialData {
 		Form form = new Form(null, UUID.fromString("13d64d76-2ca3-4cf8-b1f4-0befdbef69fc"), UUID.fromString("13d64d76-2ca3-4cf8-b1f4-0befdbef69fc"),
 				"My First Form", "my-first-form", null, false, false);
 		Form form1 = formService.createForm(form);
-		AssignedFormModule module = new AssignedFormModule(null, "addToVo", form1, null, Map.of("VO", "1"), 0);
+		AssignedFormModule module = new AssignedFormModule(null, "addToVo", form1, null, Map.of("VO", "3"), 0);
 		formService.setAssignedModules(form1.getId(), List.of(module));
 		formService.setApprovalGroups(form1.getId(), List.of(new ApprovalGroup(null, form1, 0, false, 1, UUID.fromString("13d64d76-2ca3-4cf8-b1f4-0befdbef69fc"))));
 

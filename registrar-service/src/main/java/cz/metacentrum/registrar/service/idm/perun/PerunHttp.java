@@ -1,5 +1,7 @@
 package cz.metacentrum.registrar.service.idm.perun;
 
+import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -20,19 +22,18 @@ public class PerunHttp {
 	public static final String MEMBERS_MANAGER = "membersManager";
 	public static final String USERS_MANAGER = "usersManager";
 	public static final String CESNET_EXT_SOURCE = "https://login.cesnet.cz/idp/";
+	public static final String INTERNAL_EXT_SOURCE = "INTERNAL";
 
+	@Value("${perun.rpc-url}")
 	private String perunUrl;
+	@Value("${perun.user}")
 	private String perunUser;
+	@Value("${perun.password}")
 	private String perunPassword;
 	private WebClient client;
 
-	private static PerunHttp instance = null;
-
-	private PerunHttp() {
-//		TODO better way to handle these properties
-		this.perunUrl = "http://localhost:8081/ba/rpc/";
-		this.perunUser = "perun";
-		this.perunPassword = "test";
+	@PostConstruct
+	private void initWebClient() {
 		this.client = WebClient.builder()
 				.baseUrl(perunUrl)
 				.defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -85,13 +86,14 @@ public class PerunHttp {
 				UUID.fromString("13d64d76-2ca3-4cf8-b1f4-0befdbef69fc"));
 	}
 
-	public User getUserByIdentificator(String userIdentificator) {
+	public User getUserByIdentifier(String userIdentifier) {
 		String actionUrl = "/json/" + USERS_MANAGER + '/' + "getUserByExtSourceNameAndExtLogin";
 		try {
 			Mono<User> response = client.get()
 					.uri(uriBuilder -> uriBuilder
 							.path(actionUrl)
-							.queryParam("extLogin", userIdentificator)
+							.queryParam("extLogin", userIdentifier)
+//							.queryParam("extSourceName", INTERNAL_EXT_SOURCE)
 							.queryParam("extSourceName", CESNET_EXT_SOURCE)
 							.build())
 					.retrieve()

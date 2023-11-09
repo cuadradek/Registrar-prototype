@@ -34,7 +34,10 @@ public class AddToVo extends PerunFormModule {
 
 	@Override
 	public SubmittedForm onApprove(SubmittedForm submittedForm, Map<String, String> configOptions) {
-		User user = perunHttp.getUserByIdentificator(submittedForm.getSubmission().getSubmittedById());
+		User user = perunHttp.getUserByIdentifier(submittedForm.getSubmission().getSubmittedById());
+		if (user == null) {
+			//create him
+		}
 		if (submittedForm.getFormType() == Form.FormType.INITIAL) {
 			perunHttp.createMember(user.getId(), Integer.parseInt(configOptions.get(VO)));
 		} else {
@@ -50,7 +53,7 @@ public class AddToVo extends PerunFormModule {
 
 	@Override
 	public List<SubmittedForm> onLoad(SubmittedForm submittedForm, Map<String, String> configOptions) {
-		User user = perunHttp.getUserByIdentificator(principalService.getPrincipal().getId());
+		User user = perunHttp.getUserByIdentifier(principalService.getPrincipal().getId());
 		if (user == null) {
 			submittedForm.setFormType(Form.FormType.INITIAL);
 		} else {

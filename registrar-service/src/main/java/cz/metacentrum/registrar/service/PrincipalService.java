@@ -14,7 +14,8 @@ public class PrincipalService {
 	public RegistrarPrincipal getPrincipal() {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		if (authentication instanceof AnonymousAuthenticationToken) {
-			return new RegistrarPrincipal("TEST_NAME", Map.of("sub", "TEST_ID@CESNET.CZ"), List.of());
+			return new RegistrarPrincipal("perun", Map.of("sub", "perun"), List.of());
+//			return new RegistrarPrincipal("TEST_NAME", Map.of("sub", "TEST_ID@CESNET.CZ"), List.of());
 		}
 
 		return (RegistrarPrincipal) authentication.getPrincipal();

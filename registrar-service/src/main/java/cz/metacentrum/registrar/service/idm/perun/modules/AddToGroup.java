@@ -42,7 +42,7 @@ public class AddToGroup extends PerunFormModule {
 
 	@Override
 	public SubmittedForm onApprove(SubmittedForm submittedForm, Map<String, String> configOptions) {
-		User user = perunHttp.getUserByIdentificator(principalService.getPrincipal().getId());
+		User user = perunHttp.getUserByIdentifier(principalService.getPrincipal().getId());
 		Member member = perunHttp.getMemberByUserAndVo(user.getId(), Integer.parseInt(configOptions.get(GROUP)));
 		// TODO: getCurrentUser, getVoByUUID
 		if (submittedForm.getFormType() == Form.FormType.INITIAL) {
@@ -61,7 +61,7 @@ public class AddToGroup extends PerunFormModule {
 	@Override
 	public List<SubmittedForm> onLoad(SubmittedForm submittedForm, Map<String, String> configOptions) {
 		List<SubmittedForm> loadedForms = new ArrayList<>();
-		User user = perunHttp.getUserByIdentificator(principalService.getPrincipal().getId());
+		User user = perunHttp.getUserByIdentifier(principalService.getPrincipal().getId());
 		Member member = null;
 		if (user == null) {
 			submittedForm.setFormType(Form.FormType.INITIAL);
