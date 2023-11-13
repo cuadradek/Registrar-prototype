@@ -21,8 +21,9 @@ import java.util.UUID;
 public class PerunHttp {
 	public static final String MEMBERS_MANAGER = "membersManager";
 	public static final String USERS_MANAGER = "usersManager";
-	public static final String CESNET_EXT_SOURCE = "https://login.cesnet.cz/idp/";
-	public static final String INTERNAL_EXT_SOURCE = "INTERNAL";
+
+	@Value("${perun.primary-ext-source}")
+	private String primaryExtSource;
 
 	@Value("${perun.rpc-url}")
 	private String perunUrl;
@@ -93,8 +94,7 @@ public class PerunHttp {
 					.uri(uriBuilder -> uriBuilder
 							.path(actionUrl)
 							.queryParam("extLogin", userIdentifier)
-//							.queryParam("extSourceName", INTERNAL_EXT_SOURCE)
-							.queryParam("extSourceName", CESNET_EXT_SOURCE)
+							.queryParam("extSourceName", primaryExtSource)
 							.build())
 					.retrieve()
 					.bodyToMono(User.class);
