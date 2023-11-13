@@ -42,7 +42,8 @@ public class RegistrarPrincipal implements OAuth2AuthenticatedPrincipal, OAuth2T
 
 	@Override
 	public String getName() {
-		return delegate.getName();
+		Object name = this.getAttributes().get("name");
+		return name == null ? delegate.getName() : (String) name;
 	}
 
 	public String getId() {

@@ -32,6 +32,9 @@ public class RegistrarSecurityConfig {
 	@Value("${spring.security.oauth2.resourceserver.opaquetoken.client-secret}")
 	private String clientSecret;
 
+	@Value("${registrar.resourceserver.user-info-endpoint}")
+	private String userInfoEndpoint;
+
 	@Bean
 	public RoleHierarchy roleHierarchy() {
 		var hierarchy = new RoleHierarchyImpl();
@@ -99,7 +102,7 @@ public class RegistrarSecurityConfig {
 	@Bean
 	public OpaqueTokenIntrospector introspector(RoleService roleService) {
 //		return new GoogleTokenIntrospector(introspectionUri, roleService);
-		return new RegistrarTokenIntrospector(introspectionUri, clientId, clientSecret, roleService);
+		return new RegistrarTokenIntrospector(introspectionUri, clientId, clientSecret, userInfoEndpoint, roleService);
 //		return new SpringOpaqueTokenIntrospector(introspectionUri, clientId, clientSecret);
 //		return new NimbusOpaqueTokenIntrospector(introspectionUri, clientId, clientSecret);
 	}
