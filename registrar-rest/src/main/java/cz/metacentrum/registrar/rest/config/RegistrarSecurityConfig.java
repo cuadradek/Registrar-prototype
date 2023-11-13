@@ -18,7 +18,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.server.resource.introspection.OpaqueTokenIntrospector;
 import org.springframework.security.web.SecurityFilterChain;
 
-@Profile("!local")
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -50,6 +49,7 @@ public class RegistrarSecurityConfig {
 	}
 
 	@Bean
+	@Profile("!local")
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		http
 				.authorizeHttpRequests(
@@ -78,9 +78,28 @@ public class RegistrarSecurityConfig {
 	}
 
 	@Bean
+	@Profile("local")
+	public SecurityFilterChain filterChainLocalProfile(HttpSecurity http) throws Exception {
+		http
+				.authorizeHttpRequests(
+						authorize -> authorize
+								.requestMatchers("/swagger-ui/**").permitAll()
+								.requestMatchers("/v3/api-docs/**").permitAll()
+								.requestMatchers("/submissions/**").permitAll()
+								.requestMatchers("/submitted-forms/**").permitAll()
+								.requestMatchers("/forms/**").permitAll()
+								.requestMatchers("/test/**").hasAuthority("SCOPE_openid")
+				)
+				.oauth2ResourceServer(OAuth2ResourceServerConfigurer::opaqueToken)
+				.csrf(AbstractHttpConfigurer::disable)
+				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+		return http.build();
+	}
+
+	@Bean
 	public OpaqueTokenIntrospector introspector(RoleService roleService) {
-		return new GoogleTokenIntrospector(introspectionUri, roleService);
-//		return new RegistrarTokenIntrospector(introspectionUri, clientId, clientSecret, roleService);
+//		return new GoogleTokenIntrospector(introspectionUri, roleService);
+		return new RegistrarTokenIntrospector(introspectionUri, clientId, clientSecret, roleService);
 //		return new SpringOpaqueTokenIntrospector(introspectionUri, clientId, clientSecret);
 //		return new NimbusOpaqueTokenIntrospector(introspectionUri, clientId, clientSecret);
 	}
