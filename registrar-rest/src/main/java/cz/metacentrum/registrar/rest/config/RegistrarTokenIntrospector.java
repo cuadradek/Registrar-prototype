@@ -36,6 +36,7 @@ public class RegistrarTokenIntrospector extends SpringOpaqueTokenIntrospector im
 		List<String> roles = roleService.getRolesByUserIdentifier(principal.getName());
 		Collection<GrantedAuthority> authorities = new ArrayList<>();
 		for (String role : roles) {
+			// authority ROLE_x can be used as hasRole(x) or hasAuthority(ROLE_x)
 			authorities.add(new SimpleGrantedAuthority("ROLE_" + role));
 		}
 		authorities.addAll(principal.getAuthorities());

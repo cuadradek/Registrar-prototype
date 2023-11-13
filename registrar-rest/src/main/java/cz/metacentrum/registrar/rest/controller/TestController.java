@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class TestController {
 
 	@GetMapping("/hello")
-	@PreAuthorize("hasRole('openid')")
+	@PreAuthorize("hasAuthority('SCOPE_openid')")
 	public String hello(@AuthenticationPrincipal RegistrarPrincipal principal) {
 		log.info("Som v hello metode");
 //		return "hello " + principal.getFormApprover();
