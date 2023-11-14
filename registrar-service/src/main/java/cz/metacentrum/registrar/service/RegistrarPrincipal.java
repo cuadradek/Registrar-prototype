@@ -51,8 +51,8 @@ public class RegistrarPrincipal implements OAuth2AuthenticatedPrincipal, OAuth2T
 	}
 
 	public boolean isMfa() {
-		Object mfa = this.getAttributes().get("mfa");
-		return mfa != null && Boolean.parseBoolean((String) mfa);
+		Object acrClaim = this.getAttributes().get("acr");
+		return acrClaim != null && acrClaim.equals("https://refeds.org/profile/mfa");
 	}
 
 	public Map<String, Object> getClaims() {
