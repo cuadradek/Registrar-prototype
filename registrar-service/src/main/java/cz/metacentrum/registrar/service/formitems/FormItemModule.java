@@ -20,9 +20,9 @@ public class FormItemModule {
 
 	private String id;
 	private String displayName;
-	private List<String> sourceIdmAttributes;
-	private List<String> sourceFederationAttributes;
-	private String destinationAttribute;
+	private List<String> iamSourceAttributes;
+	private List<String> sourceIdentityAttributes;
+	private String iamDestinationAttribute;
 	private Map<Locale, List<String>> label;
 	private List<FormItem.Type> itemTypes;
 	private List<Boolean> updatable;

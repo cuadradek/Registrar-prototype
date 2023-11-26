@@ -49,8 +49,8 @@ public class FormItemsLoader {
 		if (itemModule == null) {
 			throw new IllegalArgumentException("Unsupported form item: " + destAttribute);
 		}
-		nullOrContains(itemModule.getSourceIdmAttributes(), item.getIamSourceAttribute());
-		nullOrContains(itemModule.getSourceFederationAttributes(), item.getSourceIdentityAttribute());
+		nullOrContains(itemModule.getIamSourceAttributes(), item.getIamSourceAttribute());
+		nullOrContains(itemModule.getSourceIdentityAttributes(), item.getSourceIdentityAttribute());
 		nullOrContains(itemModule.getItemTypes(), item.getType());
 		nullOrContains(itemModule.getUpdatable(), item.isUpdatable());
 		nullOrContains(itemModule.getRegex(), item.getRegex());

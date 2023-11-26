@@ -1,7 +1,7 @@
 package cz.metacentrum.registrar.rest.config;
 
 import cz.metacentrum.registrar.service.FormService;
-import cz.metacentrum.registrar.service.IdmApi;
+import cz.metacentrum.registrar.service.IamService;
 import cz.metacentrum.registrar.service.PrincipalService;
 import cz.metacentrum.registrar.service.RegistrarPrincipal;
 import cz.metacentrum.registrar.service.RoleService;
@@ -23,13 +23,13 @@ import java.util.HashSet;
 @Component
 public class RegistrarPermissionEvaluator implements PermissionEvaluator {
 
-	private final IdmApi idmApi;
+	private final IamService iamService;
 	private final FormService formService;
 	private final RoleService roleService;
 	private final PrincipalService principalService;
 
-	public RegistrarPermissionEvaluator(IdmApi idmApi, FormService formService, RoleService roleService, PrincipalService principalService) {
-		this.idmApi = idmApi;
+	public RegistrarPermissionEvaluator(IamService iamService, FormService formService, RoleService roleService, PrincipalService principalService) {
+		this.iamService = iamService;
 		this.formService = formService;
 		this.roleService = roleService;
 		this.principalService = principalService;
@@ -99,7 +99,7 @@ public class RegistrarPermissionEvaluator implements PermissionEvaluator {
 			return principal;
 		}
 
-		principal.setIdmGroups(new HashSet<>(idmApi.getUserGroups(principal.getId())));
+		principal.setIdmGroups(new HashSet<>(iamService.getUserGroups(principal.getId())));
 		principal.setFormApprover(new HashSet<>(formService.getFormsByIdmApprovalGroups(principal.getIdmGroups())));
 		principal.setFormManager(new HashSet<>(formService.getFormsByIdmManagersGroups(principal.getIdmGroups())));
 		return principal;

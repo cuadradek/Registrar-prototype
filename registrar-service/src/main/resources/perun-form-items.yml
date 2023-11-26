@@ -5,9 +5,9 @@
 
 #urn:perun:user:attribute-def:def:login-namespace:einfra:
 #  displayName: Login in E-infra
-#  sourceIdmAttributes:
+#  iamSourceAttributes:
 #    - urn:perun:user:attribute-def:def:login-namespace:einfra
-#  sourceFederationAttributes: []
+#  sourceIdentityAttributes: []
 #  destinationAttribute: urn:perun:user:attribute-def:def:login-namespace:einfra
 #  label:
 #    - en:
@@ -28,9 +28,9 @@
 #
 urn:perun:user:attribute-def:def:login-namespace:einfra_password:
   displayName: Password in E-infra
-  sourceIdmAttributes: []
-  sourceFederationAttributes: []
-  destinationAttribute: urn:perun:user:attribute-def:def:login-namespace:einfra
+  iamSourceAttributes: []
+  sourceIdentityAttributes: []
+  iamDestinationAttribute: urn:perun:user:attribute-def:def:login-namespace:einfra
   label:
     en:
       - Password
@@ -50,9 +50,9 @@ urn:perun:user:attribute-def:def:login-namespace:einfra_password:
 
 urn:perun:user:attribute-def:def:login-namespace:einfra:
   displayName: E-infra login
-  sourceIdmAttributes:
+  iamSourceAttributes:
     - urn:perun:user:attribute-def:def:login-namespace:einfra
-  destinationAttribute: urn:perun:user:attribute-def:def:login-namespace:einfra
+  iamDestinationAttribute: urn:perun:user:attribute-def:def:login-namespace:einfra
   itemTypes:
     - USERNAME
   updatable:
@@ -60,9 +60,9 @@ urn:perun:user:attribute-def:def:login-namespace:einfra:
 
 urn:perun:user:attribute-def:core:displayName:
   displayName: Display name
-  sourceIdmAttributes:
+  iamSourceAttributes:
     - urn:perun:user:attribute-def:core:displayName
-  destinationAttribute: urn:perun:user:attribute-def:core:displayName
+  iamDestinationAttribute: urn:perun:user:attribute-def:core:displayName
   label:
     en:
       - Name
