@@ -119,7 +119,7 @@ public class FormServiceImpl implements FormService {
 
 	@Override
 	public List<Long> getFormsByIdmApprovalGroups(Set<UUID> groupUUIDs) {
-		return formRepository.findIsByIdmApprovalGroups(groupUUIDs);
+		return formRepository.findIsByIamApprovalGroups(groupUUIDs);
 	}
 
 	@Override
@@ -220,11 +220,11 @@ public class FormServiceImpl implements FormService {
 
 	@Override
 	public List<Form> getFormsByIdmObject(UUID idmObject) {
-		return formRepository.getFormsByIdmObject(idmObject);
+		return formRepository.getFormsByIamObject(idmObject);
 	}
 
 	@Override
 	public List<Long> getFormsByIdmManagersGroups(Set<UUID> groupUUIDs) {
-		return formRepository.findIdsByIdmFormManagersGroup(groupUUIDs);
+		return formRepository.findIdsByIamFormManagersGroup(groupUUIDs);
 	}
 }

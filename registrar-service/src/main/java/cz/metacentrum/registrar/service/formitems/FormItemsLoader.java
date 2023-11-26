@@ -44,13 +44,13 @@ public class FormItemsLoader {
 	}
 
 	public void validateItem(FormItem item) {
-		String destAttribute = item.getIdmDestinationAttribute();
+		String destAttribute = item.getIamDestinationAttribute();
 		var itemModule = formItemModules.get(destAttribute);
 		if (itemModule == null) {
 			throw new IllegalArgumentException("Unsupported form item: " + destAttribute);
 		}
-		nullOrContains(itemModule.getSourceIdmAttributes(), item.getIdmSourceAttribute());
-		nullOrContains(itemModule.getSourceFederationAttributes(), item.getFederationAttribute());
+		nullOrContains(itemModule.getSourceIdmAttributes(), item.getIamSourceAttribute());
+		nullOrContains(itemModule.getSourceFederationAttributes(), item.getSourceIdentityAttribute());
 		nullOrContains(itemModule.getItemTypes(), item.getType());
 		nullOrContains(itemModule.getUpdatable(), item.isUpdatable());
 		nullOrContains(itemModule.getRegex(), item.getRegex());

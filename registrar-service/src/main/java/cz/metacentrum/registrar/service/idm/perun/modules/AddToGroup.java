@@ -36,12 +36,11 @@ public class AddToGroup extends PerunFormModule {
 	}
 
 	@Override
-	public SubmittedForm beforeApprove(SubmittedForm submittedForm) {
-		return submittedForm;
+	public void beforeApprove(SubmittedForm submittedForm) {
 	}
 
 	@Override
-	public SubmittedForm onApprove(SubmittedForm submittedForm, Map<String, String> configOptions) {
+	public void onApprove(SubmittedForm submittedForm, Map<String, String> configOptions) {
 		User user = perunHttp.getUserByIdentifier(principalService.getPrincipal().getId());
 		Member member = perunHttp.getMemberByUserAndVo(user.getId(), Integer.parseInt(configOptions.get(GROUP)));
 		// TODO: getCurrentUser, getVoByUUID
@@ -50,12 +49,11 @@ public class AddToGroup extends PerunFormModule {
 		} else {
 			//extend
 		}
-		return submittedForm;
 	}
 
 	@Override
-	public SubmittedForm onReject(SubmittedForm submittedForm) {
-		return submittedForm;
+	public void onReject(SubmittedForm submittedForm) {
+
 	}
 
 	@Override
@@ -86,12 +84,15 @@ public class AddToGroup extends PerunFormModule {
 					f -> formService.getAssignedModules(f.getId()).stream().anyMatch(
 							a -> a.getModuleName().equals("addToVo") && a.getConfigOptions().get("VO").equals("VO_ID_TODO")
 					)).findFirst();
-			if (voForm.isPresent()) {
-				loadedForms.addAll(submissionService.loadSubmittedForm(voForm.get()));
-			}
+			voForm.ifPresent(form -> loadedForms.addAll(submissionService.loadSubmittedForm(form)));
 		}
 
 		loadedForms.add(submittedForm);
 		return loadedForms;
+	}
+
+	@Override
+	public boolean hasRightToAddToForm(SubmittedForm submittedForm, Map<String, String> configOptions) {
+		return false;
 	}
 }

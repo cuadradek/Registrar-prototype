@@ -37,7 +37,7 @@ public class ApprovalGroup implements Comparable<ApprovalGroup> {
 	private int minApprovals;
 
 	@Column
-	private UUID idmGroup;
+	private UUID iamGroup;
 
 	@Override
 	public int compareTo(ApprovalGroup o) {

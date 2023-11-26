@@ -31,19 +31,16 @@ public class Submission {
 	private List<SubmittedForm> submittedForms;
 
 	@Column
-	private String extSourceName;
+	private String identitySourceName;
 
 	@Column
-	private String extSourceType;
+	private int identitySourceLoa;
 
 	@Column
-	private int extSourceLoa;
+	private String submitterId;
 
 	@Column
-	private String submittedById;
-
-	@Column
-	private String submittedByName;
+	private String submitterName;
 
 	@Column
 	private LocalDateTime timestamp;

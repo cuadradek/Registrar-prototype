@@ -58,19 +58,19 @@ public class FormItem {
 	private Type type = Type.TEXTFIELD;
 
 	@Column
-	private boolean preferFederationAttribute;
+	private boolean preferIdentityAttribute;
 
 	@Column
 	@Nullable
-	private String federationAttribute;
+	private String sourceIdentityAttribute;
 
 	@Column
 	@Nullable
-	private String idmSourceAttribute;
+	private String iamSourceAttribute;
 
 	@Column
 	@Nullable
-	private String idmDestinationAttribute;
+	private String iamDestinationAttribute;
 
 	@Column
 	@Nullable
@@ -98,6 +98,7 @@ public class FormItem {
 	@Enumerated(EnumType.STRING)
 	private Hidden hidden = Hidden.NEVER;
 
+	@Column
 	private boolean isDeleted; //soft delete to keep form_item.id as foreign key in form_item_data
 
 	/**

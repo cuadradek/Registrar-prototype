@@ -10,6 +10,7 @@ public class SubmissionResult {
 	private Submission submission;
 	private List<String> messages = new ArrayList<>();
 	private Submission redirectSubmission;
+	private String redirectUrl;
 
 	public void addMessage(String message) {
 		messages.add(message);

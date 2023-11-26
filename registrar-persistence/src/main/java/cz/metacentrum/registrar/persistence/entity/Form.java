@@ -16,7 +16,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Form {
-	public enum FormState { SUBMITTED, VERIFIED, APPROVED, REJECTED }
+	public enum FormState { SUBMITTED, VERIFIED, PRE_APPROVED, APPROVED, REJECTED }
 
 	public enum FormType { INITIAL, EXTENSION }
 
@@ -25,10 +25,10 @@ public class Form {
 	private Long id;
 
 	@Column
-	private UUID idmObject;
+	private UUID iamObject;
 
 	@Column
-	private UUID idmFormManagersGroup;
+	private UUID iamFormManagersGroup;
 
 	@Column
 	private String name;

@@ -97,8 +97,8 @@ public class SubmissionServiceImpl implements SubmissionService {
 			s.getFormData().forEach(d -> d.setFormItem(formItemRepository.getReferenceById(d.getFormItem().getId())));
 		});
 		submission.setTimestamp(LocalDateTime.now());
-		submission.setSubmittedById(principal.getId());
-		submission.setSubmittedByName(principal.getName());
+		submission.setSubmitterId(principal.getId());
+		submission.setSubmitterName(principal.getName());
 		//TODO fill the data like extSourceName, submittedBy...
 		//TODO check if all the required fields are submitted, if all data belong to that form
 
@@ -134,8 +134,8 @@ public class SubmissionServiceImpl implements SubmissionService {
 	@Async
 	public void submitAutoForm(Submission submission, AssignedFlowForm a) {
 		Submission autoSubmission = loadSubmission(a.getFlowForm());
-		autoSubmission.setSubmittedById(submission.getSubmittedById());
-		autoSubmission.setSubmittedByName(submission.getSubmittedByName());
+		autoSubmission.setSubmitterId(submission.getSubmitterId());
+		autoSubmission.setSubmitterName(submission.getSubmitterName());
 		autoSubmission.getSubmittedForms().forEach(s -> s.setSubmission(autoSubmission));
 		//todo try to fill values
 		createSubmission(autoSubmission);
@@ -175,10 +175,10 @@ public class SubmissionServiceImpl implements SubmissionService {
 	private List<ApprovalGroup> getPrincipalsApprovalGroups(SubmittedForm saved) {
 		Set<UUID> idmGroups = new HashSet<>();//todo these are from Principal object
 		List<ApprovalGroup> approvalGroups = formService.getApprovalGroups(saved.getForm().getId());
-		idmGroups.add(approvalGroups.get(0).getIdmGroup());//todo remove this
+		idmGroups.add(approvalGroups.get(0).getIamGroup());//todo remove this
 		var principalsApprovalGroups = approvalGroups
 				.stream()
-				.filter(g -> idmGroups.contains(g.getIdmGroup()))
+				.filter(g -> idmGroups.contains(g.getIamGroup()))
 				.collect(Collectors.toList());
 		if (principalsApprovalGroups.isEmpty()) {
 			throw new IllegalArgumentException("You are not authorized to approve this form!");
@@ -282,7 +282,7 @@ public class SubmissionServiceImpl implements SubmissionService {
 		List<FormItemData> itemDataList = items
 				.stream()
 				// TODO: prefill values
-				.map(formItem -> new FormItemData(null, formItem, formItem.getShortname(), null, null, null, false))
+				.map(formItem -> new FormItemData(null, formItem, null, null))
 				.toList();
 		submittedForm.setFormData(itemDataList);
 
@@ -294,7 +294,7 @@ public class SubmissionServiceImpl implements SubmissionService {
 	@Override
 	public List<SubmittedForm> getSubmittedFormsBySubmitterId(String submitterId) {
 		return submissionRepository
-				.getAllBySubmittedById(submitterId)
+				.getAllBySubmitterId(submitterId)
 				.stream()
 				.map(Submission::getSubmittedForms)
 				.flatMap(List::stream)

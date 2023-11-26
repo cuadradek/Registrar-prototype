@@ -21,7 +21,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class Approval {
 
-	public enum Decision { APPROVED, REJECTED }
+	public enum Decision { APPROVED, REJECTED, CHANGES_REQUESTED }
 
 	@Id
 	@GeneratedValue
@@ -41,10 +41,10 @@ public class Approval {
 	private Decision decision;
 
 	@Column
-	private String approvalById;
+	private String approverId;
 
 	@Column
-	private String approvalByName;
+	private String approverName;
 
 	@Column
 	private LocalDateTime timestamp;

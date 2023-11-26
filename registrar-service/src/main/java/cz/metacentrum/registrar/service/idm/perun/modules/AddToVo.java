@@ -28,13 +28,12 @@ public class AddToVo extends PerunFormModule {
 	}
 
 	@Override
-	public SubmittedForm beforeApprove(SubmittedForm submittedForm) {
-		return submittedForm;
+	public void beforeApprove(SubmittedForm submittedForm) {
 	}
 
 	@Override
-	public SubmittedForm onApprove(SubmittedForm submittedForm, Map<String, String> configOptions) {
-		User user = perunHttp.getUserByIdentifier(submittedForm.getSubmission().getSubmittedById());
+	public void onApprove(SubmittedForm submittedForm, Map<String, String> configOptions) {
+		User user = perunHttp.getUserByIdentifier(submittedForm.getSubmission().getSubmitterId());
 		if (user == null) {
 			//create him
 		}
@@ -43,12 +42,10 @@ public class AddToVo extends PerunFormModule {
 		} else {
 			//extend
 		}
-		return submittedForm;
 	}
 
 	@Override
-	public SubmittedForm onReject(SubmittedForm submittedForm) {
-		return submittedForm;
+	public void onReject(SubmittedForm submittedForm) {
 	}
 
 	@Override
@@ -67,5 +64,10 @@ public class AddToVo extends PerunFormModule {
 			}
 		}
 		return List.of(submittedForm);
+	}
+
+	@Override
+	public boolean hasRightToAddToForm(SubmittedForm submittedForm, Map<String, String> configOptions) {
+		return false;
 	}
 }

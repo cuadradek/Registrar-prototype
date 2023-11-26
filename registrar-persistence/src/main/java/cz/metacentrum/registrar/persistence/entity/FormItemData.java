@@ -25,18 +25,9 @@ public class FormItemData {
 	@JoinColumn(name = "form_item_id")
 	private FormItem formItem;
 
-	@Column
-	private String shortname;
-
 	@Column(name = "item_value")
 	private String value;
 
 	@Column
 	private String assuranceLevel;
-
-	@Transient
-	private String prefilledValue = "";
-
-	@Transient
-	private boolean generated;
 }

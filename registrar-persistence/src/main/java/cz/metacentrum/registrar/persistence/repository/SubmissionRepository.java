@@ -8,5 +8,5 @@ import java.util.List;
 
 @Repository
 public interface SubmissionRepository extends JpaRepository<Submission, Long> {
-	List<Submission> getAllBySubmittedById(String submitterId);
+	List<Submission> getAllBySubmitterId(String submitterId);
 }

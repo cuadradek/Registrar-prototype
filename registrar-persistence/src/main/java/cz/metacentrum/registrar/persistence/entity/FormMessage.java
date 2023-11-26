@@ -32,7 +32,7 @@ import java.util.Map;
 @NoArgsConstructor
 public class FormMessage {
 
-	public enum Type { AUTO_APPROVED, WAITING_FOR_APPROVAL, WAITING_FOR_MAIL_VERIFICATION }
+	public enum Event { AUTO_APPROVED, WAITING_FOR_APPROVAL, WAITING_FOR_MAIL_VERIFICATION }
 
 	@Id
 	@GeneratedValue
@@ -52,7 +52,7 @@ public class FormMessage {
 	private List<Form.FormType> formTypes = Arrays.asList(Form.FormType.INITIAL, Form.FormType.EXTENSION);
 
 	@Enumerated(EnumType.STRING)
-	private Type messageType;
+	private Event event;
 
 	@ElementCollection(fetch = FetchType.EAGER)
 	@CollectionTable(name="form_message_contents")
