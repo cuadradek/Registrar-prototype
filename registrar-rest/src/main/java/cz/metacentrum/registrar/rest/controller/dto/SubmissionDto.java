@@ -21,18 +21,15 @@ public class SubmissionDto {
 	private List<SubmittedFormDto> submittedForms;
 
 	@Nullable
-	private String extSourceName;
+	private String identitySourceName;
+
+	private int identitySourceLoa;
 
 	@Nullable
-	private String extSourceType;
-
-	private int extSourceLoa;
+	private String submitterId;
 
 	@Nullable
-	private String submittedById;
-
-	@Nullable
-	private String submittedByName;
+	private String submitterName;
 
 	@Nullable
 	private LocalDateTime timestamp;

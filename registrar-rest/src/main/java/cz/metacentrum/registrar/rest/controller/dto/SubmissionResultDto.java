@@ -9,4 +9,5 @@ public class SubmissionResultDto {
 	private SubmissionDto submission;
 	private List<String> messages;
 	private SubmissionDto redirectSubmission;
+	private String redirectUrl;
 }

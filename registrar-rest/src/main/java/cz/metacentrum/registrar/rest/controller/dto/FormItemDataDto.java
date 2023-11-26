@@ -15,13 +15,7 @@ public class FormItemDataDto {
 
 	private Long formItemId;
 
-	private String shortname;
-
 	private String value;
 
 	private String assuranceLevel;
-
-	private String prefilledValue = "";
-
-	private boolean generated;
 }

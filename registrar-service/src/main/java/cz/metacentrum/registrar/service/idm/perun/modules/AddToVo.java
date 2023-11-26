@@ -23,8 +23,8 @@ public class AddToVo extends PerunFormModule {
 	}
 
 	@Override
-	public Map<String, String> getConfigOptions() {
-		return Map.of(VO, "");
+	public List<String> getConfigOptions() {
+		return List.of(VO);
 	}
 
 	@Override

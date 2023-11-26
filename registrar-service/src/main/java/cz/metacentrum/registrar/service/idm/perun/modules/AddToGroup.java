@@ -31,8 +31,8 @@ public class AddToGroup extends PerunFormModule {
 	}
 
 	@Override
-	public Map<String, String> getConfigOptions() {
-		return Map.of("GROUP", "");
+	public List<String> getConfigOptions() {
+		return List.of("GROUP");
 	}
 
 	@Override

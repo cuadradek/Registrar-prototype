@@ -23,7 +23,7 @@ public class SubmittedFormSimpleDto {
 
 	private Form.FormState formState;
 
-	private String submissionSubmittedById;
-	private String submissionSubmittedByName;
+	private String submissionSubmitterId;
+	private String submissionSubmitterName;
 	private LocalDateTime submissionTimestamp;
 }

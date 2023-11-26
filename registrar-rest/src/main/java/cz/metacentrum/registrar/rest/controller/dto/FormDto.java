@@ -13,9 +13,9 @@ public class FormDto {
 	@Nullable
 	private Long id;
 	@NotNull
-	private UUID idmObject;
+	private UUID iamObject;
 	@NotNull
-	private UUID idmFormManagersGroup;
+	private UUID iamFormManagersGroup;
 	@NotBlank
 	@Size(min = 3, max = 30)
 	private String name;
