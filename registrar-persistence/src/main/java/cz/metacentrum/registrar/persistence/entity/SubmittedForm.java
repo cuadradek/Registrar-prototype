@@ -46,7 +46,7 @@ public class SubmittedForm {
 	private Form.FormType formType;
 
 	@Enumerated(EnumType.STRING)
-	private Form.FormState formState;
+	private FormState formState;
 
 	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	@JoinColumn(name = "submitted_form_id")

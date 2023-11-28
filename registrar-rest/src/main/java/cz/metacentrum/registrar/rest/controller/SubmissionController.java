@@ -1,11 +1,14 @@
 package cz.metacentrum.registrar.rest.controller;
 
+import cz.metacentrum.registrar.persistence.entity.Approval;
 import cz.metacentrum.registrar.persistence.entity.Form;
 import cz.metacentrum.registrar.persistence.entity.FormItem;
 import cz.metacentrum.registrar.persistence.entity.FormItemData;
+import cz.metacentrum.registrar.persistence.entity.FormState;
 import cz.metacentrum.registrar.persistence.entity.Submission;
 import cz.metacentrum.registrar.persistence.entity.SubmissionResult;
 import cz.metacentrum.registrar.persistence.entity.SubmittedForm;
+import cz.metacentrum.registrar.rest.controller.dto.CreateApprovalDto;
 import cz.metacentrum.registrar.rest.controller.dto.FormItemDataDto;
 import cz.metacentrum.registrar.rest.controller.dto.SubmissionDto;
 import cz.metacentrum.registrar.rest.controller.dto.SubmissionResultDto;
@@ -87,7 +90,7 @@ public class SubmissionController {
 	@GetMapping("/submitted-forms")
 	public List<SubmittedFormSimpleDto> getSubmittedForms(@RequestParam(required = false) String submittedBy,
 														  @RequestParam(required = false) Long formId,
-														  @RequestParam(required = false) Form.FormState state) {
+														  @RequestParam(required = false) FormState state) {
 		if (submittedBy == null && formId == null) {
 			throw new ValidationException("submittedBy or formId parameter has to be present!");
 		}
@@ -119,6 +122,15 @@ public class SubmissionController {
 			resultDto.setRedirectSubmission(convertToDto(result.getRedirectSubmission()));
 		}
 		return resultDto;
+	}
+
+	@PostMapping("/submitted-forms/approval")
+	public SubmittedFormDto makeApprovalDecision(final @RequestBody CreateApprovalDto approvalDto) {
+		SubmittedForm submittedForm = submissionService.findSubmittedFormById(approvalDto.getSubmittedFormId())
+				.orElseThrow(() -> new FormNotFoundException(approvalDto.getSubmittedFormId()));
+
+		submittedForm = submissionService.makeApprovalDecision(submittedForm, approvalDto.getDecision(), approvalDto.getMessage());
+		return convertToDto(submittedForm);
 	}
 
 	@PutMapping("/submitted-forms/{id}/approve")

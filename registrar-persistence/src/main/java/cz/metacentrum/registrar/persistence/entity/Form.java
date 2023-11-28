@@ -16,7 +16,6 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Form {
-	public enum FormState { SUBMITTED, VERIFIED, PRE_APPROVED, APPROVED, REJECTED }
 
 	public enum FormType { INITIAL, EXTENSION }
 

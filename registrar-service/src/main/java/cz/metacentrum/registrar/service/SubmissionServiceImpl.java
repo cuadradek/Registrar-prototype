@@ -8,6 +8,7 @@ import cz.metacentrum.registrar.persistence.entity.Form;
 import cz.metacentrum.registrar.persistence.entity.FormItem;
 import cz.metacentrum.registrar.persistence.entity.FormItemData;
 import cz.metacentrum.registrar.persistence.entity.FormModule;
+import cz.metacentrum.registrar.persistence.entity.FormState;
 import cz.metacentrum.registrar.persistence.entity.Submission;
 import cz.metacentrum.registrar.persistence.entity.SubmissionResult;
 import cz.metacentrum.registrar.persistence.entity.SubmittedForm;
@@ -49,10 +50,6 @@ public class SubmissionServiceImpl implements SubmissionService {
 	private final FormService formService;
 	private final ApplicationContext context;
 	private final PrincipalService principalService;
-	private static final Set<Form.FormState> OPEN_FORM_STATES = Set.of(Form.FormState.SUBMITTED, Form.FormState.VERIFIED);
-
-	// TODO change path based on IDM used
-	private static final String MODULE_PACKAGE_PATH = "cz.metacentrum.registrar.service.idm.perun.modules.";
 
 	@Autowired
 	public SubmissionServiceImpl(SubmittedFormRepository submittedFormRepository, SubmissionRepository submissionRepository, FormItemRepository formItemRepository, ApprovalRepository approvalRepository, FormService formService, ApplicationContext context, PrincipalService principalService) {
@@ -85,7 +82,7 @@ public class SubmissionServiceImpl implements SubmissionService {
 	}
 
 	@Override
-	public List<SubmittedForm> findSubmittedFormsByFormAndState(Form form, Form.FormState state) {
+	public List<SubmittedForm> findSubmittedFormsByFormAndState(Form form, FormState state) {
 		return submittedFormRepository.findSubmittedFormsByFormAndFormState(form, state);
 	}
 
@@ -93,7 +90,7 @@ public class SubmissionServiceImpl implements SubmissionService {
 	public SubmissionResult createSubmission(Submission submission) {
 		RegistrarPrincipal principal = principalService.getPrincipal();
 		submission.getSubmittedForms().forEach(s -> {
-			s.setFormState(Form.FormState.SUBMITTED);
+			s.setFormState(FormState.PENDING_VERIFICATION);
 			s.getFormData().forEach(d -> d.setFormItem(formItemRepository.getReferenceById(d.getFormItem().getId())));
 		});
 		submission.setTimestamp(LocalDateTime.now());
@@ -150,12 +147,58 @@ public class SubmissionServiceImpl implements SubmissionService {
 	}
 
 	@Override
+	public SubmittedForm makeApprovalDecision(SubmittedForm submittedForm, Approval.Decision decision, String message) {
+		List<ApprovalGroup> principalsApprovalGroups = getPrincipalsApprovalGroups(submittedForm);
+
+		if (submittedForm.getFormState().canMakeDecision()) {
+			throw new IllegalArgumentException("Form needs to be in of the following states: "
+					+ FormState.DECISION_POSSIBLE_STATES);
+		}
+
+		createApprovals(submittedForm, principalsApprovalGroups, Approval.Decision.APPROVED, message);
+		var modules = getModules(submittedForm.getForm());
+
+		switch (decision) {
+			case APPROVED: approveForm(submittedForm, modules, principalsApprovalGroups);
+			case REJECTED: rejectSubmittedForm(submittedForm, modules);
+			case CHANGES_REQUESTED: requestChanges(submittedForm);
+		}
+
+		return submittedForm;
+	}
+
+	private SubmittedForm approveForm(SubmittedForm submittedForm, List<AssignedFormModule> modules, List<ApprovalGroup> principalsApprovalGroups) {
+		modules.forEach(assignedModule -> assignedModule.getFormModule().beforeApprove(submittedForm));
+
+		if (tryToApprove(submittedForm, principalsApprovalGroups)) {
+			submittedForm.setFormState(FormState.APPROVED);
+			modules.forEach(assignedModule -> assignedModule.getFormModule().onApprove(submittedForm, assignedModule.getConfigOptions()));
+			return submittedFormRepository.save(submittedForm);
+		}
+
+		return submittedForm;
+	}
+
+	public SubmittedForm rejectSubmittedForm(SubmittedForm submittedForm, List<AssignedFormModule> modules) {
+		modules.forEach(assignedModule -> assignedModule.getFormModule().onReject(submittedForm));
+
+		submittedForm.setFormState(FormState.REJECTED);
+		return submittedFormRepository.save(submittedForm);
+	}
+
+	public SubmittedForm requestChanges(SubmittedForm submittedForm) {
+		submittedForm.setFormState(FormState.CHANGES_REQUESTED);
+		return submittedFormRepository.save(submittedForm);
+	}
+
+	@Override
 	public SubmittedForm approveSubmittedForm(Long id) {
 		SubmittedForm saved = submittedFormRepository.findById(id).orElseThrow();
 		List<ApprovalGroup> principalsApprovalGroups = getPrincipalsApprovalGroups(saved);
 
-		if (saved.getFormState() != Form.FormState.SUBMITTED) {
-			throw new IllegalArgumentException("Form needs to be in SUBMITTED state!");
+		if (saved.getFormState().canMakeDecision()) {
+			throw new IllegalArgumentException("Form needs to be in of the following states: "
+					+ FormState.DECISION_POSSIBLE_STATES);
 		}
 
 		createApprovals(saved, principalsApprovalGroups, Approval.Decision.APPROVED, null);
@@ -164,7 +207,7 @@ public class SubmissionServiceImpl implements SubmissionService {
 		modules.forEach(assignedModule -> assignedModule.getFormModule().beforeApprove(saved));
 
 		if (tryToApprove(saved, principalsApprovalGroups)) {
-			saved.setFormState(Form.FormState.APPROVED);
+			saved.setFormState(FormState.APPROVED);
 			modules.forEach(assignedModule -> assignedModule.getFormModule().onApprove(saved, assignedModule.getConfigOptions()));
 			return submittedFormRepository.save(saved);
 		}
@@ -215,8 +258,9 @@ public class SubmissionServiceImpl implements SubmissionService {
 		SubmittedForm saved = submittedFormRepository.findById(id).orElseThrow();
 		List<ApprovalGroup> principalsApprovalGroups = getPrincipalsApprovalGroups(saved);
 
-		if (saved.getFormState() != Form.FormState.SUBMITTED) {
-			throw new IllegalArgumentException("Form needs to be in SUBMITTED state!");
+		if (saved.getFormState().canMakeDecision()) {
+			throw new IllegalArgumentException("Form needs to be in of the following states: "
+					+ FormState.DECISION_POSSIBLE_STATES);
 		}
 
 		createApprovals(saved, principalsApprovalGroups, Approval.Decision.REJECTED, message);
@@ -224,7 +268,7 @@ public class SubmissionServiceImpl implements SubmissionService {
 		var modules = getModules(saved.getForm());
 		modules.forEach(assignedModule -> assignedModule.getFormModule().onReject(saved));
 
-		saved.setFormState(Form.FormState.REJECTED);
+		saved.setFormState(FormState.REJECTED);
 		return submittedFormRepository.save(saved);
 	}
 
@@ -269,7 +313,7 @@ public class SubmissionServiceImpl implements SubmissionService {
 		submittedForm.setForm(form);
 		boolean isOpen = submittedFormRepository.findSubmittedFormsByForm(form)
 				.stream()
-				.anyMatch(s -> OPEN_FORM_STATES.contains(s.getFormState()));
+				.anyMatch(s -> s.getFormState().isOpenFormState());
 		if (isOpen) {
 			throw new IllegalArgumentException("There is already submitted form for form + " + form.getId());
 		}

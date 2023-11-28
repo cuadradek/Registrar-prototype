@@ -2,6 +2,7 @@ package cz.metacentrum.registrar.rest.controller.dto;
 
 import cz.metacentrum.registrar.persistence.entity.AssignedFlowForm;
 import cz.metacentrum.registrar.persistence.entity.Form;
+import cz.metacentrum.registrar.persistence.entity.FormState;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -22,7 +23,7 @@ public class SubmittedFormSimpleDto {
 
 	private Form.FormType formType;
 
-	private Form.FormState formState;
+	private FormState formState;
 
 	private AssignedFlowForm.FlowType flowType;
 
