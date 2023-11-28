@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
 import java.util.HashSet;
+import java.util.Set;
 
 /**
  * 2 options how to use RegistrarPermissionEvaluator:
@@ -99,9 +100,15 @@ public class RegistrarPermissionEvaluator implements PermissionEvaluator {
 			return principal;
 		}
 
-		principal.setIdmGroups(new HashSet<>(iamService.getUserGroups(principal.getId())));
-		principal.setFormApprover(new HashSet<>(formService.getFormsByIdmApprovalGroups(principal.getIdmGroups())));
-		principal.setFormManager(new HashSet<>(formService.getFormsByIdmManagersGroups(principal.getIdmGroups())));
+		if (principal.isAuthenticated()) {
+			principal.setIdmGroups(new HashSet<>(iamService.getUserGroups(principal.getId())));
+			principal.setFormApprover(new HashSet<>(formService.getFormsByIdmApprovalGroups(principal.getIdmGroups())));
+			principal.setFormManager(new HashSet<>(formService.getFormsByIdmManagersGroups(principal.getIdmGroups())));
+		} else {
+			principal.setIdmGroups(Set.of());
+			principal.setFormApprover(Set.of());
+			principal.setFormManager(Set.of());
+		}
 		return principal;
 	}
 

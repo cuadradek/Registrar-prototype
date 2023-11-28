@@ -2,7 +2,7 @@ package cz.metacentrum.registrar.rest.config;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import cz.metacentrum.registrar.service.RegistrarPrincipal;
+import cz.metacentrum.registrar.service.RegistrarOAuth2Principal;
 import cz.metacentrum.registrar.service.RoleService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
@@ -54,7 +54,7 @@ public class RegistrarTokenIntrospector extends SpringOpaqueTokenIntrospector im
 		Map<String, Object> claims = makeUserInfoRequest(token);
 		claims.putAll(principal.getAttributes());
 
-		return new RegistrarPrincipal(claims, authorities);
+		return new RegistrarOAuth2Principal(claims, authorities);
 	}
 
 	private Map<String, Object> makeUserInfoRequest(String token) {

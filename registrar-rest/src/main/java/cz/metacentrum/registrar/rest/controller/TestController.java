@@ -1,6 +1,7 @@
 package cz.metacentrum.registrar.rest.controller;
 
 import cz.metacentrum.registrar.persistence.entity.Form;
+import cz.metacentrum.registrar.service.RegistrarOAuth2Principal;
 import cz.metacentrum.registrar.service.RegistrarPrincipal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -18,7 +19,7 @@ public class TestController {
 
 	@GetMapping("/hello")
 	@PreAuthorize("hasAuthority('SCOPE_openid')")
-	public String hello(@AuthenticationPrincipal RegistrarPrincipal principal) {
+	public String hello(@AuthenticationPrincipal RegistrarOAuth2Principal principal) {
 		log.info("Som v hello metode");
 //		return "hello " + principal.getFormApprover();
 		return "hello " + (principal == null ? null : principal.getName());
@@ -31,7 +32,7 @@ public class TestController {
 
 	@PreAuthorize("hasRole('ADMIN')")
 	@GetMapping("/admin")
-	public String admin(@AuthenticationPrincipal RegistrarPrincipal principal) {
+	public String admin(@AuthenticationPrincipal RegistrarOAuth2Principal principal) {
 		return "Hello admin " + principal.getName();
 	}
 

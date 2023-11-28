@@ -17,6 +17,7 @@ import org.springframework.security.config.annotation.web.configurers.oauth2.ser
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.server.resource.introspection.OpaqueTokenIntrospector;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -57,6 +58,8 @@ public class RegistrarSecurityConfig {
 		http
 				.authorizeHttpRequests(
 						authorize -> authorize
+								.requestMatchers("/submissions").permitAll()
+								.requestMatchers("/submissions/load").permitAll()
 //								.requestMatchers("/swagger-ui/**").permitAll()
 //								.requestMatchers("/v3/api-docs/**").permitAll()
 //								.requestMatchers("/submissions/**").permitAll()
@@ -66,6 +69,7 @@ public class RegistrarSecurityConfig {
 //								//if the request didn't match test/**, then try to match this:
 //								.requestMatchers("/forms/**").hasAuthority("SCOPE_REGISTRAR_API")
 								// if the request didn't match any ant matcher, then user needs to be at least authenticated
+								.anyRequest().hasAuthority("SCOPE_REGISTRAR_API")
 								.anyRequest().authenticated()
 				)
 //				.oauth2ResourceServer(oauth2 -> oauth2.opaqueToken
@@ -76,6 +80,7 @@ public class RegistrarSecurityConfig {
 //				.oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt);
 				.oauth2ResourceServer(OAuth2ResourceServerConfigurer::opaqueToken)
 				.csrf(AbstractHttpConfigurer::disable)
+				.addFilterAfter(new RegistrarUnauthenticatedFilter(), AnonymousAuthenticationFilter.class)
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 		return http.build();
 	}
@@ -88,6 +93,8 @@ public class RegistrarSecurityConfig {
 						authorize -> authorize
 								.requestMatchers("/swagger-ui/**").permitAll()
 								.requestMatchers("/v3/api-docs/**").permitAll()
+								.requestMatchers("/submissions").permitAll()
+								.requestMatchers("/submissions/load").permitAll()
 								.requestMatchers("/submissions/**").permitAll()
 								.requestMatchers("/submitted-forms/**").permitAll()
 								.requestMatchers("/forms/**").permitAll()
@@ -95,6 +102,7 @@ public class RegistrarSecurityConfig {
 				)
 				.oauth2ResourceServer(OAuth2ResourceServerConfigurer::opaqueToken)
 				.csrf(AbstractHttpConfigurer::disable)
+				.addFilterAfter(new RegistrarUnauthenticatedFilter(), AnonymousAuthenticationFilter.class)
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 		return http.build();
 	}

@@ -1,6 +1,6 @@
 package cz.metacentrum.registrar.rest.config;
 
-import cz.metacentrum.registrar.service.RegistrarPrincipal;
+import cz.metacentrum.registrar.service.RegistrarOAuth2Principal;
 import cz.metacentrum.registrar.service.RoleService;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.ParameterizedTypeReference;
@@ -60,7 +60,7 @@ public class GoogleTokenIntrospector implements OpaqueTokenIntrospector {
 
 //			principal = new OAuth2IntrospectionAuthenticatedPrincipal(principalMap, authorities);
 //			principal = new DefaultOAuth2AuthenticatedPrincipal(principalMap, authorities);
-			principal = new RegistrarPrincipal(principalMap, authorities);
+			principal = new RegistrarOAuth2Principal(principalMap, authorities);
 		} catch (Exception ex) {
 			throw new BadOpaqueTokenException(ex.getMessage(), ex);
 		}
