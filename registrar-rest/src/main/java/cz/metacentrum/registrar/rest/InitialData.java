@@ -47,7 +47,7 @@ class InitialData {
 		formService.setApprovalGroups(form1.getId(), List.of(new ApprovalGroup(null, form1, 0, false, 1, UUID.fromString("13d64d76-2ca3-4cf8-b1f4-0befdbef69fc"))));
 
 		FormItem formItem = new FormItem(null, form1, "login", 0, true, false, FormItem.Type.USERNAME,
-				false, null, EINFRA_LOGIN, EINFRA_LOGIN, null,
+				false, null, null, EINFRA_LOGIN, EINFRA_LOGIN, null,
 				List.of(Form.FormType.INITIAL, Form.FormType.EXTENSION),
 				null, null, FormItem.Disabled.NEVER, FormItem.Hidden.NEVER, false);
 		formService.setFormItems(1L, List.of(formItem));
@@ -64,7 +64,7 @@ class InitialData {
 		formService.setApprovalGroups(form1.getId(), List.of(new ApprovalGroup(null, form1, 0, false, 1, UUID.fromString("13d64d76-2ca3-4cf8-b1f4-0befdbef69fc"))));
 
 		FormItem formItem = new FormItem(null, form1, "login", 0, true, false, FormItem.Type.USERNAME,
-				false, null, EINFRA_LOGIN, EINFRA_LOGIN, null,
+				false, null, null, EINFRA_LOGIN, EINFRA_LOGIN, null,
 				List.of(Form.FormType.INITIAL, Form.FormType.EXTENSION),
 				null, null, FormItem.Disabled.NEVER, FormItem.Hidden.NEVER, false);
 		formService.setFormItems(1L, List.of(formItem));

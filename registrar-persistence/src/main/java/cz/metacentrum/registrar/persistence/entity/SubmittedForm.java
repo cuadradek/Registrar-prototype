@@ -51,4 +51,8 @@ public class SubmittedForm {
 	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	@JoinColumn(name = "submitted_form_id")
 	private List<FormItemData> formData;
+
+	@Column
+	@Nullable
+	private AssignedFlowForm.FlowType flowType;
 }

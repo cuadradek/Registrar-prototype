@@ -1,6 +1,8 @@
 package cz.metacentrum.registrar.rest.controller.dto;
 
+import cz.metacentrum.registrar.persistence.entity.AssignedFlowForm;
 import cz.metacentrum.registrar.persistence.entity.Form;
+import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -34,4 +36,8 @@ public class SubmittedFormDto {
 	private Form.FormState formState;
 
 	private List<FormItemDataDto> formData;
+
+	@Column
+	@Nullable
+	private AssignedFlowForm.FlowType flowType;
 }

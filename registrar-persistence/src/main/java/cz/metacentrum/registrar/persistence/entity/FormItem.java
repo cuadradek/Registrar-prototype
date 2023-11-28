@@ -62,6 +62,10 @@ public class FormItem {
 
 	@Column
 	@Nullable
+	private String prefilledValue;
+
+	@Column
+	@Nullable
 	private String sourceIdentityAttribute;
 
 	@Column
@@ -128,14 +132,16 @@ public class FormItem {
 		NEVER,
 		ALWAYS,
 		IF_PREFILLED,
-		IF_EMPTY
+		IF_EMPTY,
+		HAS_VALUE
 	}
 
 	public enum Disabled {
 		NEVER,
 		ALWAYS,
 		IF_PREFILLED,
-		IF_EMPTY
+		IF_EMPTY,
+		HAS_VALUE
 	}
 
 }

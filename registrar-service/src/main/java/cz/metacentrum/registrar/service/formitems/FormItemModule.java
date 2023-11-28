@@ -23,6 +23,7 @@ public class FormItemModule {
 	private List<String> iamSourceAttributes;
 	private List<String> sourceIdentityAttributes;
 	private String iamDestinationAttribute;
+	private List<String> prefilledValue;
 	private Map<Locale, List<String>> label;
 	private List<FormItem.Type> itemTypes;
 	private List<Boolean> updatable;
