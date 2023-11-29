@@ -9,4 +9,5 @@ public interface IamService {
 	boolean canCreateForm(String userIdentifier);
 	boolean isObjectRightHolder(String userIdentifier, UUID iamObject);
 	List<String> getUserRoles(String userIdentifier);
+	String getUserAttributeValue(String userIdentifier, String attributeName);
 }

@@ -35,4 +35,9 @@ public class PerunIamService implements IamService {
 	public List<String> getUserRoles(String userIdentifier) {
 		return null;
 	}
+
+	@Override
+	public String getUserAttributeValue(String userIdentifier, String attributeName) {
+		return null;
+	}
 }

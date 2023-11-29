@@ -29,5 +29,11 @@ public class FormItemData {
 	private String value;
 
 	@Column
-	private String assuranceLevel;
+	private String identityPrefilledValue;
+
+	@Column
+	private String iamPrefilledValue;
+
+	@Column
+	private Integer assuranceLevel;
 }

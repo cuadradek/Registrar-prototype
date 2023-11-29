@@ -17,6 +17,7 @@ import cz.metacentrum.registrar.persistence.repository.FormItemRepository;
 import cz.metacentrum.registrar.persistence.repository.SubmissionRepository;
 import cz.metacentrum.registrar.persistence.repository.SubmittedFormRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -32,6 +33,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -50,9 +52,10 @@ public class SubmissionServiceImpl implements SubmissionService {
 	private final FormService formService;
 	private final ApplicationContext context;
 	private final PrincipalService principalService;
+	private final IamService iamService;
 
 	@Autowired
-	public SubmissionServiceImpl(SubmittedFormRepository submittedFormRepository, SubmissionRepository submissionRepository, FormItemRepository formItemRepository, ApprovalRepository approvalRepository, FormService formService, ApplicationContext context, PrincipalService principalService) {
+	public SubmissionServiceImpl(SubmittedFormRepository submittedFormRepository, SubmissionRepository submissionRepository, FormItemRepository formItemRepository, ApprovalRepository approvalRepository, FormService formService, ApplicationContext context, PrincipalService principalService, IamService iamService) {
 		this.submittedFormRepository = submittedFormRepository;
 		this.submissionRepository = submissionRepository;
 		this.formItemRepository = formItemRepository;
@@ -60,6 +63,7 @@ public class SubmissionServiceImpl implements SubmissionService {
 		this.formService = formService;
 		this.context = context;
 		this.principalService = principalService;
+		this.iamService = iamService;
 	}
 
 	private SubmissionService getSelf() {
@@ -86,18 +90,45 @@ public class SubmissionServiceImpl implements SubmissionService {
 		return submittedFormRepository.findSubmittedFormsByFormAndFormState(form, state);
 	}
 
+	private void checkFilledItemData(FormItemData itemData, RegistrarPrincipal principal) {
+		var formItem = formItemRepository.findById(itemData.getFormItem().getId()).orElseThrow();
+		itemData.setFormItem(formItem);
+
+		if (formItem.isRequired() && StringUtils.isEmpty(itemData.getValue())) {
+			throw new IllegalArgumentException(String.format("Form item with id: %d is required but not filled out!", formItem.getId()));
+		}
+		//todo check regex
+
+		if (!principal.isAuthenticated()) {
+			itemData.setAssuranceLevel(0);
+			return;
+		}
+
+		var iamValue = getIamAttributeValue(formItem, principal);
+		var identityValue = getIdentityAttributeValue(formItem, principal);
+		itemData.setIamPrefilledValue(iamValue);
+		itemData.setIdentityPrefilledValue(identityValue);
+
+		if (StringUtils.isEmpty(itemData.getValue())) {
+			itemData.setAssuranceLevel(0);
+		} else if (Objects.equals(identityValue, itemData.getValue()) || Objects.equals(iamValue, itemData.getValue())) {
+			itemData.setAssuranceLevel(2);
+		} else {
+			itemData.setAssuranceLevel(0);
+		}
+	}
+
 	@Override
 	public SubmissionResult createSubmission(Submission submission) {
 		RegistrarPrincipal principal = principalService.getPrincipal();
 		submission.getSubmittedForms().forEach(s -> {
 			s.setFormState(FormState.PENDING_VERIFICATION);
-			s.getFormData().forEach(d -> d.setFormItem(formItemRepository.getReferenceById(d.getFormItem().getId())));
+			s.getFormData().forEach(d -> checkFilledItemData(d, principal));
 		});
+
 		submission.setTimestamp(LocalDateTime.now());
 		submission.setSubmitterId(principal.getId());
 		submission.setSubmitterName(principal.getName());
-		//TODO fill the data like extSourceName, submittedBy...
-		//TODO check if all the required fields are submitted, if all data belong to that form
 
 		var flowForms = getAssignedFlowForms(submission);
 		var autoFlowForms = flowForms.stream()
@@ -323,10 +354,10 @@ public class SubmissionServiceImpl implements SubmissionService {
 		modules.forEach(m -> m.getFormModule().onLoad(submittedForm, m.getConfigOptions()));
 
 		List<FormItem> items = formService.getFormItems(form.getId());
+		var principal = principalService.getPrincipal();
 		List<FormItemData> itemDataList = items
 				.stream()
-				// TODO: prefill values
-				.map(formItem -> new FormItemData(null, formItem, null, null))
+				.map(item -> prefillValue(item, principal))
 				.toList();
 		submittedForm.setFormData(itemDataList);
 
@@ -334,6 +365,49 @@ public class SubmissionServiceImpl implements SubmissionService {
 		submittedForms.add(submittedForm);
 		return submittedForms;
 	}
+
+	private FormItemData prefillValue(FormItem formItem, RegistrarPrincipal principal) {
+		var itemData = new FormItemData(null, formItem, null, null, null, null);
+
+		var staticValue = formItem.getPrefilledValue();
+
+		if (principal.isAuthenticated()) {
+			if (staticValue != null) {
+				itemData.setValue(staticValue);
+			}
+			return itemData;
+		}
+
+		String prefilledValue = null;
+		var identityValue = getIdentityAttributeValue(formItem, principal);
+
+		if (formItem.isPreferIdentityAttribute() && identityValue != null) {
+			prefilledValue = identityValue;
+		} else {
+			var iamValue = getIamAttributeValue(formItem, principal);
+			if (iamValue != null) {
+				prefilledValue = iamValue;
+			} else if (identityValue != null) {
+				prefilledValue = identityValue;
+			} else if (staticValue != null) {
+				prefilledValue = staticValue;
+			}
+		}
+
+		itemData.setValue(prefilledValue);
+		return itemData;
+	}
+
+	private @Nullable String getIdentityAttributeValue(FormItem formItem, RegistrarPrincipal principal) {
+		var identityAttribute = formItem.getSourceIdentityAttribute();
+		return identityAttribute == null ? null : principal.getClaimAsString(identityAttribute);
+	}
+
+	private @Nullable String getIamAttributeValue(FormItem formItem, RegistrarPrincipal principal) {
+		var attribute = formItem.getIamSourceAttribute();
+		return attribute == null ? null : iamService.getUserAttributeValue(principal.getId(), attribute);
+	}
+
 
 	@Override
 	public List<SubmittedForm> getSubmittedFormsBySubmitterId(String submitterId) {
