@@ -17,5 +17,9 @@ public class FormItemDataDto {
 
 	private String value;
 
-	private String assuranceLevel;
+	private String identityPrefilledValue;
+
+	private String iamPrefilledValue;
+
+	private Integer assuranceLevel;
 }
