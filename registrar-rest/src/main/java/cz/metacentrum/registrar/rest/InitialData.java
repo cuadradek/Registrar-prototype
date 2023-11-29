@@ -5,6 +5,7 @@ import cz.metacentrum.registrar.persistence.entity.AssignedFlowForm;
 import cz.metacentrum.registrar.persistence.entity.AssignedFormModule;
 import cz.metacentrum.registrar.persistence.entity.Form;
 import cz.metacentrum.registrar.persistence.entity.FormItem;
+import cz.metacentrum.registrar.persistence.entity.ItemTexts;
 import cz.metacentrum.registrar.persistence.entity.Role;
 import cz.metacentrum.registrar.service.FormService;
 import cz.metacentrum.registrar.service.RoleService;
@@ -13,6 +14,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
@@ -47,7 +49,9 @@ class InitialData {
 		formService.setApprovalGroups(form1.getId(), List.of(new ApprovalGroup(null, form1, 0, false, 1, UUID.fromString("13d64d76-2ca3-4cf8-b1f4-0befdbef69fc"))));
 
 		FormItem formItem = new FormItem(null, form1, "login", 0, true, false, FormItem.Type.USERNAME,
-				false, null, null, EINFRA_LOGIN, EINFRA_LOGIN, null,
+				false, null, null, EINFRA_LOGIN, EINFRA_LOGIN,
+				List.of(new ItemTexts(null, Locale.ENGLISH, "einfra", null, null, null)),
+				null,
 				List.of(Form.FormType.INITIAL, Form.FormType.EXTENSION),
 				null, null, FormItem.Disabled.NEVER, FormItem.Hidden.NEVER, false);
 		formService.setFormItems(1L, List.of(formItem));
@@ -64,7 +68,9 @@ class InitialData {
 		formService.setApprovalGroups(form1.getId(), List.of(new ApprovalGroup(null, form1, 0, false, 1, UUID.fromString("13d64d76-2ca3-4cf8-b1f4-0befdbef69fc"))));
 
 		FormItem formItem = new FormItem(null, form1, "login", 0, true, false, FormItem.Type.USERNAME,
-				false, null, null, EINFRA_LOGIN, EINFRA_LOGIN, null,
+				false, null, null, EINFRA_LOGIN, EINFRA_LOGIN,
+				List.of(new ItemTexts(null, Locale.ENGLISH, "einfra", null, null, null)),
+				null,
 				List.of(Form.FormType.INITIAL, Form.FormType.EXTENSION),
 				null, null, FormItem.Disabled.NEVER, FormItem.Hidden.NEVER, false);
 		formService.setFormItems(1L, List.of(formItem));

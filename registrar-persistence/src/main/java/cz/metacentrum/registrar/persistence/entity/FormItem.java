@@ -1,7 +1,9 @@
 package cz.metacentrum.registrar.persistence.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -24,6 +26,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 @Entity
 @Data
@@ -75,6 +78,10 @@ public class FormItem {
 	@Column
 	@Nullable
 	private String iamDestinationAttribute;
+
+	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+	@JoinColumn(name = "item_id")
+	private List<ItemTexts> texts;
 
 	@Column
 	@Nullable
@@ -142,6 +149,13 @@ public class FormItem {
 		IF_PREFILLED,
 		IF_EMPTY,
 		HAS_VALUE
+	}
+
+	public ItemTexts getTexts(Locale locale) {
+		return texts.stream()
+				.filter(t -> t.getLocale() == locale)
+				.findFirst()
+				.orElse(null);
 	}
 
 }
