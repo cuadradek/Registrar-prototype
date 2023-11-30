@@ -25,7 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -81,8 +81,11 @@ public class FormController {
 			@ApiResponse(responseCode = "404", description = "Form not found",
 					content = @Content(schema = @Schema(implementation = ExceptionResponse.class)))
 	})
-	@PreAuthorize("@registrarPermissionEvaluator.hasRole(#id, 'FORM_MANAGER')" +
-			"|| @registrarPermissionEvaluator.hasRole(#id, 'FORM_APPROVER')")
+	@PostAuthorize(
+			"@permissionService.hasRole(#id, 'FORM_MANAGER')" +
+			"|| @permissionService.hasRole(#id, 'FORM_APPROVER')" +
+			"|| @permissionService.isObjectRightHolder(#returnObject)"
+	)
 	@GetMapping("/forms/{id}")
 	public FormDto getFormById(@PathVariable Long id) {
 		Optional<Form> formData = formService.getFormById(id);

@@ -37,7 +37,7 @@ public class TestController {
 	}
 
 	@GetMapping("/forms/{id}")
-	@PreAuthorize("@registrarPermissionEvaluator.hasRole(#id, 'FORM_MANAGER')")
+	@PreAuthorize("@permissionService.hasRole(#id, 'FORM_MANAGER')")
 //	@PreAuthorize("hasPermission(#id, 'FORM_MANAGER')")
 	public Form getForm(@PathVariable Long id) {
 		var form = new Form();

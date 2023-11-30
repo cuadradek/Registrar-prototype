@@ -1,5 +1,6 @@
 package cz.metacentrum.registrar.rest.config;
 
+import cz.metacentrum.registrar.persistence.entity.Form;
 import cz.metacentrum.registrar.service.FormService;
 import cz.metacentrum.registrar.service.IamService;
 import cz.metacentrum.registrar.service.PrincipalService;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -22,14 +24,14 @@ import java.util.Set;
  * 		- @PreAuthorize("hasPermission(#id, 'FORM_MANAGER')")
  */
 @Component
-public class RegistrarPermissionEvaluator implements PermissionEvaluator {
+public class PermissionService implements PermissionEvaluator {
 
 	private final IamService iamService;
 	private final FormService formService;
 	private final RoleService roleService;
 	private final PrincipalService principalService;
 
-	public RegistrarPermissionEvaluator(IamService iamService, FormService formService, RoleService roleService, PrincipalService principalService) {
+	public PermissionService(IamService iamService, FormService formService, RoleService roleService, PrincipalService principalService) {
 		this.iamService = iamService;
 		this.formService = formService;
 		this.roleService = roleService;
@@ -50,6 +52,16 @@ public class RegistrarPermissionEvaluator implements PermissionEvaluator {
 
 		return false;
 //		return hasPrivilege(auth, targetType.toUpperCase(), permission.toString().toUpperCase());
+	}
+
+	public boolean isObjectRightHolder(Optional<Form> form) {
+		RegistrarPrincipal principal = principalService.getPrincipal();
+
+		if (form.isEmpty() || !principal.isAuthenticated()) {
+			return false;
+		}
+
+		return iamService.isObjectRightHolder(principal.getId(), form.get().getIamObject());
 	}
 
 	@Override
