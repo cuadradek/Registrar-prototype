@@ -1,5 +1,6 @@
 package cz.metacentrum.registrar.rest.controller.dto;
 
+import cz.metacentrum.registrar.persistence.entity.Identity;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -33,4 +34,7 @@ public class SubmissionDto {
 
 	@Nullable
 	private LocalDateTime timestamp;
+
+	@Nullable
+	private List<Identity> similarUsers;
 }

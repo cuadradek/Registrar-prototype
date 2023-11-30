@@ -20,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.lang.Nullable;
 import org.springframework.scheduling.annotation.Async;
@@ -53,6 +54,9 @@ public class SubmissionServiceImpl implements SubmissionService {
 	private final ApplicationContext context;
 	private final PrincipalService principalService;
 	private final IamService iamService;
+
+	@Value("${registrar.find-similar-users}")
+	private boolean findSimilarUsers;
 
 	@Autowired
 	public SubmissionServiceImpl(SubmittedFormRepository submittedFormRepository, SubmissionRepository submissionRepository, FormItemRepository formItemRepository, ApprovalRepository approvalRepository, FormService formService, ApplicationContext context, PrincipalService principalService, IamService iamService) {
@@ -330,6 +334,11 @@ public class SubmissionServiceImpl implements SubmissionService {
 
 		Submission submission = new Submission();
 		submission.setSubmittedForms(submittedForms);
+
+		RegistrarPrincipal principal = principalService.getPrincipal();
+		if (findSimilarUsers && principal.isAuthenticated()) {
+			submission.setSimilarUsers(iamService.getSimilarUsers(principal.getAttributes()));
+		}
 		return submission;
 	}
 

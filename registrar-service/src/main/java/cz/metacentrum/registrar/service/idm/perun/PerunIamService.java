@@ -5,7 +5,7 @@ import cz.metacentrum.perun.openapi.model.Group;
 import cz.metacentrum.perun.openapi.model.User;
 import cz.metacentrum.perun.openapi.model.Vo;
 import cz.metacentrum.registrar.service.IamService;
-import cz.metacentrum.registrar.service.Identity;
+import cz.metacentrum.registrar.persistence.entity.Identity;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;

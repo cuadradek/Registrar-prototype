@@ -1,5 +1,7 @@
 package cz.metacentrum.registrar.service;
 
+import cz.metacentrum.registrar.persistence.entity.Identity;
+
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;

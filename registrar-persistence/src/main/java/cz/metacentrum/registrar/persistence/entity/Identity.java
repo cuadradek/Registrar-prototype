@@ -1,4 +1,4 @@
-package cz.metacentrum.registrar.service;
+package cz.metacentrum.registrar.persistence.entity;
 
 import lombok.Data;
 
