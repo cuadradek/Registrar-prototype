@@ -10,6 +10,8 @@ import cz.metacentrum.registrar.rest.controller.dto.ExceptionResponse;
 import cz.metacentrum.registrar.rest.controller.dto.FormDto;
 import cz.metacentrum.registrar.service.FormNotFoundException;
 import cz.metacentrum.registrar.service.FormService;
+import cz.metacentrum.registrar.service.IamService;
+import cz.metacentrum.registrar.service.RegistrarPrincipal;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.info.Info;
@@ -25,7 +27,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -57,11 +61,13 @@ public class FormController {
 
 	private final FormService formService;
 	private final ModelMapper modelMapper;
+	private final IamService iamService;
 
 	@Autowired
-	public FormController(FormService formService, ModelMapper modelMapper) {
+	public FormController(FormService formService, ModelMapper modelMapper, IamService iamService) {
 		this.formService = formService;
 		this.modelMapper = modelMapper;
+		this.iamService = iamService;
 	}
 
 	@Operation(summary = "Get all forms")
@@ -94,7 +100,15 @@ public class FormController {
 	}
 
 	@PostMapping("/forms")
-	public ResponseEntity<FormDto> createForm(final @RequestBody @Validated FormDto formDTO) {
+	public ResponseEntity<FormDto> createForm(final @RequestBody @Validated FormDto formDTO,
+											  @AuthenticationPrincipal RegistrarPrincipal principal) {
+		if (formDTO.getIamObject() == null && !iamService.canCreateForm(principal.getId())) {
+			throw new AccessDeniedException("Not allowed to create object!");
+		}
+		if (formDTO.getIamObject() != null && !iamService.isObjectRightHolder(principal.getId(), formDTO.getIamObject())) {
+			throw new AccessDeniedException("Not allowed to create object!");
+		}
+
 		Form form = formService.createForm(convertToEntity(formDTO));
 		return new ResponseEntity<>(convertToDto(form), HttpStatus.CREATED);
 	}
