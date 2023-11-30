@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 public class RegistrarTokenIntrospector extends SpringOpaqueTokenIntrospector implements OpaqueTokenIntrospector {
 
 	private final RoleService roleService;
-	private String userInfoEndpoint;
+	private final String userInfoEndpoint;
 	private final WebClient webClient = WebClient.create();
 	private final ObjectMapper objectMapper = new ObjectMapper();
 

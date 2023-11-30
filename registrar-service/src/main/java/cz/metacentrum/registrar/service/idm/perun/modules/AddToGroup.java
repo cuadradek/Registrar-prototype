@@ -7,7 +7,7 @@ import cz.metacentrum.registrar.service.PrincipalService;
 import cz.metacentrum.registrar.service.SubmissionService;
 import cz.metacentrum.registrar.service.idm.perun.Member;
 import cz.metacentrum.registrar.service.idm.perun.PerunHttp;
-import cz.metacentrum.registrar.service.idm.perun.User;
+import cz.metacentrum.registrar.service.idm.perun.UserHttp;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -41,7 +41,7 @@ public class AddToGroup extends PerunFormModule {
 
 	@Override
 	public void onApprove(SubmittedForm submittedForm, Map<String, String> configOptions) {
-		User user = perunHttp.getUserByIdentifier(principalService.getPrincipal().getId());
+		UserHttp user = perunHttp.getUserByIdentifier(principalService.getPrincipal().getId());
 		Member member = perunHttp.getMemberByUserAndVo(user.getId(), Integer.parseInt(configOptions.get(GROUP)));
 		// TODO: getCurrentUser, getVoByUUID
 		if (submittedForm.getFormType() == Form.FormType.INITIAL) {
@@ -59,7 +59,7 @@ public class AddToGroup extends PerunFormModule {
 	@Override
 	public List<SubmittedForm> onLoad(SubmittedForm submittedForm, Map<String, String> configOptions) {
 		List<SubmittedForm> loadedForms = new ArrayList<>();
-		User user = perunHttp.getUserByIdentifier(principalService.getPrincipal().getId());
+		UserHttp user = perunHttp.getUserByIdentifier(principalService.getPrincipal().getId());
 		Member member = null;
 		if (user == null) {
 			submittedForm.setFormType(Form.FormType.INITIAL);

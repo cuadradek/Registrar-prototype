@@ -5,10 +5,10 @@
 	<parent>
 		<groupId>cz.metacentrum</groupId>
 		<artifactId>registrar</artifactId>
-		<version>1.1-SNAPSHOT</version>
+		<version>1.2-SNAPSHOT</version>
 	</parent>
 	<artifactId>registrar-rest</artifactId>
-	<version>1.1-SNAPSHOT</version>
+	<version>1.2-SNAPSHOT</version>
 	<packaging>war</packaging>
 	<name>registrar-rest</name>
 	<properties>
@@ -37,6 +37,7 @@
 		<dependency>
 			<groupId>org.springdoc</groupId>
 			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+			<version>2.2.0</version>
 		</dependency>
 
 		<!--		needed if we are using NimbusOpaqueTokenIntrospector -->

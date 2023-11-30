@@ -5,7 +5,7 @@ import cz.metacentrum.registrar.persistence.entity.SubmittedForm;
 import cz.metacentrum.registrar.service.PrincipalService;
 import cz.metacentrum.registrar.service.idm.perun.Member;
 import cz.metacentrum.registrar.service.idm.perun.PerunHttp;
-import cz.metacentrum.registrar.service.idm.perun.User;
+import cz.metacentrum.registrar.service.idm.perun.UserHttp;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -33,7 +33,7 @@ public class AddToVo extends PerunFormModule {
 
 	@Override
 	public void onApprove(SubmittedForm submittedForm, Map<String, String> configOptions) {
-		User user = perunHttp.getUserByIdentifier(submittedForm.getSubmission().getSubmitterId());
+		UserHttp user = perunHttp.getUserByIdentifier(submittedForm.getSubmission().getSubmitterId());
 		if (user == null) {
 			//create him
 		}
@@ -50,7 +50,7 @@ public class AddToVo extends PerunFormModule {
 
 	@Override
 	public List<SubmittedForm> onLoad(SubmittedForm submittedForm, Map<String, String> configOptions) {
-		User user = perunHttp.getUserByIdentifier(principalService.getPrincipal().getId());
+		UserHttp user = perunHttp.getUserByIdentifier(principalService.getPrincipal().getId());
 		if (user == null) {
 			submittedForm.setFormType(Form.FormType.INITIAL);
 		} else {

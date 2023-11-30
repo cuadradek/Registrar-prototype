@@ -2,6 +2,7 @@ package cz.metacentrum.registrar.service.idm.perun;
 
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -15,12 +16,16 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 @Component
 public class PerunHttp {
 	public static final String MEMBERS_MANAGER = "membersManager";
 	public static final String USERS_MANAGER = "usersManager";
+	public static final String GROUPS_MANAGER = "groupsManager";
+	public static final String AUTHZ_RESOLVER = "authzResolver";
+	public static final String ATTRIBUTES_MANAGER = "attributesManager";
 
 	@Value("${perun.primary-ext-source}")
 	private String primaryExtSource;
@@ -87,17 +92,90 @@ public class PerunHttp {
 				UUID.fromString("13d64d76-2ca3-4cf8-b1f4-0befdbef69fc"));
 	}
 
-	public User getUserByIdentifier(String userIdentifier) {
+	public UserHttp getUserByIdentifier(String userIdentifier) {
 		String actionUrl = "/json/" + USERS_MANAGER + '/' + "getUserByExtSourceNameAndExtLogin";
 		try {
-			Mono<User> response = client.get()
+			Mono<UserHttp> response = client.get()
 					.uri(uriBuilder -> uriBuilder
 							.path(actionUrl)
 							.queryParam("extLogin", userIdentifier)
 							.queryParam("extSourceName", primaryExtSource)
 							.build())
 					.retrieve()
-					.bodyToMono(User.class);
+					.bodyToMono(UserHttp.class);
+			return response.block();
+		} catch (WebClientRequestException ex) {
+			return null;
+		} catch (Exception ex) {
+			return null;
+		}
+	}
+
+	public Map<String, Map<String, Set<Integer>>> getUserRoles(int userId) {
+		String actionUrl = "/json/" + AUTHZ_RESOLVER + '/' + "getUserRoles";
+		try {
+			Mono<Map<String, Map<String, Set<Integer>>>> response = client.get()
+					.uri(uriBuilder -> uriBuilder
+							.path(actionUrl)
+							.queryParam("userId", userId)
+							.build())
+					.retrieve()
+					.bodyToMono(new ParameterizedTypeReference<>() {});
+			return response.block();
+		} catch (WebClientRequestException ex) {
+			return null;
+		} catch (Exception ex) {
+			return null;
+		}
+	}
+
+	public List<VOHttp> getVosWhereUserIsMember(int userId) {
+		String actionUrl = "/json/" + USERS_MANAGER + '/' + "getVosWhereUserIsMember";
+		try {
+			Mono<List<VOHttp>> response = client.get()
+					.uri(uriBuilder -> uriBuilder
+							.path(actionUrl)
+							.queryParam("userId", userId)
+							.build())
+					.retrieve()
+					.bodyToMono(new ParameterizedTypeReference<>() {});
+			return response.block();
+		} catch (WebClientRequestException ex) {
+			return null;
+		} catch (Exception ex) {
+			return null;
+		}
+	}
+
+	public List<Group> getMemberGroups(int memberId) {
+		String actionUrl = "/json/" + GROUPS_MANAGER + '/' + "getMemberGroups";
+		try {
+			Mono<List<Group>> response = client.get()
+					.uri(uriBuilder -> uriBuilder
+							.path(actionUrl)
+							.queryParam("member", memberId)
+							.build())
+					.retrieve()
+					.bodyToMono(new ParameterizedTypeReference<>() {});
+			return response.block();
+		} catch (WebClientRequestException ex) {
+			return null;
+		} catch (Exception ex) {
+			return null;
+		}
+	}
+
+	public String getAttribute(int userId, String attributeName) {
+		String actionUrl = "/json/" + ATTRIBUTES_MANAGER + '/' + "getAttribute";
+		try {
+			Mono<String> response = client.get()
+					.uri(uriBuilder -> uriBuilder
+							.path(actionUrl)
+							.queryParam("user", userId)
+							.queryParam("attributeName", attributeName)
+							.build())
+					.retrieve()
+					.bodyToMono(String.class);
 			return response.block();
 		} catch (WebClientRequestException ex) {
 			return null;

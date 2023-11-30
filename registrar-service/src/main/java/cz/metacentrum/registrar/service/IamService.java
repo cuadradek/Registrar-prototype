@@ -1,6 +1,7 @@
 package cz.metacentrum.registrar.service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public interface IamService {
@@ -10,4 +11,6 @@ public interface IamService {
 	boolean isObjectRightHolder(String userIdentifier, UUID iamObject);
 	List<String> getUserRoles(String userIdentifier);
 	String getUserAttributeValue(String userIdentifier, String attributeName);
+	boolean userExists(String userIdentifier);
+	List<Identity> getSimilarUsers(Map<String, Object> claims);
 }
