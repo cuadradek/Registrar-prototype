@@ -94,7 +94,7 @@ public class SubmissionServiceImpl implements SubmissionService {
 		return submittedFormRepository.findSubmittedFormsByFormAndFormState(form, state);
 	}
 
-	private void checkFilledItemData(FormItemData itemData, RegistrarPrincipal principal) {
+	private void checkFilledItemData(FormItemData itemData, RegistrarPrincipal principal, Form form) {
 		var formItem = formItemRepository.findById(itemData.getFormItem().getId()).orElseThrow();
 		itemData.setFormItem(formItem);
 
@@ -102,6 +102,11 @@ public class SubmissionServiceImpl implements SubmissionService {
 			throw new IllegalArgumentException(String.format("Form item with id: %d is required but not filled out!", formItem.getId()));
 		}
 		//todo check regex
+
+		if (!formItem.getForm().getId().equals(form.getId())) {
+			throw new IllegalArgumentException(String.format("Form item with id: %d belongs to form with id: %d instead of %d!",
+					formItem.getId(), formItem.getForm().getId(), form.getId()));
+		}
 
 		if (!principal.isAuthenticated()) {
 			itemData.setAssuranceLevel(0);
@@ -127,7 +132,8 @@ public class SubmissionServiceImpl implements SubmissionService {
 		RegistrarPrincipal principal = principalService.getPrincipal();
 		submission.getSubmittedForms().forEach(s -> {
 			s.setFormState(FormState.PENDING_VERIFICATION);
-			s.getFormData().forEach(d -> checkFilledItemData(d, principal));
+			s.getFormData().forEach(d -> checkFilledItemData(d, principal, s.getForm()));
+			checkAllRequiredItemsAreFilled(s);
 		});
 
 		submission.setTimestamp(LocalDateTime.now());
@@ -160,6 +166,22 @@ public class SubmissionServiceImpl implements SubmissionService {
 		}
 		result.addMessage("Successfully submitted"); // todo use this default only if custom form message is missing
 		return result;
+	}
+
+	private void checkAllRequiredItemsAreFilled(SubmittedForm s) {
+		var requiredItemsIds = formItemRepository.getAllByFormAndIsDeleted(s.getForm(), false)
+				.stream()
+				.filter(FormItem::isRequired)
+				.map(FormItem::getId)
+				.collect(Collectors.toList());
+		var filledItemsIds = s.getFormData()
+				.stream()
+				.filter(d -> StringUtils.isEmpty(d.getValue()))
+				.map(d -> d.getFormItem().getId())
+				.collect(Collectors.toList());
+		if (requiredItemsIds.containsAll(filledItemsIds)) {
+			throw new IllegalArgumentException("Missing required items: " + requiredItemsIds.removeAll(filledItemsIds));
+		}
 	}
 
 	@Override
@@ -214,14 +236,14 @@ public class SubmissionServiceImpl implements SubmissionService {
 		return submittedForm;
 	}
 
-	public SubmittedForm rejectSubmittedForm(SubmittedForm submittedForm, List<AssignedFormModule> modules) {
+	private SubmittedForm rejectSubmittedForm(SubmittedForm submittedForm, List<AssignedFormModule> modules) {
 		modules.forEach(assignedModule -> assignedModule.getFormModule().onReject(submittedForm));
 
 		submittedForm.setFormState(FormState.REJECTED);
 		return submittedFormRepository.save(submittedForm);
 	}
 
-	public SubmittedForm requestChanges(SubmittedForm submittedForm) {
+	private SubmittedForm requestChanges(SubmittedForm submittedForm) {
 		submittedForm.setFormState(FormState.CHANGES_REQUESTED);
 		return submittedFormRepository.save(submittedForm);
 	}
