@@ -154,6 +154,12 @@ public class SubmissionServiceImpl implements SubmissionService {
 		Submission saved = submissionRepository.save(submission);
 		SubmissionResult result = new SubmissionResult();
 		result.setSubmission(saved);
+		setRedirections(submission, redirectFlowForms, result);
+		result.addMessage("Successfully submitted"); // todo use this default only if custom form message is missing
+		return result;
+	}
+
+	private void setRedirections(Submission submission, Set<Form> redirectFlowForms, SubmissionResult result) {
 		if (!redirectFlowForms.isEmpty()) {
 			try {
 				Submission redirectSubmission = loadSubmission(redirectFlowForms);
@@ -164,8 +170,11 @@ public class SubmissionServiceImpl implements SubmissionService {
 				result.addMessage(message);
 			}
 		}
-		result.addMessage("Successfully submitted"); // todo use this default only if custom form message is missing
-		return result;
+		submission.getSubmittedForms().stream()
+				.map(SubmittedForm::getRedirectUrl)
+				.filter(StringUtils::isNotEmpty)
+				.findFirst()
+				.ifPresent(result::setRedirectUrl);
 	}
 
 	private void checkAllRequiredItemsAreFilled(SubmittedForm s) {
