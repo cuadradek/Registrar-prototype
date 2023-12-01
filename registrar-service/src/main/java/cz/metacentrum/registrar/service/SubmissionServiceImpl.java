@@ -286,25 +286,6 @@ public class SubmissionServiceImpl implements SubmissionService {
 		);
 	}
 
-	@Override
-	public SubmittedForm rejectSubmittedForm(Long id, String message) {
-		SubmittedForm saved = submittedFormRepository.findById(id).orElseThrow();
-		List<ApprovalGroup> principalsApprovalGroups = getPrincipalsApprovalGroups(saved);
-
-		if (saved.getFormState().canMakeDecision()) {
-			throw new IllegalArgumentException("Form needs to be in of the following states: "
-					+ FormState.DECISION_POSSIBLE_STATES);
-		}
-
-		createApprovals(saved, principalsApprovalGroups, Approval.Decision.REJECTED, message);
-
-		var modules = getModules(saved.getForm());
-		modules.forEach(assignedModule -> assignedModule.getFormModule().onReject(saved));
-
-		saved.setFormState(FormState.REJECTED);
-		return submittedFormRepository.save(saved);
-	}
-
 	private List<AssignedFormModule> getModules(Form form) {
 		return formService.getAssignedModules(form.getId())
 				.stream()
