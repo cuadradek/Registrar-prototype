@@ -134,19 +134,6 @@ public class SubmissionController {
 		return convertToDto(submittedForm);
 	}
 
-	@PutMapping("/submitted-forms/{id}/approve")
-	public SubmittedFormDto approveSubmittedForm(final @PathVariable Long id) {
-		SubmittedForm submittedForm = submissionService.approveSubmittedForm(id);
-		return convertToDto(submittedForm);
-	}
-
-	@PutMapping("/submitted-forms/{id}/reject")
-	public SubmittedFormDto rejectSubmittedForm(final @PathVariable Long id,
-												@RequestParam(required = false) String message) {
-		SubmittedForm submittedForm = submissionService.rejectSubmittedForm(id, message);
-		return convertToDto(submittedForm);
-	}
-
 	private SubmissionDto convertToDto(Submission submission) {
 		SubmissionDto submissionDto = modelMapper.map(submission, SubmissionDto.class);
 		submissionDto.setSubmittedForms(submission.getSubmittedForms().stream()

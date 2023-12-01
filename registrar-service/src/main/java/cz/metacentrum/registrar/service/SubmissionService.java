@@ -24,9 +24,6 @@ public interface SubmissionService {
 
 	SubmittedForm makeApprovalDecision(SubmittedForm submittedForm, Approval.Decision decision, String message);
 
-	SubmittedForm approveSubmittedForm(Long id);
-	SubmittedForm rejectSubmittedForm(Long id, String message);
-
 	Submission loadSubmission(Collection<Form> forms);
 
 	Submission loadSubmission(Form form, @Nullable String redirectUrl);

@@ -248,30 +248,6 @@ public class SubmissionServiceImpl implements SubmissionService {
 		return submittedFormRepository.save(submittedForm);
 	}
 
-	@Override
-	public SubmittedForm approveSubmittedForm(Long id) {
-		SubmittedForm saved = submittedFormRepository.findById(id).orElseThrow();
-		List<ApprovalGroup> principalsApprovalGroups = getPrincipalsApprovalGroups(saved);
-
-		if (saved.getFormState().canMakeDecision()) {
-			throw new IllegalArgumentException("Form needs to be in of the following states: "
-					+ FormState.DECISION_POSSIBLE_STATES);
-		}
-
-		createApprovals(saved, principalsApprovalGroups, Approval.Decision.APPROVED, null);
-
-		var modules = getModules(saved.getForm());
-		modules.forEach(assignedModule -> assignedModule.getFormModule().beforeApprove(saved));
-
-		if (tryToApprove(saved, principalsApprovalGroups)) {
-			saved.setFormState(FormState.APPROVED);
-			modules.forEach(assignedModule -> assignedModule.getFormModule().onApprove(saved, assignedModule.getConfigOptions()));
-			return submittedFormRepository.save(saved);
-		}
-
-		return saved;
-	}
-
 	private List<ApprovalGroup> getPrincipalsApprovalGroups(SubmittedForm saved) {
 		Set<UUID> idmGroups = new HashSet<>();//todo these are from Principal object
 		List<ApprovalGroup> approvalGroups = formService.getApprovalGroups(saved.getForm().getId());
