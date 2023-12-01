@@ -7,6 +7,7 @@ import cz.metacentrum.registrar.persistence.entity.FormState;
 import cz.metacentrum.registrar.persistence.entity.Submission;
 import cz.metacentrum.registrar.persistence.entity.SubmissionResult;
 import cz.metacentrum.registrar.persistence.entity.SubmittedForm;
+import org.springframework.lang.Nullable;
 
 import java.util.Collection;
 import java.util.List;
@@ -28,7 +29,7 @@ public interface SubmissionService {
 
 	Submission loadSubmission(Collection<Form> forms);
 
-	Submission loadSubmission(Form form);
+	Submission loadSubmission(Form form, @Nullable String redirectUrl);
 
 	List<SubmittedForm> loadSubmittedForm(Form form);
 

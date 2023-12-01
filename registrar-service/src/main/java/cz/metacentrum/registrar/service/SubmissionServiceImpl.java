@@ -165,7 +165,7 @@ public class SubmissionServiceImpl implements SubmissionService {
 	@Override
 	@Async
 	public void submitAutoForm(Submission submission, AssignedFlowForm a) {
-		Submission autoSubmission = loadSubmission(a.getFlowForm());
+		Submission autoSubmission = loadSubmission(a.getFlowForm(), null);
 		autoSubmission.setSubmitterId(submission.getSubmitterId());
 		autoSubmission.setSubmitterName(submission.getSubmitterName());
 		autoSubmission.getSubmittedForms().forEach(s -> s.setSubmission(autoSubmission));
@@ -343,8 +343,14 @@ public class SubmissionServiceImpl implements SubmissionService {
 	}
 
 	@Override
-	public Submission loadSubmission(Form form) {
-		return loadSubmission(List.of(form));
+	public Submission loadSubmission(Form form, String redirectUrl) {
+		Submission submission = loadSubmission(List.of(form));
+		submission.getSubmittedForms().stream()
+				.filter(s -> s.getForm().getId().equals(form.getId()))
+				.findFirst()
+				.orElseThrow()
+				.setRedirectUrl(redirectUrl);
+		return submission;
 	}
 
 	@Override

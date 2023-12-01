@@ -37,6 +37,10 @@ public class SubmittedForm {
 	@ManyToOne
 	private Submission submission;
 
+	@Column
+	@Nullable
+	private String redirectUrl;
+
 	@NonNull
 	@ManyToOne
 	@JoinColumn(name = "form_id")

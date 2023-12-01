@@ -63,7 +63,8 @@ public class SubmissionController {
 
 	@GetMapping("/submissions/load")
 	public SubmissionDto loadForm(@RequestParam(required = false) String urlSuffix,
-								  @RequestParam(required = false) Long formId) {
+								  @RequestParam(required = false) Long formId,
+								  @RequestParam(required = false) String redirectUrl) {
 		if (urlSuffix == null && formId == null) {
 			throw new ValidationException("urlSuffix or formId parameter has to be present!");
 		}
@@ -76,7 +77,7 @@ public class SubmissionController {
 			form = formService.getFormById(formId).orElseThrow(() -> new FormNotFoundException(formId));
 		}
 
-		return convertToDto(submissionService.loadSubmission(form));
+		return convertToDto(submissionService.loadSubmission(form, redirectUrl));
 	}
 
 	@GetMapping("/submitted-forms/{id}")
