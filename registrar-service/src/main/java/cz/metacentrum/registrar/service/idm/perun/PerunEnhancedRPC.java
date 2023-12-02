@@ -3,6 +3,7 @@ package cz.metacentrum.registrar.service.idm.perun;
 import cz.metacentrum.perun.openapi.PerunRPC;
 import cz.metacentrum.perun.openapi.model.User;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.lang.Nullable;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Optional;
@@ -16,7 +17,10 @@ public class PerunEnhancedRPC extends PerunRPC {
 		super(perunURL, username, password, restTemplate);
 	}
 
-	public Optional<User> getUserByIdentifier(String userIdentifier) {
+	public Optional<User> getUserByIdentifier(@Nullable String userIdentifier) {
+		if (userIdentifier == null) {
+			return Optional.empty();
+		}
 		try {
 			return Optional.of(super.getUsersManager().getUserByExtSourceNameAndExtLogin(userIdentifier, primaryExtSource));
 		} catch (PerunRuntimeException ex) {

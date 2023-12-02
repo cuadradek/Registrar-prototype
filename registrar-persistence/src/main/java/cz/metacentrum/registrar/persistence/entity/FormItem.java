@@ -65,7 +65,7 @@ public class FormItem {
 
 	@Column
 	@Nullable
-	private String prefilledValue;
+	private String prefilledStaticValue;
 
 	@Column
 	@Nullable

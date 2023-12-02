@@ -131,7 +131,7 @@ public class SubmissionServiceImpl implements SubmissionService {
 	public SubmissionResult createSubmission(Submission submission) {
 		RegistrarPrincipal principal = principalService.getPrincipal();
 		submission.getSubmittedForms().forEach(s -> {
-			s.setFormState(FormState.PENDING_VERIFICATION);
+			s.setFormState(FormState.PENDING_APPROVAL);
 			s.getFormData().forEach(d -> checkFilledItemData(d, principal, s.getForm()));
 			checkAllRequiredItemsAreFilled(s);
 		});
@@ -185,11 +185,12 @@ public class SubmissionServiceImpl implements SubmissionService {
 				.collect(Collectors.toList());
 		var filledItemsIds = s.getFormData()
 				.stream()
-				.filter(d -> StringUtils.isEmpty(d.getValue()))
+				.filter(d -> !StringUtils.isEmpty(d.getValue()))
 				.map(d -> d.getFormItem().getId())
 				.collect(Collectors.toList());
-		if (requiredItemsIds.containsAll(filledItemsIds)) {
-			throw new IllegalArgumentException("Missing required items: " + requiredItemsIds.removeAll(filledItemsIds));
+		if (!filledItemsIds.containsAll(requiredItemsIds)) {
+			requiredItemsIds.removeAll(filledItemsIds);
+			throw new IllegalArgumentException("Missing required items: " + requiredItemsIds);
 		}
 	}
 
@@ -216,7 +217,7 @@ public class SubmissionServiceImpl implements SubmissionService {
 	public SubmittedForm makeApprovalDecision(SubmittedForm submittedForm, Approval.Decision decision, String message) {
 		List<ApprovalGroup> principalsApprovalGroups = getPrincipalsApprovalGroups(submittedForm);
 
-		if (submittedForm.getFormState().canMakeDecision()) {
+		if (!submittedForm.getFormState().canMakeDecision()) {
 			throw new IllegalArgumentException("Form needs to be in of the following states: "
 					+ FormState.DECISION_POSSIBLE_STATES);
 		}
@@ -225,9 +226,9 @@ public class SubmissionServiceImpl implements SubmissionService {
 		var modules = getModules(submittedForm.getForm());
 
 		switch (decision) {
-			case APPROVED: approveForm(submittedForm, modules, principalsApprovalGroups);
-			case REJECTED: rejectSubmittedForm(submittedForm, modules);
-			case CHANGES_REQUESTED: requestChanges(submittedForm);
+			case APPROVED -> approveForm(submittedForm, modules, principalsApprovalGroups);
+			case REJECTED -> rejectSubmittedForm(submittedForm, modules);
+			case CHANGES_REQUESTED -> requestChanges(submittedForm);
 		}
 
 		return submittedForm;
@@ -372,7 +373,7 @@ public class SubmissionServiceImpl implements SubmissionService {
 	private FormItemData prefillValue(FormItem formItem, RegistrarPrincipal principal) {
 		var itemData = new FormItemData(null, formItem, null, null, null, null);
 
-		var staticValue = formItem.getPrefilledValue();
+		var staticValue = formItem.getPrefilledStaticValue();
 
 		if (principal.isAuthenticated()) {
 			if (staticValue != null) {

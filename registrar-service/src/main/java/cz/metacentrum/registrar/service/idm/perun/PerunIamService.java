@@ -72,9 +72,17 @@ public class PerunIamService implements IamService {
 		Optional<User> user = perunRPC.getUserByIdentifier(userIdentifier);
 		if (user.isEmpty()) return null;
 
-		var value = perunRPC.getAttributesManager().getAttribute(attributeName, null, null, user.get().getId(), null, null,
-				null, null, null, null, null).getValue();
-		return value == null ? null : value.toString();
+		try {
+			var value = perunRPC.getAttributesManager().getAttribute(attributeName, null, null, user.get().getId(), null, null,
+					null, null, null, null, null).getValue();
+			return value == null ? null : value.toString();
+		} catch (PerunRuntimeException ex) {
+			if (ex.getName().equals("AttributeNotExistsException")) {
+				return null;
+			} else {
+				throw ex;
+			}
+		}
 	}
 
 	@Override

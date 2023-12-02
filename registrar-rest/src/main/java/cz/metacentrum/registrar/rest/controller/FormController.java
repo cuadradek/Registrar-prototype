@@ -5,6 +5,7 @@ import cz.metacentrum.registrar.persistence.entity.AssignedFlowForm;
 import cz.metacentrum.registrar.persistence.entity.AssignedFormModule;
 import cz.metacentrum.registrar.persistence.entity.Form;
 import cz.metacentrum.registrar.persistence.entity.FormItem;
+import cz.metacentrum.registrar.persistence.entity.FormModule;
 import cz.metacentrum.registrar.rest.controller.dto.AssignedFlowFormDto;
 import cz.metacentrum.registrar.rest.controller.dto.ExceptionResponse;
 import cz.metacentrum.registrar.rest.controller.dto.FormDto;
@@ -23,7 +24,9 @@ import io.swagger.v3.oas.annotations.servers.Server;
 import io.swagger.v3.oas.annotations.servers.ServerVariable;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -62,12 +65,14 @@ public class FormController {
 	private final FormService formService;
 	private final ModelMapper modelMapper;
 	private final IamService iamService;
+	private final ApplicationContext context;
 
 	@Autowired
-	public FormController(FormService formService, ModelMapper modelMapper, IamService iamService) {
+	public FormController(FormService formService, ModelMapper modelMapper, IamService iamService, ApplicationContext context) {
 		this.formService = formService;
 		this.modelMapper = modelMapper;
 		this.iamService = iamService;
+		this.context = context;
 	}
 
 	@Operation(summary = "Get all forms")
@@ -159,7 +164,25 @@ public class FormController {
 	@PutMapping("/forms/{id}/modules")
 	public List<AssignedFormModule> setAssignedModules(final @PathVariable Long id,
 													   final @RequestBody @Validated List<AssignedFormModule> modules) {
+		Form form = formService.getFormById(id).orElseThrow(() -> new FormNotFoundException(id));
+		modules.forEach(m -> {
+			setModule(m);
+			if (!m.getFormModule().hasRightToAddToForm(form, m.getConfigOptions())) {
+				throw new AccessDeniedException("You don't have rights to assign this module: " + m);
+			}
+		});
+
 		return formService.setAssignedModules(id, modules);
+	}
+
+	private AssignedFormModule setModule(AssignedFormModule assignedModule) {
+		try {
+			FormModule formModule = context.getBean(assignedModule.getModuleName(), FormModule.class);
+			assignedModule.setFormModule(formModule);
+			return assignedModule;
+		} catch (BeansException ex) {
+			throw new IllegalArgumentException("Non existing form module: " + assignedModule.getModuleName());
+		}
 	}
 
 	@GetMapping("/forms/{id}/approval-groups")

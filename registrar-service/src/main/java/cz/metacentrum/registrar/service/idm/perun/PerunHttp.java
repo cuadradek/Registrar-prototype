@@ -49,13 +49,13 @@ public class PerunHttp {
 				.build();
 	}
 
-	public Member createMember(int userId, int voId) {
+	public MemberHttp createMember(int userId, int voId) {
 		String actionUrl = "/json/" + MEMBERS_MANAGER + '/' + "createMember";
 		//vo, user
 		Map<String, String> bodyMap = new HashMap();
 		bodyMap.put("vo", String.valueOf(voId));
 		bodyMap.put("user", String.valueOf(userId));
-		Mono<Member> response = client.post()
+		Mono<MemberHttp> response = client.post()
 				.uri(uriBuilder -> uriBuilder
 						.path(actionUrl)
 						.queryParam("vo", voId)
@@ -63,21 +63,21 @@ public class PerunHttp {
 						.build())
 				.body(BodyInserters.fromValue(bodyMap))
 				.retrieve()
-				.bodyToMono(Member.class);
+				.bodyToMono(MemberHttp.class);
 		return response.block();
 	}
 
-	public Member getMemberByUserAndVo(int userId, int voId) {
+	public MemberHttp getMemberByUserAndVo(int userId, int voId) {
 		String actionUrl = "/json/" + MEMBERS_MANAGER + '/' + "getMemberByUser";
 		try {
-			Mono<Member> response = client.get()
+			Mono<MemberHttp> response = client.get()
 					.uri(uriBuilder -> uriBuilder
 							.path(actionUrl)
 							.queryParam("vo", voId)
 							.queryParam("user", userId)
 							.build())
 					.retrieve()
-					.bodyToMono(Member.class);
+					.bodyToMono(MemberHttp.class);
 			return response.block();
 		} catch (WebClientRequestException ex) {
 			return null;

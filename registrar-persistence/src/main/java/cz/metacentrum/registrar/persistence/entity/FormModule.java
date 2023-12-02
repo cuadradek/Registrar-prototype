@@ -10,5 +10,5 @@ public interface FormModule {
 	void onApprove(SubmittedForm submittedForm, Map<String, String> configOptions);
 	void onReject(SubmittedForm submittedForm);
 	List<SubmittedForm> onLoad(SubmittedForm submittedForm, Map<String, String> configOptions);
-	boolean hasRightToAddToForm(SubmittedForm submittedForm, Map<String, String> configOptions);
+	boolean hasRightToAddToForm(Form form, Map<String, String> configOptions);
 }

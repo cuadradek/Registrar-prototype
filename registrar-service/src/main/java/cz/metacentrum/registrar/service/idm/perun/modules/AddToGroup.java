@@ -1,20 +1,22 @@
 package cz.metacentrum.registrar.service.idm.perun.modules;
 
-import cz.metacentrum.perun.openapi.PerunRPC;
+import cz.metacentrum.perun.openapi.model.Group;
+import cz.metacentrum.perun.openapi.model.Member;
+import cz.metacentrum.perun.openapi.model.User;
 import cz.metacentrum.registrar.persistence.entity.Form;
 import cz.metacentrum.registrar.persistence.entity.SubmittedForm;
 import cz.metacentrum.registrar.service.FormService;
 import cz.metacentrum.registrar.service.PrincipalService;
 import cz.metacentrum.registrar.service.SubmissionService;
-import cz.metacentrum.registrar.service.idm.perun.Member;
+import cz.metacentrum.registrar.service.idm.perun.MemberHttp;
 import cz.metacentrum.registrar.service.idm.perun.PerunEnhancedRPC;
 import cz.metacentrum.registrar.service.idm.perun.PerunHttp;
-import cz.metacentrum.registrar.service.idm.perun.UserHttp;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @Component
@@ -43,8 +45,12 @@ public class AddToGroup extends PerunFormModule {
 
 	@Override
 	public void onApprove(SubmittedForm submittedForm, Map<String, String> configOptions) {
-		UserHttp user = perunHttp.getUserByIdentifier(principalService.getPrincipal().getId());
-		Member member = perunHttp.getMemberByUserAndVo(user.getId(), Integer.parseInt(configOptions.get(GROUP)));
+		Optional<User> user = perunRPC.getUserByIdentifier(submittedForm.getSubmission().getSubmitterId());
+		if (user.isEmpty()) {
+
+		}
+		Group group = perunRPC.getGroupsManager().getGroupById(Integer.parseInt(configOptions.get(GROUP)));
+		Member member = perunRPC.getMembersManager().getMemberByUser(group.getVoId(), user.get().getId());
 		// TODO: getCurrentUser, getVoByUUID
 		if (submittedForm.getFormType() == Form.FormType.INITIAL) {
 //			groupsManager.addMember(group, member);
@@ -61,12 +67,12 @@ public class AddToGroup extends PerunFormModule {
 	@Override
 	public List<SubmittedForm> onLoad(SubmittedForm submittedForm, Map<String, String> configOptions) {
 		List<SubmittedForm> loadedForms = new ArrayList<>();
-		UserHttp user = perunHttp.getUserByIdentifier(principalService.getPrincipal().getId());
-		Member member = null;
-		if (user == null) {
+		Optional<User> user = perunRPC.getUserByIdentifier(principalService.getPrincipal().getId());
+		MemberHttp member = null;
+		if (user.isEmpty()) {
 			submittedForm.setFormType(Form.FormType.INITIAL);
 		} else {
-			member = perunHttp.getMemberByUserAndVo(user.getId(), Integer.parseInt(configOptions.get(GROUP)));
+			member = perunHttp.getMemberByUserAndVo(user.get().getId(), Integer.parseInt(configOptions.get(GROUP)));
 			if (member == null) {
 				submittedForm.setFormType(Form.FormType.INITIAL);
 			} else {
@@ -94,7 +100,7 @@ public class AddToGroup extends PerunFormModule {
 	}
 
 	@Override
-	public boolean hasRightToAddToForm(SubmittedForm submittedForm, Map<String, String> configOptions) {
+	public boolean hasRightToAddToForm(Form form, Map<String, String> configOptions) {
 		return false;
 	}
 }
