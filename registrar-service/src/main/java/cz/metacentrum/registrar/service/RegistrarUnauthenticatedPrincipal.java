@@ -31,7 +31,9 @@ public class RegistrarUnauthenticatedPrincipal extends RegistrarPrincipal {
 
 	@Override
 	public String getId() {
-		return null;
+//		return "perunaaa"; //only for local tests
+		return "perun"; //only for local tests
+//		return null;
 	}
 
 	@Override

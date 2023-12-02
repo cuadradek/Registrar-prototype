@@ -1,12 +1,17 @@
 package cz.metacentrum.registrar.service.idm.perun.modules;
 
+import cz.metacentrum.perun.openapi.PerunRPC;
+import cz.metacentrum.perun.openapi.model.User;
 import cz.metacentrum.registrar.persistence.entity.Form;
 import cz.metacentrum.registrar.persistence.entity.SubmittedForm;
 import cz.metacentrum.registrar.service.PrincipalService;
 import cz.metacentrum.registrar.service.idm.perun.Member;
+import cz.metacentrum.registrar.service.idm.perun.PerunEnhancedRPC;
 import cz.metacentrum.registrar.service.idm.perun.PerunHttp;
 import cz.metacentrum.registrar.service.idm.perun.UserHttp;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.List;
 import java.util.Map;
@@ -17,8 +22,8 @@ public class AddToVo extends PerunFormModule {
 	private static final String VO = "VO";
 	private final PrincipalService principalService;
 
-	public AddToVo(PerunHttp perunHttp, PrincipalService principalService) {
-		super(perunHttp);
+	public AddToVo(PerunHttp perunHttp, PerunEnhancedRPC perunRPC, PrincipalService principalService) {
+		super(perunHttp, perunRPC);
 		this.principalService = principalService;
 	}
 

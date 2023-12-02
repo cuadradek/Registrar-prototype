@@ -21,9 +21,10 @@ import java.util.stream.Collectors;
 public class PerunIamService implements IamService {
 
 	private final PerunHttp perunHttp;
-	private final PerunRPC perunRPC;
+	private final PerunEnhancedRPC perunRPC;
+//	private final PerunRPC perunRPC;
 
-	public PerunIamService(PerunHttp perunHttp, PerunRPC perunRPC) {
+	public PerunIamService(PerunHttp perunHttp, PerunEnhancedRPC perunRPC) {
 		this.perunHttp = perunHttp;
 		this.perunRPC = perunRPC;
 	}
@@ -31,16 +32,8 @@ public class PerunIamService implements IamService {
 	@Value("${perun.primary-ext-source}")
 	private String primaryExtSource;
 
-	private User getUserByIdentifier(String userIdentifier) {
-		try {
-			return perunRPC.getUsersManager().getUserByExtSourceNameAndExtLogin(userIdentifier, primaryExtSource);
-		} catch (HttpClientErrorException ex) {
-			if (ex.getStatusCode() == HttpStatus.BAD_REQUEST) {
-				return null;
-			} else {
-				throw ex;
-			}
-		}
+	public User getUserByIdentifier(String userIdentifier) {
+		return perunRPC.getUserByIdentifier(userIdentifier);
 	}
 
 	@Override

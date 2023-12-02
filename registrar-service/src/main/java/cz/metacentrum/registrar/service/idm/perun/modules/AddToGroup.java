@@ -1,11 +1,13 @@
 package cz.metacentrum.registrar.service.idm.perun.modules;
 
+import cz.metacentrum.perun.openapi.PerunRPC;
 import cz.metacentrum.registrar.persistence.entity.Form;
 import cz.metacentrum.registrar.persistence.entity.SubmittedForm;
 import cz.metacentrum.registrar.service.FormService;
 import cz.metacentrum.registrar.service.PrincipalService;
 import cz.metacentrum.registrar.service.SubmissionService;
 import cz.metacentrum.registrar.service.idm.perun.Member;
+import cz.metacentrum.registrar.service.idm.perun.PerunEnhancedRPC;
 import cz.metacentrum.registrar.service.idm.perun.PerunHttp;
 import cz.metacentrum.registrar.service.idm.perun.UserHttp;
 import org.springframework.stereotype.Component;
@@ -23,8 +25,8 @@ public class AddToGroup extends PerunFormModule {
 	private final SubmissionService submissionService;
 	private final PrincipalService principalService;
 
-	public AddToGroup(PerunHttp perunHttp, FormService formService, SubmissionService submissionService, PrincipalService principalService) {
-		super(perunHttp);
+	public AddToGroup(PerunHttp perunHttp, PerunEnhancedRPC perunRPC, FormService formService, SubmissionService submissionService, PrincipalService principalService) {
+		super(perunHttp, perunRPC);
 		this.formService = formService;
 		this.submissionService = submissionService;
 		this.principalService = principalService;

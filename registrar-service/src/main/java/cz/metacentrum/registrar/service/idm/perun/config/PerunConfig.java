@@ -3,6 +3,7 @@ package cz.metacentrum.registrar.service.idm.perun.config;
 import cz.metacentrum.perun.openapi.PerunRPC;
 import cz.metacentrum.perun.openapi.UsersManagerApi;
 import cz.metacentrum.perun.openapi.invoker.ApiClient;
+import cz.metacentrum.registrar.service.idm.perun.PerunEnhancedRPC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,8 +33,12 @@ public class PerunConfig {
 		return new UsersManagerApi(apiClient());
 	}
 
+//	@Bean
+//	public PerunRPC PerunRPC() {
+//		return new PerunRPC(perunUrl, perunUser, perunPassword, new RestTemplate());
+//	}
 	@Bean
-	public PerunRPC PerunRPC() {
-		return new PerunRPC(perunUrl, perunUser, perunPassword, new RestTemplate());
+	public PerunEnhancedRPC PerunRPC() {
+		return new PerunEnhancedRPC(perunUrl, perunUser, perunPassword, new RestTemplate());
 	}
 }
