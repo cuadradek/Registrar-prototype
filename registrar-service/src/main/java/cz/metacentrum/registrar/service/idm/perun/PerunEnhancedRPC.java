@@ -3,9 +3,9 @@ package cz.metacentrum.registrar.service.idm.perun;
 import cz.metacentrum.perun.openapi.PerunRPC;
 import cz.metacentrum.perun.openapi.model.User;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+
+import java.util.Optional;
 
 public class PerunEnhancedRPC extends PerunRPC {
 
@@ -16,12 +16,12 @@ public class PerunEnhancedRPC extends PerunRPC {
 		super(perunURL, username, password, restTemplate);
 	}
 
-	public User getUserByIdentifier(String userIdentifier) {
+	public Optional<User> getUserByIdentifier(String userIdentifier) {
 		try {
-			return super.getUsersManager().getUserByExtSourceNameAndExtLogin(userIdentifier, primaryExtSource);
-		} catch (HttpClientErrorException ex) {
-			if (ex.getStatusCode() == HttpStatus.BAD_REQUEST) {
-				return null;
+			return Optional.of(super.getUsersManager().getUserByExtSourceNameAndExtLogin(userIdentifier, primaryExtSource));
+		} catch (PerunRuntimeException ex) {
+			if (ex.getName().equals("UserExtSourceNotExistsException")) {
+				return Optional.empty();
 			} else {
 				throw ex;
 			}
