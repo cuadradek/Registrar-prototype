@@ -49,7 +49,9 @@ public class AddToVo extends PerunFormModule {
 				var input = new InputCreateMemberForCandidate();
 				input.setVo(Integer.parseInt(configOptions.get(VO)));
 				input.setCandidate(getCandidate(submittedForm));
-				perunRPC.getMembersManager().createMemberForCandidate(input);
+				Member member = perunRPC.getMembersManager().createMemberForCandidate(input);
+				// TODO: now that the user is created in IAM, his submission need to be marked with his new identifier
+				//  member.getUserId();
 			} else {
 				var input = new InputCreateMemberForUser();
 				input.setUser(user.get().getId());
