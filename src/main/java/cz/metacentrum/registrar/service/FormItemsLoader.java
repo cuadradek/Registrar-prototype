@@ -7,6 +7,7 @@ import cz.metacentrum.registrar.model.FormItem;
 import cz.metacentrum.registrar.service.iam.FormItemModule;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
@@ -22,7 +23,7 @@ import java.util.Map;
 @Slf4j
 public class FormItemsLoader {
 
-	@Value("${registrar.idm.form-items.config}")
+	@Value("${registrar.idm.form-items.config:}")
 	private String configPath;
 
 	private static final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
@@ -30,6 +31,11 @@ public class FormItemsLoader {
 
 	@PostConstruct
 	private void loadFormModules() throws IOException {
+		if (StringUtils.isEmpty(configPath)) {
+			formItemModules = new HashMap<>();
+			log.warn("No IAM form item modules were loaded, because 'registrar.idm.form-items.config' is not configured!");
+			return;
+		}
 		TypeReference<HashMap<String,FormItemModule>> typeRef
 				= new TypeReference<>() {};
 		try {
