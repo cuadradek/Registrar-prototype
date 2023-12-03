@@ -22,6 +22,8 @@ public interface SubmissionService {
 
 	void submitAutoForm(Submission submission, AssignedFlowForm a);
 
+	void consolidateSubmissions(String submitterId, String originalIdentityIdentifier, String originalIdentityIssuer);
+
 	SubmittedForm createApproval(Approval approval);
 
 	Submission loadSubmission(Collection<Form> forms);

@@ -9,4 +9,7 @@ import java.util.List;
 @Repository
 public interface SubmissionRepository extends JpaRepository<Submission, Long> {
 	List<Submission> getAllBySubmitterId(String submitterId);
+	List<Submission> getAllByOriginalIdentityIdentifierAndOriginalIdentityIssuer(
+			String originalIdentityIdentifier,
+			String originalIdentityIssuer);
 }

@@ -11,6 +11,7 @@ import cz.metacentrum.registrar.model.Form;
 import cz.metacentrum.registrar.model.SubmittedForm;
 import cz.metacentrum.registrar.security.PrincipalService;
 import cz.metacentrum.registrar.security.RegistrarPrincipal;
+import cz.metacentrum.registrar.service.SubmissionService;
 import cz.metacentrum.registrar.service.iam.perun.client.PerunEnhancedRPC;
 import cz.metacentrum.registrar.service.iam.perun.client.PerunRuntimeException;
 import cz.metacentrum.registrar.service.iam.perun.client.PerunHttp;
@@ -25,10 +26,12 @@ public class AddToVo extends PerunFormModule {
 
 	private static final String VO = "VO";
 	private final PrincipalService principalService;
+	private final SubmissionService submissionService;
 
-	public AddToVo(PerunHttp perunHttp, PerunEnhancedRPC perunRPC, PrincipalService principalService) {
+	public AddToVo(PerunHttp perunHttp, PerunEnhancedRPC perunRPC, PrincipalService principalService, SubmissionService submissionService) {
 		super(perunHttp, perunRPC);
 		this.principalService = principalService;
+		this.submissionService = submissionService;
 	}
 
 	@Override
@@ -51,7 +54,10 @@ public class AddToVo extends PerunFormModule {
 				input.setCandidate(getCandidate(submittedForm));
 				Member member = perunRPC.getMembersManager().createMemberForCandidate(input);
 				// TODO: now that the user is created in IAM, his submission need to be marked with his new identifier
-				//  member.getUserId();
+				submissionService.consolidateSubmissions(
+						member.getId().toString(), // TODO: change for his actual new identifier
+						submittedForm.getSubmission().getOriginalIdentityIdentifier(),
+						submittedForm.getSubmission().getOriginalIdentityIssuer());
 			} else {
 				var input = new InputCreateMemberForUser();
 				input.setUser(user.get().getId());
@@ -71,7 +77,7 @@ public class AddToVo extends PerunFormModule {
 		candidate.setLastName("TODOsecond");
 		if (submittedForm.getSubmission().getSubmitterName() != null) {
 			var ues = new UserExtSource();
-			ues.setLoa(submittedForm.getSubmission().getIdentitySourceLoa());
+			ues.setLoa(submittedForm.getSubmission().getOriginalIdentityLoa());
 			ues.setLogin(submittedForm.getSubmission().getSubmitterName());
 			var es = new ExtSource();
 //		es.setName(principalService.getPrincipal().getIssuer().toString());
@@ -96,7 +102,6 @@ public class AddToVo extends PerunFormModule {
 		} else {
 			try {
 				Member member = perunRPC.getMembersManager().getMemberByUser(Integer.parseInt(configOptions.get(VO)), user.get().getId());
-				// check this call to see if he can EXTEND
 				if (!perunRPC.getMembersManager().canExtendMembership(member.getId())) {
 					return List.of();
 				}

@@ -29,5 +29,7 @@ public class SubmittedFormSimpleDto {
 
 	private String submissionSubmitterId;
 	private String submissionSubmitterName;
+	private String submissionOriginalIdentityIdentifier;
+	private String submissionOriginalIdentityIssuer;
 	private LocalDateTime submissionTimestamp;
 }

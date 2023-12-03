@@ -9,6 +9,7 @@ import org.springframework.lang.Nullable;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @Data
 @AllArgsConstructor
@@ -22,15 +23,22 @@ public class SubmissionDto {
 	private List<SubmittedFormDto> submittedForms;
 
 	@Nullable
-	private String identitySourceName;
-
-	private int identitySourceLoa;
-
-	@Nullable
 	private String submitterId;
 
 	@Nullable
 	private String submitterName;
+
+	@Nullable
+	private Integer originalIdentityLoa;
+
+	@Nullable
+	private String originalIdentityIdentifier;
+
+	@Nullable
+	private String originalIdentityIssuer;
+
+	@Nullable
+	private Map<String, String> identityAttributes;
 
 	@Nullable
 	private LocalDateTime timestamp;

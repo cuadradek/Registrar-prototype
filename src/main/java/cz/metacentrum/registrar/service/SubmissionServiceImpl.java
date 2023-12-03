@@ -35,6 +35,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -137,9 +138,7 @@ public class SubmissionServiceImpl implements SubmissionService {
 			checkAllRequiredItemsAreFilled(s);
 		});
 
-		submission.setTimestamp(LocalDateTime.now());
-		submission.setSubmitterId(principal.getId());
-		submission.setSubmitterName(principal.getName());
+		setSubmissionMetadata(submission, principal);
 
 		var flowForms = getAssignedFlowForms(submission);
 		var autoFlowForms = flowForms.stream()
@@ -158,6 +157,28 @@ public class SubmissionServiceImpl implements SubmissionService {
 		setRedirections(submission, redirectFlowForms, result);
 		result.addMessage("Successfully submitted"); // todo use this default only if custom form message is missing
 		return result;
+	}
+
+	private void setSubmissionMetadata(Submission submission, RegistrarPrincipal principal) {
+		submission.setTimestamp(LocalDateTime.now());
+		if (!principal.isAuthenticated()) {
+			submission.setOriginalIdentityLoa(0);
+			return;
+		}
+
+		if (iamService.userExists(principal.getId())) {
+			submission.setSubmitterId(principal.getId());
+			//todo set original identity identifier by one of the additional user identifiers
+		} else {
+			submission.setOriginalIdentityIdentifier(principal.getId());
+		}
+
+		submission.setSubmitterName(principal.getName());
+		submission.setOriginalIdentityIssuer(principal.getClaimAsString("target_issuer"));
+		submission.setOriginalIdentityLoa(1);
+		submission.setIdentityAttributes(principal.getAttributes().entrySet().stream()
+				.filter(e -> e.getValue() != null)
+				.collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toString())));
 	}
 
 	private void setRedirections(Submission submission, Set<Form> redirectFlowForms, SubmissionResult result) {
@@ -212,6 +233,14 @@ public class SubmissionServiceImpl implements SubmissionService {
 						.stream()
 						.filter(f -> f.getIfMainFlowType().contains(s.getFormType())))
 				.collect(Collectors.toList());
+	}
+
+	@Override
+	public void consolidateSubmissions(String submitterId, String originalIdentityIdentifier, String originalIdentityIssuer) {
+		var submissions = submissionRepository.getAllByOriginalIdentityIdentifierAndOriginalIdentityIssuer(
+				originalIdentityIdentifier, originalIdentityIssuer);
+		submissions.forEach(s -> s.setSubmitterId(submitterId));
+		submissionRepository.saveAll(submissions);
 	}
 
 	@Override
