@@ -9,7 +9,6 @@ import cz.metacentrum.registrar.model.FormItem;
 import cz.metacentrum.registrar.model.FormItemData;
 import cz.metacentrum.registrar.security.PrincipalService;
 import cz.metacentrum.registrar.security.RegistrarPrincipal;
-import cz.metacentrum.registrar.service.iam.FormModule;
 import cz.metacentrum.registrar.model.FormState;
 import cz.metacentrum.registrar.model.Submission;
 import cz.metacentrum.registrar.model.SubmissionResult;
@@ -21,7 +20,6 @@ import cz.metacentrum.registrar.repository.SubmittedFormRepository;
 import cz.metacentrum.registrar.service.iam.IamService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
@@ -226,7 +224,7 @@ public class SubmissionServiceImpl implements SubmissionService {
 		}
 
 		createApprovals(submittedForm, principalsApprovalGroups, Approval.Decision.APPROVED, message);
-		var modules = getModules(submittedForm.getForm());
+		var modules = formService.getAssignedModules(submittedForm.getForm().getId());
 
 		switch (decision) {
 			case APPROVED -> approveForm(submittedForm, modules, principalsApprovalGroups);
@@ -299,24 +297,6 @@ public class SubmissionServiceImpl implements SubmissionService {
 		);
 	}
 
-	private List<AssignedFormModule> getModules(Form form) {
-		return formService.getAssignedModules(form.getId())
-				.stream()
-				.sorted()
-				.map(this::setModule)
-				.toList();
-	}
-
-	private AssignedFormModule setModule(AssignedFormModule assignedModule) {
-		try {
-			FormModule formModule = context.getBean(assignedModule.getModuleName(), FormModule.class);
-			assignedModule.setFormModule(formModule);
-			return assignedModule;
-		} catch (BeansException ex) {
-			throw new IllegalArgumentException("Non existing form module: " + assignedModule.getModuleName());
-		}
-	}
-
 	@Override
 	public Submission loadSubmission(Collection<Form> forms) {
 		List<SubmittedForm> submittedForms = forms.stream()
@@ -357,7 +337,7 @@ public class SubmissionServiceImpl implements SubmissionService {
 		}
 
 		submittedForm.setFormType(Form.FormType.INITIAL);
-		var modules = getModules(form);
+		var modules = formService.getAssignedModules(form.getId());
 		modules.forEach(m -> m.getFormModule().onLoad(submittedForm, m.getConfigOptions()));
 
 		List<FormItem> items = formService.getFormItems(form.getId());

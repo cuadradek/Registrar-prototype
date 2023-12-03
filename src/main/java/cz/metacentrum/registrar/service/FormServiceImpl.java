@@ -11,7 +11,10 @@ import cz.metacentrum.registrar.repository.FlowFormRepository;
 import cz.metacentrum.registrar.repository.FormItemRepository;
 import cz.metacentrum.registrar.repository.FormModuleRepository;
 import cz.metacentrum.registrar.repository.FormRepository;
+import cz.metacentrum.registrar.service.iam.FormModule;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,16 +36,18 @@ public class FormServiceImpl implements FormService {
 	private final FormItemsLoader formItemsLoader;
 	private final FormModuleRepository formModulesRepository;
 	private final ApprovalGroupRepository approvalGroupRepository;
+	private final ApplicationContext context;
 
 	@Autowired
 	public FormServiceImpl(FormRepository formRepository, FormItemRepository formItemRepository, FlowFormRepository flowFormRepository,
-						   FormItemsLoader formItemsLoader, FormModuleRepository formModulesRepository, ApprovalGroupRepository approvalGroupRepository) {
+						   FormItemsLoader formItemsLoader, FormModuleRepository formModulesRepository, ApprovalGroupRepository approvalGroupRepository, ApplicationContext context) {
 		this.formRepository = formRepository;
 		this.formItemRepository = formItemRepository;
 		this.flowFormRepository = flowFormRepository;
 		this.formItemsLoader = formItemsLoader;
 		this.formModulesRepository = formModulesRepository;
 		this.approvalGroupRepository = approvalGroupRepository;
+		this.context = context;
 	}
 
 	@Override
@@ -163,7 +168,20 @@ public class FormServiceImpl implements FormService {
 	@Override
 	public List<AssignedFormModule> getAssignedModules(Long formId) {
 		Form form = formRepository.getReferenceById(formId);
-		return formModulesRepository.getAllByForm(form);
+		return formModulesRepository.getAllByForm(form).stream()
+				.sorted()
+				.map(this::setModule)
+				.toList();
+	}
+
+	private AssignedFormModule setModule(AssignedFormModule assignedModule) {
+		try {
+			FormModule formModule = context.getBean(assignedModule.getModuleName(), FormModule.class);
+			assignedModule.setFormModule(formModule);
+			return assignedModule;
+		} catch (BeansException ex) {
+			throw new IllegalArgumentException("Non existing form module: " + assignedModule.getModuleName());
+		}
 	}
 
 	@Override
