@@ -215,22 +215,23 @@ public class SubmissionServiceImpl implements SubmissionService {
 	}
 
 	@Override
-	public SubmittedForm makeApprovalDecision(SubmittedForm submittedForm, Approval.Decision decision, String message) {
+	public SubmittedForm createApproval(Approval approval) {
+		SubmittedForm submittedForm = approval.getSubmittedForm();
 		List<ApprovalGroup> principalsApprovalGroups = getPrincipalsApprovalGroups(submittedForm);
 
-		if (!submittedForm.getFormState().canMakeDecision()) {
+		if (!approval.getSubmittedForm().getFormState().canMakeDecision()) {
 			throw new IllegalArgumentException("Form needs to be in of the following states: "
 					+ FormState.DECISION_POSSIBLE_STATES);
 		}
 
-		createApprovals(submittedForm, principalsApprovalGroups, Approval.Decision.APPROVED, message);
+		createApprovals(principalsApprovalGroups, approval);
 		var modules = formService.getAssignedModules(submittedForm.getForm().getId());
 
-		switch (decision) {
+		submittedForm = switch (approval.getDecision()) {
 			case APPROVED -> approveForm(submittedForm, modules, principalsApprovalGroups);
 			case REJECTED -> rejectSubmittedForm(submittedForm, modules);
 			case CHANGES_REQUESTED -> requestChanges(submittedForm);
-		}
+		};
 
 		return submittedForm;
 	}
@@ -284,16 +285,19 @@ public class SubmissionServiceImpl implements SubmissionService {
 		return lastApprovalGroup.getMinApprovals() <= approvalsCount;
 	}
 
-	private void createApprovals(SubmittedForm saved, List<ApprovalGroup> approvalGroups, Approval.Decision decision, @Nullable String message) {
+	private void createApprovals(List<ApprovalGroup> approvalGroups, Approval approval) {
 		RegistrarPrincipal principal = principalService.getPrincipal();
 		approvalGroups.forEach(approvalGroup -> {
-			if (approvalGroup.isMfaRequired() && !principal.isMfa()) {
-				throw new IllegalArgumentException("You need to be authenticated using multi-factor authentication to approve or reject this form!");
-			}
-			Approval approval = new Approval(null, approvalGroup.getLevel(), principal.isMfa(), saved, decision,
-					principal.getId(), principal.getName(), LocalDateTime.now(), message);
-			approvalRepository.save(approval);
-			}
+					if (approvalGroup.isMfaRequired() && !principal.isMfa()) {
+						throw new IllegalArgumentException("You need to be authenticated using multi-factor authentication to approve or reject this form!");
+					}
+					approval.setLevel(approvalGroup.getLevel());
+					approval.setMfa(principal.isMfa());
+					approval.setApproverId(principal.getId());
+					approval.setApproverName(principal.getName());
+					approval.setTimestamp(LocalDateTime.now());
+					approvalRepository.save(approval);
+				}
 		);
 	}
 

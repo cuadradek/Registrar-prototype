@@ -1,5 +1,6 @@
 package cz.metacentrum.registrar.controller;
 
+import cz.metacentrum.registrar.model.Approval;
 import cz.metacentrum.registrar.model.Form;
 import cz.metacentrum.registrar.model.FormItem;
 import cz.metacentrum.registrar.model.FormItemData;
@@ -125,10 +126,12 @@ public class SubmissionController {
 
 	@PostMapping("/submitted-forms/approval")
 	public SubmittedFormDto makeApprovalDecision(final @RequestBody CreateApprovalDto approvalDto) {
+		Approval approval = modelMapper.map(approvalDto, Approval.class);
 		SubmittedForm submittedForm = submissionService.findSubmittedFormById(approvalDto.getSubmittedFormId())
 				.orElseThrow(() -> new FormNotFoundException(approvalDto.getSubmittedFormId()));
+		approval.setSubmittedForm(submittedForm);
 
-		submittedForm = submissionService.makeApprovalDecision(submittedForm, approvalDto.getDecision(), approvalDto.getMessage());
+		submittedForm = submissionService.createApproval(approval);
 		return convertToDto(submittedForm);
 	}
 

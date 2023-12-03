@@ -22,7 +22,7 @@ public interface SubmissionService {
 
 	void submitAutoForm(Submission submission, AssignedFlowForm a);
 
-	SubmittedForm makeApprovalDecision(SubmittedForm submittedForm, Approval.Decision decision, String message);
+	SubmittedForm createApproval(Approval approval);
 
 	Submission loadSubmission(Collection<Form> forms);
 
