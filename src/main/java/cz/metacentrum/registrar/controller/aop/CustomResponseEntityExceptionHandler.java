@@ -1,7 +1,7 @@
-package cz.metacentrum.registrar.controller.advice;
+package cz.metacentrum.registrar.controller.aop;
 
-import cz.metacentrum.registrar.controller.dto.ExceptionResponse;
-import cz.metacentrum.registrar.controller.exception.ValidationException;
+import cz.metacentrum.registrar.dto.ExceptionResponse;
+import cz.metacentrum.registrar.exception.ValidationException;
 import cz.metacentrum.registrar.exception.FormNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -1,4 +1,4 @@
-package cz.metacentrum.registrar.controller.dto;
+package cz.metacentrum.registrar.dto;
 
 import lombok.Data;
 import org.springframework.lang.Nullable;

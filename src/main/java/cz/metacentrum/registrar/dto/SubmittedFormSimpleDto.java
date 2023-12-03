@@ -1,45 +1,33 @@
-package cz.metacentrum.registrar.controller.dto;
+package cz.metacentrum.registrar.dto;
 
 import cz.metacentrum.registrar.model.AssignedFlowForm;
 import cz.metacentrum.registrar.model.Form;
 import cz.metacentrum.registrar.model.FormState;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.lang.Nullable;
 
-import java.util.List;
+import java.time.LocalDateTime;
 
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class SubmittedFormDto {
+public class SubmittedFormSimpleDto {
 
-	@Nullable
 	private Long id;
 
-	@NotNull
-	private int stepOrder;
-
-	@NotNull
 	private Long formId;
 
-	@NotNull
-	private Long submissionId;
+	private String formName;
 
-	@Nullable
 	private Form.FormType formType;
 
-	@Nullable
 	private FormState formState;
 
-	private List<FormItemDataDto> formData;
-
-	@Nullable
 	private AssignedFlowForm.FlowType flowType;
 
-	@Nullable
-	private String redirectUrl;
+	private String submissionSubmitterId;
+	private String submissionSubmitterName;
+	private LocalDateTime submissionTimestamp;
 }

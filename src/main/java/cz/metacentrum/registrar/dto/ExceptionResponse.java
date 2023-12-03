@@ -1,4 +1,4 @@
-package cz.metacentrum.registrar.controller.dto;
+package cz.metacentrum.registrar.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
