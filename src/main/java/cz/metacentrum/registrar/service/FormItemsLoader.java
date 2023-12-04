@@ -33,7 +33,7 @@ public class FormItemsLoader {
 	private void loadFormModules() throws IOException {
 		if (StringUtils.isEmpty(configPath)) {
 			formItemModules = new HashMap<>();
-			log.warn("No IAM form item modules were loaded, because 'registrar.idm.form-items.config' is not configured!");
+			log.warn("No additional IAM form item modules were loaded, because 'registrar.idm.form-items.config' is not configured!");
 			return;
 		}
 		TypeReference<HashMap<String,FormItemModule>> typeRef
@@ -41,7 +41,7 @@ public class FormItemsLoader {
 		try {
 			formItemModules = mapper.readValue(new File(configPath), typeRef);
 		} catch (IOException e) {
-			log.error("Error while loading additional form modules", e);
+			log.error("Error while loading additional IAM form item modules", e);
 			throw e;
 		}
 	}
@@ -58,11 +58,15 @@ public class FormItemsLoader {
 		}
 		nullOrContains(itemModule.getIamSourceAttributes(), item.getIamSourceAttribute());
 		nullOrContains(itemModule.getSourceIdentityAttributes(), item.getSourceIdentityAttribute());
+		nullOrContains(itemModule.getPrefilledStaticValue(), item.getPrefilledStaticValue());
 		nullOrContains(itemModule.getItemTypes(), item.getType());
 		nullOrContains(itemModule.getUpdatable(), item.isUpdatable());
 		nullOrContains(itemModule.getRegex(), item.getRegex());
 		nullOrContains(itemModule.getDisabled(), item.getDisabled());
 		nullOrContains(itemModule.getHidden(), item.getHidden());
+		if (itemModule.getLabel() != null) {
+			item.getTexts().forEach(text ->	nullOrContains(itemModule.getLabel().get(text.getLocale()), text.getLabel()));
+		}
 	}
 
 	private <V> void nullOrContains(@Nullable Collection<V> collection, @Nullable V value) {

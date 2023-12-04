@@ -30,18 +30,4 @@ public class FormItemModule {
 	private List<String> regex;
 	private List<FormItem.Disabled> disabled;
 	private List<FormItem.Hidden> hidden;
-
-//	TODO labels
-//  label:
-//    - en:
-//      - Login
-//      - login
-//      - Username
-//  labelRegex:
-//    - en: /login/i
-//  includePolicy:
-//    - usernamePolicy
-//  help: any
-//  error: any
-
 }
