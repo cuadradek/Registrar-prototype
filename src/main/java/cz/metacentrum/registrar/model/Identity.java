@@ -2,8 +2,6 @@ package cz.metacentrum.registrar.model;
 
 import lombok.Data;
 
-import java.util.Map;
-
 @Data
 public class Identity {
 
@@ -16,5 +14,5 @@ public class Identity {
 	private String name;
 	private String organization;
 	private String email;
-	private Map<String, IdentityType> identities;
+	private IdentityType type;
 }
