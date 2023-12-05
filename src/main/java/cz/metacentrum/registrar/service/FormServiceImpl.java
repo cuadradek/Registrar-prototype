@@ -33,18 +33,18 @@ public class FormServiceImpl implements FormService {
 	private final FormRepository formRepository;
 	private final FormItemRepository formItemRepository;
 	private final FlowFormRepository flowFormRepository;
-	private final FormItemsLoader formItemsLoader;
+	private final IAMFormItemsLoader iamFormItemsLoader;
 	private final FormModuleRepository formModulesRepository;
 	private final ApprovalGroupRepository approvalGroupRepository;
 	private final ApplicationContext context;
 
 	@Autowired
 	public FormServiceImpl(FormRepository formRepository, FormItemRepository formItemRepository, FlowFormRepository flowFormRepository,
-						   FormItemsLoader formItemsLoader, FormModuleRepository formModulesRepository, ApprovalGroupRepository approvalGroupRepository, ApplicationContext context) {
+						   IAMFormItemsLoader iamFormItemsLoader, FormModuleRepository formModulesRepository, ApprovalGroupRepository approvalGroupRepository, ApplicationContext context) {
 		this.formRepository = formRepository;
 		this.formItemRepository = formItemRepository;
 		this.flowFormRepository = flowFormRepository;
-		this.formItemsLoader = formItemsLoader;
+		this.iamFormItemsLoader = iamFormItemsLoader;
 		this.formModulesRepository = formModulesRepository;
 		this.approvalGroupRepository = approvalGroupRepository;
 		this.context = context;
@@ -109,12 +109,12 @@ public class FormServiceImpl implements FormService {
 		Form form = getFormById(formId).orElseThrow(() -> new FormNotFoundException(formId));
 		var existingItemsIds = getFormItems(formId).stream().map(FormItem::getId).collect(Collectors.toSet());
 
-		formItems.forEach(formItem -> {
-			if (formItem.getId() != null && !existingItemsIds.contains(formItem.getId())) {
-				throw new IllegalArgumentException("Cannot change form item from different form!");
+		formItems.forEach(item -> {
+			if (item.getId() != null && !existingItemsIds.contains(item.getId())) {
+				throw new IllegalArgumentException("Cannot change form items from another form!");
 			}
-			formItemsLoader.validateItem(formItem);
-			formItem.setForm(form);
+			iamFormItemsLoader.validateItem(item);
+			item.setForm(form);
 		});
 
 		//possibly hard delete formItems marked as deleted if such formItem is not used in any submitted form

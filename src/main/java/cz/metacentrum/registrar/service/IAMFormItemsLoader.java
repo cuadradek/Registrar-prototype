@@ -21,7 +21,7 @@ import java.util.Map;
 
 @Service
 @Slf4j
-public class FormItemsLoader {
+public class IAMFormItemsLoader {
 
 	@Value("${registrar.idm.form-items.config:}")
 	private String configPath;
