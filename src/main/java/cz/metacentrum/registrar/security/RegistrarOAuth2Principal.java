@@ -7,8 +7,6 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
 
 /**
  * Check OAuth2IntrospectionAuthenticatedPrincipal and DefaultOAuth2AuthenticatedPrincipal
@@ -17,9 +15,6 @@ import java.util.UUID;
 public class RegistrarOAuth2Principal extends RegistrarPrincipal {
 	// DefaultOAuth2AuthenticatedPrincipal by default
 	private final OAuth2AuthenticatedPrincipal delegate;
-	private Set<UUID> idmGroups;
-	private Set<Long> formManager;
-	private Set<Long> formApprover;
 
 	public RegistrarOAuth2Principal(Map<String, Object> attributes, Collection<GrantedAuthority> authorities) {
 		this.delegate = new DefaultOAuth2AuthenticatedPrincipal(attributes, authorities);

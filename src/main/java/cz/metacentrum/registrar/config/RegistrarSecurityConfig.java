@@ -7,10 +7,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
-import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
-import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
-import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -39,50 +35,19 @@ public class RegistrarSecurityConfig {
 	private String userInfoEndpoint;
 
 	@Bean
-	public RoleHierarchy roleHierarchy() {
-		var hierarchy = new RoleHierarchyImpl();
-		hierarchy.setHierarchy("ROLE_ADMIN > ROLE_USER\n" +
-				"ROLE_USER > ROLE_GUEST");
-		return hierarchy;
-	}
-
-	@Bean
-	public MethodSecurityExpressionHandler createExpressionHandler(RoleHierarchy roleHierarchy) {
-		var expressionHandler = new DefaultMethodSecurityExpressionHandler();
-		expressionHandler.setRoleHierarchy(roleHierarchy);
-//		expressionHandler.setPermissionEvaluator(new RegistrarPermissionEvaluator());
-		return expressionHandler;
-	}
-
-	@Bean
 	@Profile("!local")
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-		http
-				.authorizeHttpRequests(
-						authorize -> authorize
-								.requestMatchers("/submissions").permitAll()
-								.requestMatchers("/submissions/load").permitAll()
-//								.requestMatchers("/swagger-ui/**").permitAll()
-//								.requestMatchers("/v3/api-docs/**").permitAll()
-//								.requestMatchers("/submissions/**").permitAll()
-//								.requestMatchers("/submitted-forms/**").permitAll()
-//								.requestMatchers("/forms/**").permitAll()
-//								.requestMatchers("/test/**").hasAuthority("SCOPE_openid")
-//								//if the request didn't match test/**, then try to match this:
-//								.requestMatchers("/forms/**").hasAuthority("SCOPE_REGISTRAR_API")
-								// if the request didn't match any ant matcher, then user needs to be at least authenticated
-								.anyRequest().hasAuthority("SCOPE_REGISTRAR_API")
-								.anyRequest().authenticated()
-				)
-//				.oauth2ResourceServer(oauth2 -> oauth2.opaqueToken
-//						(token -> token.introspectionUri(this.introspectionUri)
-//								.introspectionClientCredentials(this.clientId, this.clientSecret)
-//								.introspector(introspector()))
-//				);
-//				.oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt);
+		http.authorizeHttpRequests(
+				authorize -> authorize
+						.requestMatchers("/submissions").permitAll()
+						.requestMatchers("/submissions/load").permitAll()
+						// if the request didn't match any previous matcher,
+						// then user needs to be authenticated with OIDC and his token to have scope REGISTRAR_API
+						.anyRequest().hasAuthority("SCOPE_REGISTRAR_API")
+		)
 				.oauth2ResourceServer(OAuth2ResourceServerConfigurer::opaqueToken)
-				.csrf(AbstractHttpConfigurer::disable)
 				.addFilterAfter(new RegistrarUnauthenticatedFilter(), AnonymousAuthenticationFilter.class)
+				.csrf(AbstractHttpConfigurer::disable)
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 		return http.build();
 	}
@@ -103,17 +68,14 @@ public class RegistrarSecurityConfig {
 								.requestMatchers("/test/**").hasAuthority("SCOPE_openid")
 				)
 				.oauth2ResourceServer(OAuth2ResourceServerConfigurer::opaqueToken)
-				.csrf(AbstractHttpConfigurer::disable)
 				.addFilterAfter(new RegistrarUnauthenticatedFilter(), AnonymousAuthenticationFilter.class)
+				.csrf(AbstractHttpConfigurer::disable)
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 		return http.build();
 	}
 
 	@Bean
 	public OpaqueTokenIntrospector introspector(RoleService roleService) {
-//		return new GoogleTokenIntrospector(introspectionUri, roleService);
 		return new RegistrarTokenIntrospector(introspectionUri, clientId, clientSecret, userInfoEndpoint, roleService);
-//		return new SpringOpaqueTokenIntrospector(introspectionUri, clientId, clientSecret);
-//		return new NimbusOpaqueTokenIntrospector(introspectionUri, clientId, clientSecret);
 	}
 }

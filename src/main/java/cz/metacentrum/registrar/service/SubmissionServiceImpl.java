@@ -222,6 +222,10 @@ public class SubmissionServiceImpl implements SubmissionService {
 		Submission autoSubmission = loadSubmission(a.getFlowForm(), null);
 		autoSubmission.setSubmitterId(submission.getSubmitterId());
 		autoSubmission.setSubmitterName(submission.getSubmitterName());
+		autoSubmission.setOriginalIdentityLoa(submission.getOriginalIdentityLoa());
+		autoSubmission.setIdentityAttributes(submission.getIdentityAttributes());
+		autoSubmission.setOriginalIdentityIssuer(submission.getOriginalIdentityIssuer());
+		autoSubmission.setOriginalIdentityIdentifier(submission.getOriginalIdentityIdentifier());
 		autoSubmission.getSubmittedForms().forEach(s -> s.setSubmission(autoSubmission));
 		//todo try to fill values
 		createSubmission(autoSubmission);

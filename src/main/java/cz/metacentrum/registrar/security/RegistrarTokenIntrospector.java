@@ -19,10 +19,11 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * We need custom TokenIntrospector for 2 reasons:
+ * We need custom TokenIntrospector for 3 reasons:
  * - make introspect method cacheable
  * - extend OAuth2AuthenticatedPrincipal returned from introspect method,
  *  but maybe this can be done in custom AuthenticationProvider instead
+ *  - make user info request
  */
 @Slf4j
 public class RegistrarTokenIntrospector extends SpringOpaqueTokenIntrospector implements OpaqueTokenIntrospector {
@@ -42,7 +43,6 @@ public class RegistrarTokenIntrospector extends SpringOpaqueTokenIntrospector im
 	@Override
 	public OAuth2AuthenticatedPrincipal introspect(String token) {
 		OAuth2AuthenticatedPrincipal principal = super.introspect(token);
-		makeUserInfoRequest(token);
 
 		List<String> roles = roleService.getRolesByUserIdentifier(principal.getName());
 		Collection<GrantedAuthority> authorities = roles.stream()
