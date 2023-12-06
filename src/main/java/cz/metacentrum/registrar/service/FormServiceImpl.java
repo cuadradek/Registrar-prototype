@@ -124,7 +124,7 @@ public class FormServiceImpl implements FormService {
 
 	@Override
 	public List<Long> getFormsByIdmApprovalGroups(Set<UUID> groupUUIDs) {
-		return formRepository.findIsByIamApprovalGroups(groupUUIDs);
+		return formRepository.findIdsByIamApprovalGroups(groupUUIDs);
 	}
 
 	@Override
