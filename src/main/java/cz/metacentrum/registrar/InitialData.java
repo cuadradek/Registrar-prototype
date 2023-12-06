@@ -31,7 +31,7 @@ class InitialData {
 			Form secondForm = createSecondForm(formService);
 			var flowForm = new AssignedFlowForm(null, AssignedFlowForm.FlowType.AUTO, 0, secondForm, firstForm,
 					List.of(Form.FormType.INITIAL), List.of(Form.FormType.INITIAL));
-			formService.setAssignedFlowForms(firstForm.getId(), List.of(flowForm));
+			formService.setAssignedFlowForms(firstForm, List.of(flowForm));
 
 			var adminRole = new Role();
 			adminRole.setName("ADMIN");
@@ -45,8 +45,8 @@ class InitialData {
 				"My Second Form", "my-second-form", null, false, false);
 		Form form1 = formService.createForm(form);
 		AssignedFormModule module = new AssignedFormModule(null, "addToVo", form1, null, Map.of("VO", "2"), 0);
-		formService.setAssignedModules(form1.getId(), List.of(module));
-		formService.setApprovalGroups(form1.getId(), List.of(new ApprovalGroup(null, form1, 0, false, 1, UUID.fromString("13d64d76-2ca3-4cf8-b1f4-0befdbef69fc"))));
+		formService.setAssignedModules(form1, List.of(module));
+		formService.setApprovalGroups(form1, List.of(new ApprovalGroup(null, form1, 0, false, 1, UUID.fromString("13d64d76-2ca3-4cf8-b1f4-0befdbef69fc"))));
 
 		FormItem formItem = new FormItem(null, form1, "login", 0, false, false, FormItem.Type.USERNAME,
 				false, null, null, EINFRA_LOGIN, EINFRA_LOGIN,
@@ -54,7 +54,7 @@ class InitialData {
 				null,
 				List.of(Form.FormType.INITIAL, Form.FormType.EXTENSION),
 				null, null, FormItem.Disabled.NEVER, FormItem.Hidden.NEVER, false);
-		formService.setFormItems(2L, List.of(formItem));
+		formService.setFormItems(form1, List.of(formItem));
 
 		return form1;
 	}
@@ -64,8 +64,8 @@ class InitialData {
 				"My First Form", "my-first-form", null, false, false);
 		Form form1 = formService.createForm(form);
 		AssignedFormModule module = new AssignedFormModule(null, "addToVo", form1, null, Map.of("VO", "3"), 0);
-		formService.setAssignedModules(form1.getId(), List.of(module));
-		formService.setApprovalGroups(form1.getId(), List.of(new ApprovalGroup(null, form1, 0, false, 1, UUID.fromString("13d64d76-2ca3-4cf8-b1f4-0befdbef69fc"))));
+		formService.setAssignedModules(form1, List.of(module));
+		formService.setApprovalGroups(form1, List.of(new ApprovalGroup(null, form1, 0, false, 1, UUID.fromString("13d64d76-2ca3-4cf8-b1f4-0befdbef69fc"))));
 
 		FormItem formItem = new FormItem(null, form1, "login", 0, true, false, FormItem.Type.USERNAME,
 				false, null, null, EINFRA_LOGIN, EINFRA_LOGIN,
@@ -73,7 +73,7 @@ class InitialData {
 				null,
 				List.of(Form.FormType.INITIAL, Form.FormType.EXTENSION),
 				null, null, FormItem.Disabled.NEVER, FormItem.Hidden.NEVER, false);
-		formService.setFormItems(1L, List.of(formItem));
+		formService.setFormItems(form1, List.of(formItem));
 
 		return form1;
 	}

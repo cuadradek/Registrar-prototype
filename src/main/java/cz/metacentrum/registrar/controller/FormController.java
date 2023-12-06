@@ -23,6 +23,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.servers.Server;
 import io.swagger.v3.oas.annotations.servers.ServerVariable;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +60,7 @@ import java.util.stream.Collectors;
 		})
 )
 @Tag(name = "Form service", description = "endpoints for managing forms")
+@Validated // necessary when request body is list of objects that need to be validated
 @RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 public class FormController {
 
@@ -105,7 +107,7 @@ public class FormController {
 	}
 
 	@PostMapping("/forms")
-	public ResponseEntity<FormDto> createForm(final @RequestBody @Validated FormDto formDTO,
+	public ResponseEntity<FormDto> createForm(final @RequestBody @Valid FormDto formDTO,
 											  @AuthenticationPrincipal RegistrarPrincipal principal) {
 		if (formDTO.getIamObject() == null && !iamService.canCreateForm(principal.getId())) {
 			throw new AccessDeniedException("Not allowed to create object!");
@@ -119,7 +121,7 @@ public class FormController {
 	}
 
 	@PutMapping("/forms")
-	public FormDto updateForm(final @RequestBody @Validated FormDto formDTO) {
+	public FormDto updateForm(final @RequestBody @Valid FormDto formDTO) {
 		Form form = formService.updateForm(convertToEntity(formDTO));
 		return convertToDto(form);
 	}
@@ -131,40 +133,49 @@ public class FormController {
 
 	@GetMapping("/forms/{id}/items")
 	public List<FormItem> getFormItems(final @PathVariable Long id) {
-		return formService.getFormItems(id);
+		Form form = getFormOrElseThrow(id);
+		return formService.getFormItems(form);
+	}
+
+	private Form getFormOrElseThrow(@PathVariable Long id) {
+		return formService.getFormById(id).orElseThrow(() -> new FormNotFoundException(id));
 	}
 
 	@PutMapping("/forms/{id}/items")
 	public List<FormItem> setFormItems(final @PathVariable Long id,
-									   final @RequestBody @Validated List<FormItem> formItems) {
-		return formService.setFormItems(id, formItems);
+									   final @RequestBody @Valid List<FormItem> formItems) {
+		Form form = getFormOrElseThrow(id);
+		return formService.setFormItems(form, formItems);
 	}
 
 	@GetMapping("/forms/{id}/flow-forms")
 	public List<AssignedFlowFormDto> getAssignedFlowForms(final @PathVariable Long id) {
-		return formService.getAssignedFlowForms(id).stream()
+		Form form = getFormOrElseThrow(id);
+		return formService.getAssignedFlowForms(form).stream()
 				.map(this::convertToDto)
 				.collect(Collectors.toList());
 	}
 
 	@PutMapping("/forms/{id}/flow-forms")
 	public List<AssignedFlowFormDto> setAssignedFlowForms(final @PathVariable Long id,
-														  final @RequestBody @Validated List<AssignedFlowFormDto> flowForms) {
+														  final @RequestBody @Valid List<AssignedFlowFormDto> flowForms) {
+		Form form = getFormOrElseThrow(id);
 		var entities = flowForms.stream().map(this::convertToEntity).collect(Collectors.toList());
-		return formService.setAssignedFlowForms(id, entities).stream()
+		return formService.setAssignedFlowForms(form, entities).stream()
 				.map(this::convertToDto)
 				.collect(Collectors.toList());
 	}
 
 	@GetMapping("/forms/{id}/modules")
 	public List<AssignedFormModule> getAssignedModules(final @PathVariable Long id) {
-		return formService.getAssignedModules(id);
+		Form form = getFormOrElseThrow(id);
+		return formService.getAssignedModules(form);
 	}
 
 	@PutMapping("/forms/{id}/modules")
 	public List<AssignedFormModule> setAssignedModules(final @PathVariable Long id,
-													   final @RequestBody @Validated List<AssignedFormModule> modules) {
-		Form form = formService.getFormById(id).orElseThrow(() -> new FormNotFoundException(id));
+													   final @RequestBody @Valid List<AssignedFormModule> modules) {
+		Form form = getFormOrElseThrow(id);
 		modules.forEach(m -> {
 			setModule(m);
 			if (!m.getFormModule().hasRightToAddToForm(form, m.getConfigOptions())) {
@@ -172,7 +183,7 @@ public class FormController {
 			}
 		});
 
-		return formService.setAssignedModules(id, modules);
+		return formService.setAssignedModules(form, modules);
 	}
 
 	private AssignedFormModule setModule(AssignedFormModule assignedModule) {
@@ -187,13 +198,15 @@ public class FormController {
 
 	@GetMapping("/forms/{id}/approval-groups")
 	public List<ApprovalGroup> getApprovalGroups(final @PathVariable Long id) {
-		return formService.getApprovalGroups(id);
+		Form form = getFormOrElseThrow(id);
+		return formService.getApprovalGroups(form);
 	}
 
 	@PutMapping("/forms/{id}/approval-groups")
 	public List<ApprovalGroup> setApprovalGroups(final @PathVariable Long id,
-												 final @RequestBody @Validated List<ApprovalGroup> groups) {
-		return formService.setApprovalGroups(id, groups);
+												 final @RequestBody @Valid List<ApprovalGroup> groups) {
+		Form form = getFormOrElseThrow(id);
+		return formService.setApprovalGroups(form, groups);
 	}
 
 	private <T> T convertToDto(Form form, Class<T> tClass) {
@@ -215,8 +228,7 @@ public class FormController {
 
 	private AssignedFlowForm convertToEntity(AssignedFlowFormDto dto) {
 		AssignedFlowForm assignedFlowForm = modelMapper.map(dto, AssignedFlowForm.class);
-		Form form = formService.getFormById(dto.getFlowFormId())
-				.orElseThrow(() -> new FormNotFoundException(dto.getFlowFormId()));
+		Form form = getFormOrElseThrow(dto.getFlowFormId());
 		assignedFlowForm.setFlowForm(form);
 		return assignedFlowForm;
 	}

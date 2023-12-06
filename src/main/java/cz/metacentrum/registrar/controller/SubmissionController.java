@@ -19,6 +19,7 @@ import cz.metacentrum.registrar.exception.FormNotFoundException;
 import cz.metacentrum.registrar.service.FormService;
 import cz.metacentrum.registrar.service.SubmissionService;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -38,6 +39,7 @@ import java.util.stream.Collectors;
 
 @Tag(name = "Submission service", description = "endpoints for submitting and approving forms")
 @RestController
+@Validated // necessary when request body is list of objects that need to be validated
 @RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 public class SubmissionController {
 
@@ -114,7 +116,7 @@ public class SubmissionController {
 	}
 
 	@PostMapping("/submissions")
-	public SubmissionResultDto createSubmission(final @RequestBody @Validated SubmissionDto submissionDto) {
+	public SubmissionResultDto createSubmission(final @RequestBody @Valid SubmissionDto submissionDto) {
 		SubmissionResult result = submissionService.createSubmission(convertToEntity(submissionDto));
 		SubmissionResultDto resultDto = modelMapper.map(result, SubmissionResultDto.class);
 		resultDto.setSubmission(convertToDto(result.getSubmission()));
@@ -125,7 +127,7 @@ public class SubmissionController {
 	}
 
 	@PostMapping("/submitted-forms/approval")
-	public SubmittedFormDto makeApprovalDecision(final @RequestBody CreateApprovalDto approvalDto) {
+	public SubmittedFormDto makeApprovalDecision(final @RequestBody @Valid CreateApprovalDto approvalDto) {
 		Approval approval = modelMapper.map(approvalDto, Approval.class);
 		SubmittedForm submittedForm = submissionService.findSubmittedFormById(approvalDto.getSubmittedFormId())
 				.orElseThrow(() -> new FormNotFoundException(approvalDto.getSubmittedFormId()));

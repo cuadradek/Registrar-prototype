@@ -233,7 +233,7 @@ public class SubmissionServiceImpl implements SubmissionService {
 
 	private List<AssignedFlowForm> getAssignedFlowForms(Submission submission) {
 		return submission.getSubmittedForms().stream()
-				.flatMap(s -> formService.getAssignedFlowForms(s.getForm().getId())
+				.flatMap(s -> formService.getAssignedFlowForms(s.getForm())
 						.stream()
 						.filter(f -> f.getIfMainFlowType().contains(s.getFormType())))
 				.collect(Collectors.toList());
@@ -258,7 +258,7 @@ public class SubmissionServiceImpl implements SubmissionService {
 		}
 
 		createApprovals(principalsApprovalGroups, approval);
-		var modules = formService.getAssignedModules(submittedForm.getForm().getId());
+		var modules = formService.getAssignedModules(submittedForm.getForm());
 
 		submittedForm = switch (approval.getDecision()) {
 			case APPROVED -> approveForm(submittedForm, modules, principalsApprovalGroups);
@@ -295,7 +295,7 @@ public class SubmissionServiceImpl implements SubmissionService {
 
 	private List<ApprovalGroup> getPrincipalsApprovalGroups(SubmittedForm saved) {
 		Set<UUID> idmGroups = new HashSet<>();//todo these are from Principal object
-		List<ApprovalGroup> approvalGroups = formService.getApprovalGroups(saved.getForm().getId());
+		List<ApprovalGroup> approvalGroups = formService.getApprovalGroups(saved.getForm());
 		idmGroups.add(approvalGroups.get(0).getIamGroup());//todo remove this
 		var principalsApprovalGroups = approvalGroups
 				.stream()
@@ -308,7 +308,7 @@ public class SubmissionServiceImpl implements SubmissionService {
 	}
 
 	private boolean tryToApprove(SubmittedForm saved, List<ApprovalGroup> approvalGroups) {
-		var lastApprovalGroup = formService.getApprovalGroups(saved.getForm().getId())
+		var lastApprovalGroup = formService.getApprovalGroups(saved.getForm())
 				.stream()
 				.sorted(Comparator.reverseOrder())
 				.findFirst()
@@ -374,10 +374,10 @@ public class SubmissionServiceImpl implements SubmissionService {
 		}
 
 		submittedForm.setFormType(Form.FormType.INITIAL);
-		var modules = formService.getAssignedModules(form.getId());
+		var modules = formService.getAssignedModules(form);
 		modules.forEach(m -> m.getFormModule().onLoad(submittedForm, m.getConfigOptions()));
 
-		List<FormItem> items = formService.getFormItems(form.getId());
+		List<FormItem> items = formService.getFormItems(form);
 		var principal = principalService.getPrincipal();
 		List<FormItemData> itemDataList = items
 				.stream()

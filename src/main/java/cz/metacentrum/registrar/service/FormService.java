@@ -21,25 +21,25 @@ public interface FormService {
 	void deleteForm(Long id);
 	Form updateForm(Form form);
 
-	List<FormItem> getFormItems(Long formId);
+	List<FormItem> getFormItems(Form form);
 
-	List<FormItem> setFormItems(Long formId, List<FormItem> formItems);
+	List<FormItem> setFormItems(Form form, List<FormItem> formItems);
 
 	List<Form> getFormsByIdmObject(UUID idmObject);
 
 	List<Long> getFormsByIdmManagersGroups(Set<UUID> groupUUIDs);
 	List<Long> getFormsByIdmApprovalGroups(Set<UUID> groupUUIDs);
 
-	List<AssignedFlowForm> getAssignedFlowForms(Long mainFormId);
-	List<AssignedFlowForm> setAssignedFlowForms(Long mainFormId, List<AssignedFlowForm> assignedFlowForms);
+	List<AssignedFlowForm> getAssignedFlowForms(Form mainForm);
+	List<AssignedFlowForm> setAssignedFlowForms(Form mainForm, List<AssignedFlowForm> assignedFlowForms);
 
 	Optional<Form> getFormByUrlSuffix(String urlSuffix);
 
-	List<AssignedFormModule> getAssignedModules(Long formId);
+	List<AssignedFormModule> getAssignedModules(Form form);
 
-	List<AssignedFormModule> setAssignedModules(Long formId, List<AssignedFormModule> modules);
+	List<AssignedFormModule> setAssignedModules(Form form, List<AssignedFormModule> modules);
 
-	List<ApprovalGroup> getApprovalGroups(Long formId);
+	List<ApprovalGroup> getApprovalGroups(Form form);
 
-	List<ApprovalGroup> setApprovalGroups(Long formId, List<ApprovalGroup> groups);
+	List<ApprovalGroup> setApprovalGroups(Form form, List<ApprovalGroup> groups);
 }

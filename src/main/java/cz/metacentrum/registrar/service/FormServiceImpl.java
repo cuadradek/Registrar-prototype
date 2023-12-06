@@ -97,17 +97,13 @@ public class FormServiceImpl implements FormService {
 	}
 
 	@Override
-	public List<FormItem> getFormItems(Long formId) {
-//		Form form = getFormById(formId)
-//				.orElseThrow(() -> new FormNotFoundException(formId));
-		Form form = formRepository.getReferenceById(formId);
+	public List<FormItem> getFormItems(Form form) {
 		return formItemRepository.getAllByFormAndIsDeleted(form, false);
 	}
 
 	@Override
-	public List<FormItem> setFormItems(Long formId, List<FormItem> formItems) {
-		Form form = getFormById(formId).orElseThrow(() -> new FormNotFoundException(formId));
-		var existingItemsIds = getFormItems(formId).stream().map(FormItem::getId).collect(Collectors.toSet());
+	public List<FormItem> setFormItems(Form form, List<FormItem> formItems) {
+		var existingItemsIds = getFormItems(form).stream().map(FormItem::getId).collect(Collectors.toSet());
 
 		formItems.forEach(item -> {
 			if (item.getId() != null && !existingItemsIds.contains(item.getId())) {
@@ -128,15 +124,13 @@ public class FormServiceImpl implements FormService {
 	}
 
 	@Override
-	public List<AssignedFlowForm> getAssignedFlowForms(Long mainFormId) {
-		Form mainForm = formRepository.getReferenceById(mainFormId);
+	public List<AssignedFlowForm> getAssignedFlowForms(Form mainForm) {
 		return flowFormRepository.getAllByMainForm(mainForm);
 	}
 
 	@Override
-	public List<AssignedFlowForm> setAssignedFlowForms(Long mainFormId, List<AssignedFlowForm> assignedFlowForms) {
-		Form mainForm = getFormById(mainFormId).orElseThrow(() -> new FormNotFoundException(mainFormId));
-		var existingFlowsIds = getAssignedFlowForms(mainFormId).stream().map(AssignedFlowForm::getId).collect(Collectors.toSet());
+	public List<AssignedFlowForm> setAssignedFlowForms(Form mainForm, List<AssignedFlowForm> assignedFlowForms) {
+		var existingFlowsIds = getAssignedFlowForms(mainForm).stream().map(AssignedFlowForm::getId).collect(Collectors.toSet());
 		var updatingItemsIds = assignedFlowForms.stream().map(AssignedFlowForm::getId).collect(Collectors.toSet());
 
 		assignedFlowForms.forEach(assignedFlowForm -> {
@@ -144,7 +138,7 @@ public class FormServiceImpl implements FormService {
 				throw new IllegalArgumentException("Cannot change flow assignment for different main form!");
 			}
 //			TODO: check self-assignment, multiple assignments to 1 form, ...
-			if (mainFormId.equals(assignedFlowForm.getFlowForm().getId())) {
+			if (mainForm.getId().equals(assignedFlowForm.getFlowForm().getId())) {
 				throw new IllegalArgumentException("Cannot create self flow-assignment!");
 			}
 			assignedFlowForm.setMainForm(mainForm);
@@ -166,8 +160,7 @@ public class FormServiceImpl implements FormService {
 	}
 
 	@Override
-	public List<AssignedFormModule> getAssignedModules(Long formId) {
-		Form form = formRepository.getReferenceById(formId);
+	public List<AssignedFormModule> getAssignedModules(Form form) {
 		return formModulesRepository.getAllByForm(form).stream()
 				.sorted()
 				.map(this::setModule)
@@ -185,9 +178,8 @@ public class FormServiceImpl implements FormService {
 	}
 
 	@Override
-	public List<AssignedFormModule> setAssignedModules(Long formId, List<AssignedFormModule> modules) {
-		Form form = getFormById(formId).orElseThrow(() -> new FormNotFoundException(formId));
-		var existingModulesIds = getAssignedModules(formId).stream().map(AssignedFormModule::getId).collect(Collectors.toSet());
+	public List<AssignedFormModule> setAssignedModules(Form form, List<AssignedFormModule> modules) {
+		var existingModulesIds = getAssignedModules(form).stream().map(AssignedFormModule::getId).collect(Collectors.toSet());
 		var updatingModulesIds = modules.stream().map(AssignedFormModule::getId).collect(Collectors.toSet());
 
 		modules.forEach(assignedModule -> {
@@ -208,15 +200,13 @@ public class FormServiceImpl implements FormService {
 	}
 
 	@Override
-	public List<ApprovalGroup> getApprovalGroups(Long formId) {
-		Form form = formRepository.getReferenceById(formId);
+	public List<ApprovalGroup> getApprovalGroups(Form form) {
 		return approvalGroupRepository.getAllByForm(form);
 	}
 
 	@Override
-	public List<ApprovalGroup> setApprovalGroups(Long formId, List<ApprovalGroup> groups) {
-		Form form = getFormById(formId).orElseThrow(() -> new FormNotFoundException(formId));
-		var existingGroupsIds = getApprovalGroups(formId).stream().map(ApprovalGroup::getId).collect(Collectors.toSet());
+	public List<ApprovalGroup> setApprovalGroups(Form form, List<ApprovalGroup> groups) {
+		var existingGroupsIds = getApprovalGroups(form).stream().map(ApprovalGroup::getId).collect(Collectors.toSet());
 		var updatingGroupsIds = groups.stream().map(ApprovalGroup::getId).collect(Collectors.toSet());
 
 		groups.forEach(approvalGroup -> {
