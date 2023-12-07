@@ -60,6 +60,9 @@ public class SubmissionServiceImpl implements SubmissionService {
 	@Value("${registrar.find-similar-users}")
 	private boolean findSimilarUsers;
 
+	@Value("#{'${registrar.oauth2.resourceserver.user-identifiers-claims}'.split(',')}")
+	private List<String> userIdentifierClaims;
+
 	@Autowired
 	public SubmissionServiceImpl(SubmittedFormRepository submittedFormRepository, SubmissionRepository submissionRepository, FormItemRepository formItemRepository, ApprovalRepository approvalRepository, FormService formService, ApplicationContext context, PrincipalService principalService, IamService iamService) {
 		this.submittedFormRepository = submittedFormRepository;
@@ -168,13 +171,21 @@ public class SubmissionServiceImpl implements SubmissionService {
 
 		if (iamService.userExists(principal.getId())) {
 			submission.setSubmitterId(principal.getId());
-			//todo set original identity identifier by one of the additional user identifiers
-		} else {
-			submission.setOriginalIdentityIdentifier(principal.getId());
 		}
 
 		submission.setSubmitterName(principal.getName());
 		submission.setOriginalIdentityIssuer(principal.getClaimAsString("target_issuer"));
+
+		Optional<String> identifier = userIdentifierClaims.stream()
+				.map(principal::getClaimAsString)
+				.filter(StringUtils::isNotEmpty)
+				.findFirst();
+		if (identifier.isPresent()) {
+			submission.setOriginalIdentityIdentifier(identifier.get());
+		} else {
+			log.warn("No original identifier found for user {}", principal.getId());
+		}
+
 		submission.setOriginalIdentityLoa(1);
 		submission.setIdentityAttributes(principal.getAttributes().entrySet().stream()
 				.filter(e -> e.getValue() != null)
