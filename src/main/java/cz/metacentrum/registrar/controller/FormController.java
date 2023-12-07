@@ -5,6 +5,7 @@ import cz.metacentrum.registrar.model.AssignedFlowForm;
 import cz.metacentrum.registrar.model.AssignedFormModule;
 import cz.metacentrum.registrar.model.Form;
 import cz.metacentrum.registrar.model.FormItem;
+import cz.metacentrum.registrar.security.PermissionService;
 import cz.metacentrum.registrar.service.iam.FormModule;
 import cz.metacentrum.registrar.dto.AssignedFlowFormDto;
 import cz.metacentrum.registrar.dto.ExceptionResponse;
@@ -67,13 +68,15 @@ public class FormController {
 	private final FormService formService;
 	private final ModelMapper modelMapper;
 	private final IamService iamService;
+	private final PermissionService permissionService;
 	private final ApplicationContext context;
 
 	@Autowired
-	public FormController(FormService formService, ModelMapper modelMapper, IamService iamService, ApplicationContext context) {
+	public FormController(FormService formService, ModelMapper modelMapper, IamService iamService, PermissionService permissionService, ApplicationContext context) {
 		this.formService = formService;
 		this.modelMapper = modelMapper;
 		this.iamService = iamService;
+		this.permissionService = permissionService;
 		this.context = context;
 	}
 
@@ -141,10 +144,20 @@ public class FormController {
 		return formService.getFormById(id).orElseThrow(() -> new FormNotFoundException(id));
 	}
 
+	@Operation(summary = "Updates and/or creates form items for the form with {id}.")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200"),
+			@ApiResponse(responseCode = "404", description = "Form not found",
+					content = @Content(schema = @Schema(implementation = ExceptionResponse.class)))
+	})
 	@PutMapping("/forms/{id}/items")
 	public List<FormItem> setFormItems(final @PathVariable Long id,
 									   final @RequestBody @Valid List<FormItem> formItems) {
 		Form form = getFormOrElseThrow(id);
+		if (permissionService.hasRole(id, "FORM_MANAGER") ||
+			permissionService.isObjectRightHolder(Optional.of(form))) {
+			throw new AccessDeniedException("Not allowed to update items for form: " + id);
+		}
 		return formService.setFormItems(form, formItems);
 	}
 
@@ -172,6 +185,12 @@ public class FormController {
 		return formService.getAssignedModules(form);
 	}
 
+	@Operation(summary = "Assigns, updates, and unassgins form modules for the form with {id}.")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200"),
+			@ApiResponse(responseCode = "404", description = "Form not found",
+					content = @Content(schema = @Schema(implementation = ExceptionResponse.class)))
+	})
 	@PutMapping("/forms/{id}/modules")
 	public List<AssignedFormModule> setAssignedModules(final @PathVariable Long id,
 													   final @RequestBody @Valid List<AssignedFormModule> modules) {
