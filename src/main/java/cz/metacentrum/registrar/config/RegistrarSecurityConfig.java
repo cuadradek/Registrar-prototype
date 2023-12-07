@@ -22,16 +22,16 @@ import org.springframework.security.web.authentication.AnonymousAuthenticationFi
 @EnableMethodSecurity
 public class RegistrarSecurityConfig {
 
-	@Value("${spring.security.oauth2.resourceserver.opaquetoken.introspection-uri}")
+	@Value("${registrar.oauth2.resourceserver.introspection-uri}")
 	private String introspectionUri;
 
-	@Value("${spring.security.oauth2.resourceserver.opaquetoken.client-id}")
+	@Value("${registrar.oauth2.resourceserver.client-id}")
 	private String clientId;
 
-	@Value("${spring.security.oauth2.resourceserver.opaquetoken.client-secret}")
+	@Value("${registrar.oauth2.resourceserver.client-secret}")
 	private String clientSecret;
 
-	@Value("${registrar.resourceserver.user-info-endpoint}")
+	@Value("${registrar.oauth2.resourceserver.userinfo-uri}")
 	private String userInfoEndpoint;
 
 	@Bean
