@@ -139,6 +139,7 @@ public class SubmissionServiceImpl implements SubmissionService {
 	public SubmissionResult createSubmission(Submission submission) {
 		RegistrarPrincipal principal = principalService.getPrincipal();
 		submission.getSubmittedForms().forEach(s -> {
+			checkOpenSubmittedForms(s.getForm(), principal);
 			s.setFormState(FormState.PENDING_APPROVAL);
 			s.getFormData().forEach(d -> checkFilledItemData(d, principal, s.getForm()));
 			checkAllRequiredItemsAreFilled(s);
@@ -186,10 +187,7 @@ public class SubmissionServiceImpl implements SubmissionService {
 		submission.setSubmitterName(principal.getName());
 		submission.setOriginalIdentityIssuer(principal.getClaimAsString(originalIdpClaimName));
 
-		Optional<String> identifier = userIdentifierClaims.stream()
-				.map(principal::getClaimAsString)
-				.filter(StringUtils::isNotEmpty)
-				.findFirst();
+		Optional<String> identifier = getOriginalIdentifier(principal);
 		if (identifier.isPresent()) {
 			submission.setOriginalIdentityIdentifier(identifier.get());
 		} else {
@@ -201,6 +199,13 @@ public class SubmissionServiceImpl implements SubmissionService {
 		submission.setIdentityAttributes(principal.getAttributes().entrySet().stream()
 				.filter(e -> e.getValue() != null)
 				.collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toString())));
+	}
+
+	private Optional<String> getOriginalIdentifier(RegistrarPrincipal principal) {
+		return userIdentifierClaims.stream()
+				.map(principal::getClaimAsString)
+				.filter(StringUtils::isNotEmpty)
+				.findFirst();
 	}
 
 	private void setRedirections(Submission submission, Set<Form> redirectFlowForms, SubmissionResult result) {
@@ -386,21 +391,17 @@ public class SubmissionServiceImpl implements SubmissionService {
 
 	@Override
 	public List<SubmittedForm> loadSubmittedForm(Form form) {
+		var principal = principalService.getPrincipal();
 		SubmittedForm submittedForm = new SubmittedForm();
 		submittedForm.setForm(form);
-		boolean isOpen = submittedFormRepository.findSubmittedFormsByForm(form)
-				.stream()
-				.anyMatch(s -> s.getFormState().isOpenFormState());
-		if (isOpen) {
-			throw new IllegalArgumentException("There is already submitted form for form + " + form.getId());
-		}
+
+		checkOpenSubmittedForms(form, principal);
 
 		submittedForm.setFormType(Form.FormType.INITIAL);
 		var modules = formService.getAssignedModules(form);
 		modules.forEach(m -> m.getFormModule().onLoad(submittedForm, m.getConfigOptions()));
 
 		List<FormItem> items = formService.getFormItems(form);
-		var principal = principalService.getPrincipal();
 		List<FormItemData> itemDataList = items
 				.stream()
 				.map(item -> prefillValue(item, principal))
@@ -410,6 +411,20 @@ public class SubmissionServiceImpl implements SubmissionService {
 		List<SubmittedForm> submittedForms = new ArrayList<>();
 		submittedForms.add(submittedForm);
 		return submittedForms;
+	}
+
+	private void checkOpenSubmittedForms(Form form, RegistrarPrincipal principal) {
+		if (principal.isAuthenticated()) {
+			boolean isOpen = submittedFormRepository.findSubmittedFormsByForm(form)
+					.stream()
+					.filter(s -> s.getFormState().isOpenFormState())
+					.anyMatch(s ->
+							//todo check also by original identifier + issuer
+							(principal.getId() != null && principal.getId().equals(s.getSubmission().getSubmitterId())));
+			if (isOpen) {
+				throw new IllegalArgumentException("You already have open submitted form for form + " + form.getId());
+			}
+		}
 	}
 
 	private FormItemData prefillValue(FormItem formItem, RegistrarPrincipal principal) {
