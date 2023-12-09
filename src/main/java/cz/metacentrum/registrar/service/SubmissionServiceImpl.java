@@ -63,6 +63,9 @@ public class SubmissionServiceImpl implements SubmissionService {
 	@Value("#{'${registrar.oauth2.resourceserver.user-identifiers-claims}'.split(',')}")
 	private List<String> userIdentifierClaims;
 
+	@Value("${registrar.oauth2.resourceserver.original-idp-claim}")
+	private String originalIdpClaimName;
+
 	@Autowired
 	public SubmissionServiceImpl(SubmittedFormRepository submittedFormRepository, SubmissionRepository submissionRepository, FormItemRepository formItemRepository, ApprovalRepository approvalRepository, FormService formService, ApplicationContext context, PrincipalService principalService, IamService iamService) {
 		this.submittedFormRepository = submittedFormRepository;
@@ -174,7 +177,7 @@ public class SubmissionServiceImpl implements SubmissionService {
 		}
 
 		submission.setSubmitterName(principal.getName());
-		submission.setOriginalIdentityIssuer(principal.getClaimAsString("target_issuer"));
+		submission.setOriginalIdentityIssuer(principal.getClaimAsString(originalIdpClaimName));
 
 		Optional<String> identifier = userIdentifierClaims.stream()
 				.map(principal::getClaimAsString)
