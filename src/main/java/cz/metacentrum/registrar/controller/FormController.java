@@ -16,11 +16,15 @@ import cz.metacentrum.registrar.service.iam.IamService;
 import cz.metacentrum.registrar.security.RegistrarPrincipal;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.servers.Server;
 import io.swagger.v3.oas.annotations.servers.ServerVariable;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -61,6 +65,14 @@ import java.util.stream.Collectors;
 		})
 )
 @Tag(name = "Form service", description = "endpoints for managing forms")
+@SecurityScheme(
+		name = "bearerAuth",
+		type = SecuritySchemeType.HTTP,
+		bearerFormat = "JWT",
+		scheme = "bearer",
+		in = SecuritySchemeIn.HEADER
+)
+@SecurityRequirement(name = "bearerAuth")
 @Validated // necessary when request body is list of objects that need to be validated
 @RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 public class FormController {

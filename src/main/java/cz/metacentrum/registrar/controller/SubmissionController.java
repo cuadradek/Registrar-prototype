@@ -18,6 +18,7 @@ import cz.metacentrum.registrar.exception.ValidationException;
 import cz.metacentrum.registrar.exception.FormNotFoundException;
 import cz.metacentrum.registrar.service.FormService;
 import cz.metacentrum.registrar.service.SubmissionService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
@@ -39,6 +40,7 @@ import java.util.stream.Collectors;
 
 @Tag(name = "Submission service", description = "endpoints for submitting and approving forms")
 @RestController
+@SecurityRequirement(name = "bearerAuth")
 @Validated // necessary when request body is list of objects that need to be validated
 @RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 public class SubmissionController {

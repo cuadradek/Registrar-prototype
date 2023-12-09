@@ -41,6 +41,8 @@ public class RegistrarSecurityConfig {
 				authorize -> authorize
 						.requestMatchers("/submissions").permitAll()
 						.requestMatchers("/submissions/load").permitAll()
+						.requestMatchers("/swagger-ui/**").permitAll()
+						.requestMatchers("/v3/api-docs/**").permitAll()
 						// if the request didn't match any previous matcher,
 						// then user needs to be authenticated with OIDC and his token to have scope REGISTRAR_API
 						.anyRequest().hasAuthority("SCOPE_REGISTRAR_API")
