@@ -35,6 +35,9 @@ public class RegistrarSecurityConfig {
 	@Value("${registrar.oauth2.resourceserver.userinfo-uri}")
 	private String userInfoEndpoint;
 
+	@Value("${registrar.oauth2.resourceserver.required-scope}")
+	private String requiredScope;
+
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		http.authorizeHttpRequests(
@@ -44,8 +47,9 @@ public class RegistrarSecurityConfig {
 						.requestMatchers("/swagger-ui/**").permitAll()
 						.requestMatchers("/v3/api-docs/**").permitAll()
 						// if the request didn't match any previous matcher,
-						// then user needs to be authenticated with OIDC and his token to have scope REGISTRAR_API
-						.anyRequest().hasAuthority("SCOPE_REGISTRAR_API")
+						// then user needs to be authenticated with OIDC and
+						// his token to have the required scope configured in app properties
+						.anyRequest().hasAuthority("SCOPE_" + requiredScope)
 		)
 				.oauth2ResourceServer(OAuth2ResourceServerConfigurer::opaqueToken)
 				.addFilterAfter(new RegistrarUnauthenticatedFilter(), AnonymousAuthenticationFilter.class)
