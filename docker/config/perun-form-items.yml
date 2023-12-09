@@ -1,0 +1,42 @@
+urn:perun:user:attribute-def:def:login-namespace:einfra_password:
+  displayName: Password in E-infra
+  iamSourceAttributes: []
+  sourceIdentityAttributes: []
+  iamDestinationAttribute: urn:perun:user:attribute-def:def:login-namespace:einfra
+  label:
+    en:
+      - Password
+      - password
+    cs:
+      - heslo
+      - Heslo
+  labelRegex:
+    - en: /password/i
+    - cs: /heslo/i
+  includePolicy:
+    - passwordPolicy
+  itemTypes:
+    - PASSWORD
+  updatable:
+    - false
+
+urn:perun:user:attribute-def:def:login-namespace:einfra:
+  displayName: E-infra login
+  iamSourceAttributes:
+    - urn:perun:user:attribute-def:def:login-namespace:einfra
+  iamDestinationAttribute: urn:perun:user:attribute-def:def:login-namespace:einfra
+  itemTypes:
+    - USERNAME
+  updatable:
+    - false
+
+urn:perun:user:attribute-def:core:displayName:
+  displayName: Display name
+  iamSourceAttributes:
+    - urn:perun:user:attribute-def:core:displayName
+  iamDestinationAttribute: urn:perun:user:attribute-def:core:displayName
+  label:
+    en:
+      - Name
+      - name
+      - Full name
