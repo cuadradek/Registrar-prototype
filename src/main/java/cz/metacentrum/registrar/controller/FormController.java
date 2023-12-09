@@ -33,6 +33,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -49,6 +50,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -82,14 +84,16 @@ public class FormController {
 	private final IamService iamService;
 	private final PermissionService permissionService;
 	private final ApplicationContext context;
+	private final Environment environment;
 
 	@Autowired
-	public FormController(FormService formService, ModelMapper modelMapper, IamService iamService, PermissionService permissionService, ApplicationContext context) {
+	public FormController(FormService formService, ModelMapper modelMapper, IamService iamService, PermissionService permissionService, ApplicationContext context, Environment environment) {
 		this.formService = formService;
 		this.modelMapper = modelMapper;
 		this.iamService = iamService;
 		this.permissionService = permissionService;
 		this.context = context;
+		this.environment = environment;
 	}
 
 	@Operation(summary = "Get all forms")
@@ -124,10 +128,10 @@ public class FormController {
 	@PostMapping("/forms")
 	public ResponseEntity<FormDto> createForm(final @RequestBody @Valid FormDto formDTO,
 											  @AuthenticationPrincipal RegistrarPrincipal principal) {
-		if (formDTO.getIamObject() == null && !iamService.canCreateForm(principal.getId())) {
+		if (performAuthorization() && formDTO.getIamObject() == null && !iamService.canCreateForm(principal.getId())) {
 			throw new AccessDeniedException("Not allowed to create object!");
 		}
-		if (formDTO.getIamObject() != null && !iamService.isObjectRightHolder(principal.getId(), formDTO.getIamObject())) {
+		if (performAuthorization() && formDTO.getIamObject() != null && !iamService.isObjectRightHolder(principal.getId(), formDTO.getIamObject())) {
 			throw new AccessDeniedException("Not allowed to create object!");
 		}
 
@@ -166,8 +170,9 @@ public class FormController {
 	public List<FormItem> setFormItems(final @PathVariable Long id,
 									   final @RequestBody @Valid List<FormItem> formItems) {
 		Form form = getFormOrElseThrow(id);
-		if (permissionService.hasRole(id, "FORM_MANAGER") ||
-			permissionService.isObjectRightHolder(Optional.of(form))) {
+		if (performAuthorization() &&
+				(!permissionService.hasRole(id, "FORM_MANAGER")
+				|| !permissionService.isObjectRightHolder(Optional.of(form)))) {
 			throw new AccessDeniedException("Not allowed to update items for form: " + id);
 		}
 		return formService.setFormItems(form, formItems);
@@ -207,12 +212,14 @@ public class FormController {
 	public List<AssignedFormModule> setAssignedModules(final @PathVariable Long id,
 													   final @RequestBody @Valid List<AssignedFormModule> modules) {
 		Form form = getFormOrElseThrow(id);
-		modules.forEach(m -> {
-			setModule(m);
-			if (!m.getFormModule().hasRightToAddToForm(form, m.getConfigOptions())) {
-				throw new AccessDeniedException("You don't have rights to assign this module: " + m);
-			}
-		});
+		if (performAuthorization()) {
+			modules.forEach(m -> {
+				setModule(m);
+				if (!m.getFormModule().hasRightToAddToForm(form, m.getConfigOptions())) {
+					throw new AccessDeniedException("You don't have rights to assign this module: " + m);
+				}
+			});
+		}
 
 		return formService.setAssignedModules(form, modules);
 	}
@@ -288,5 +295,9 @@ public class FormController {
 //		}
 
 		return form;
+	}
+
+	private boolean performAuthorization() {
+		return !Arrays.asList(environment.getActiveProfiles()).contains("local");
 	}
 }
