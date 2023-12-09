@@ -6,7 +6,6 @@ import cz.metacentrum.perun.openapi.model.Vo;
 import cz.metacentrum.registrar.service.iam.IamService;
 import cz.metacentrum.registrar.model.Identity;
 import cz.metacentrum.registrar.service.iam.perun.client.PerunEnhancedRPC;
-import cz.metacentrum.registrar.service.iam.perun.client.PerunHttp;
 import cz.metacentrum.registrar.service.iam.perun.client.PerunRuntimeException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -21,12 +20,9 @@ import java.util.stream.Collectors;
 @Service
 public class PerunIamService implements IamService {
 
-	private final PerunHttp perunHttp;
 	private final PerunEnhancedRPC perunRPC;
-//	private final PerunRPC perunRPC;
 
-	public PerunIamService(PerunHttp perunHttp, PerunEnhancedRPC perunRPC) {
-		this.perunHttp = perunHttp;
+	public PerunIamService(PerunEnhancedRPC perunRPC) {
 		this.perunRPC = perunRPC;
 	}
 

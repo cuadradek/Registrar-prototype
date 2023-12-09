@@ -14,7 +14,6 @@ import cz.metacentrum.registrar.security.RegistrarPrincipal;
 import cz.metacentrum.registrar.service.SubmissionService;
 import cz.metacentrum.registrar.service.iam.perun.client.PerunEnhancedRPC;
 import cz.metacentrum.registrar.service.iam.perun.client.PerunRuntimeException;
-import cz.metacentrum.registrar.service.iam.perun.client.PerunHttp;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -28,8 +27,8 @@ public class AddToVo extends PerunFormModule {
 	private final PrincipalService principalService;
 	private final SubmissionService submissionService;
 
-	public AddToVo(PerunHttp perunHttp, PerunEnhancedRPC perunRPC, PrincipalService principalService, SubmissionService submissionService) {
-		super(perunHttp, perunRPC);
+	public AddToVo(PerunEnhancedRPC perunRPC, PrincipalService principalService, SubmissionService submissionService) {
+		super(perunRPC);
 		this.principalService = principalService;
 		this.submissionService = submissionService;
 	}
@@ -46,11 +45,12 @@ public class AddToVo extends PerunFormModule {
 	@Override
 	public void onApprove(SubmittedForm submittedForm, Map<String, String> configOptions) {
 		Optional<User> user = perunRPC.getUserByIdentifier(submittedForm.getSubmission().getSubmitterId());
+		int voId = Integer.parseInt(configOptions.get(VO));
 
 		if (submittedForm.getFormType() == Form.FormType.INITIAL) {
 			if (user.isEmpty()) {
 				var input = new InputCreateMemberForCandidate();
-				input.setVo(Integer.parseInt(configOptions.get(VO)));
+				input.setVo(voId);
 				input.setCandidate(getCandidate(submittedForm));
 				Member member = perunRPC.getMembersManager().createMemberForCandidate(input);
 				// TODO: now that the user is created in IAM, his submission need to be marked with his new identifier
@@ -61,11 +61,11 @@ public class AddToVo extends PerunFormModule {
 			} else {
 				var input = new InputCreateMemberForUser();
 				input.setUser(user.get().getId());
-				input.setVo(Integer.parseInt(configOptions.get(VO)));
+				input.setVo(voId);
 				perunRPC.getMembersManager().createMemberForUser(input);
 			}
 		} else if (submittedForm.getFormType() == Form.FormType.EXTENSION) {
-			Member member = perunRPC.getMembersManager().getMemberByUser(Integer.parseInt(configOptions.get(VO)), user.get().getId());
+			Member member = perunRPC.getMembersManager().getMemberByUser(voId, user.get().getId());
 			perunRPC.getMembersManager().extendMembership(member.getId());
 		}
 	}

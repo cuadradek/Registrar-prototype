@@ -33,10 +33,6 @@ public class PerunConfig {
 		return new UsersManagerApi(apiClient());
 	}
 
-//	@Bean
-//	public PerunRPC PerunRPC() {
-//		return new PerunRPC(perunUrl, perunUser, perunPassword, new RestTemplate());
-//	}
 	@Bean
 	public PerunEnhancedRPC PerunRPC() {
 		var restTemplate = new RestTemplate();
