@@ -168,12 +168,19 @@ public class SubmissionServiceImpl implements SubmissionService {
 	private void setSubmissionMetadata(Submission submission, RegistrarPrincipal principal) {
 		submission.setTimestamp(LocalDateTime.now());
 		if (!principal.isAuthenticated()) {
+			submission.setSubmitterId(null);
+			submission.setSubmitterName(null);
+			submission.setOriginalIdentityIssuer(null);
+			submission.setOriginalIdentityIdentifier(null);
 			submission.setOriginalIdentityLoa(0);
+			submission.setIdentityAttributes(null);
 			return;
 		}
 
 		if (iamService.userExists(principal.getId())) {
 			submission.setSubmitterId(principal.getId());
+		} else {
+			submission.setSubmitterId(null);
 		}
 
 		submission.setSubmitterName(principal.getName());
@@ -186,6 +193,7 @@ public class SubmissionServiceImpl implements SubmissionService {
 		if (identifier.isPresent()) {
 			submission.setOriginalIdentityIdentifier(identifier.get());
 		} else {
+			submission.setOriginalIdentityIdentifier(null);
 			log.warn("No original identifier found for user {}", principal.getId());
 		}
 
