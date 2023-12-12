@@ -20,8 +20,6 @@ public class TestController {
 	@GetMapping("/hello")
 	@PreAuthorize("hasAuthority('SCOPE_openid')")
 	public String hello(@AuthenticationPrincipal RegistrarOAuth2Principal principal) {
-		log.info("Som v hello metode");
-//		return "hello " + principal.getFormApprover();
 		return "hello " + (principal == null ? null : principal.getName());
 	}
 
@@ -38,7 +36,6 @@ public class TestController {
 
 	@GetMapping("/forms/{id}")
 	@PreAuthorize("@permissionService.hasRole(#id, 'FORM_MANAGER')")
-//	@PreAuthorize("hasPermission(#id, 'FORM_MANAGER')")
 	public Form getForm(@PathVariable Long id) {
 		var form = new Form();
 		form.setId(id);
