@@ -8,6 +8,7 @@ import cz.metacentrum.perun.openapi.model.Member;
 import cz.metacentrum.perun.openapi.model.User;
 import cz.metacentrum.perun.openapi.model.UserExtSource;
 import cz.metacentrum.registrar.model.Form;
+import cz.metacentrum.registrar.model.Submission;
 import cz.metacentrum.registrar.model.SubmittedForm;
 import cz.metacentrum.registrar.security.PrincipalService;
 import cz.metacentrum.registrar.security.RegistrarPrincipal;
@@ -51,7 +52,7 @@ public class AddToVo extends PerunFormModule {
 			if (user.isEmpty()) {
 				var input = new InputCreateMemberForCandidate();
 				input.setVo(voId);
-				input.setCandidate(getCandidate(submittedForm));
+				input.setCandidate(getCandidate(submittedForm.getSubmission()));
 				Member member = perunRPC.getMembersManager().createMemberForCandidate(input);
 				// TODO: now that the user is created in IAM, his submission need to be marked with his new identifier
 				submissionService.consolidateSubmissions(
@@ -70,20 +71,18 @@ public class AddToVo extends PerunFormModule {
 		}
 	}
 
-	private Candidate getCandidate(SubmittedForm submittedForm) {
+	private Candidate getCandidate(Submission submission) {
 		Candidate candidate = new Candidate();
-		// todo get this from identity info
-		candidate.setFirstName("TODOfirst");
-		candidate.setLastName("TODOsecond");
-		if (submittedForm.getSubmission().getSubmitterName() != null) {
+
+		candidate.setFirstName(submission.getIdentityAttributes().get("given_name"));
+		candidate.setLastName(submission.getIdentityAttributes().get("family_name"));
+		if (submission.getSubmitterName() != null) {
 			var ues = new UserExtSource();
-			ues.setLoa(submittedForm.getSubmission().getOriginalIdentityLoa());
-			ues.setLogin(submittedForm.getSubmission().getSubmitterName());
+			ues.setLoa(submission.getOriginalIdentityLoa());
+			ues.setLogin(submission.getOriginalIdentityIdentifier());
 			var es = new ExtSource();
-//		es.setName(principalService.getPrincipal().getIssuer().toString());
-			es.setName("INTERNAL");
-			es.setType("cz.metacentrum.perun.core.impl.ExtSourceInternal");
-//		es.setType("cz.metacentrum.perun.core.impl.ExtSourceIdp");
+			es.setName(submission.getOriginalIdentityIssuer());
+			es.setType("cz.metacentrum.perun.core.impl.ExtSourceIdp");
 			ues.setExtSource(es);
 			candidate.setUserExtSource(ues);
 		}
