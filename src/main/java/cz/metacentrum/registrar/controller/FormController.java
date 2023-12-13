@@ -152,13 +152,25 @@ public class FormController {
 	})
 	@PutMapping("/forms")
 	public FormDto updateForm(final @RequestBody @Valid FormDto formDTO) {
-		Form form = formService.updateForm(convertToEntity(formDTO));
+		Form form = getFormOrElseThrow(formDTO.getId());
+		if (performAuthorization() &&
+				(!permissionService.hasRole(formDTO.getId(), "FORM_MANAGER")
+						|| !permissionService.isObjectRightHolder(Optional.of(form)))) {
+			throw new AccessDeniedException("Not allowed to update form: " + form.getId());
+		}
+		form = formService.updateForm(convertToEntity(formDTO));
 		return convertToDto(form);
 	}
 
 	@Operation(summary = "Delete a form identified by the specified {id}.")
 	@DeleteMapping("/forms/{id}")
 	public void deleteForm(@PathVariable Long id) {
+		Form form = getFormOrElseThrow(id);
+		if (performAuthorization() &&
+				(!permissionService.hasRole(id, "FORM_MANAGER")
+						|| !permissionService.isObjectRightHolder(Optional.of(form)))) {
+			throw new AccessDeniedException("Not allowed to delete form: " + form.getId());
+		}
 		formService.deleteForm(id);
 	}
 
@@ -170,6 +182,12 @@ public class FormController {
 	@GetMapping("/forms/{id}/items")
 	public List<FormItem> getFormItems(final @PathVariable Long id) {
 		Form form = getFormOrElseThrow(id);
+		if (performAuthorization() &&
+				(!permissionService.hasRole(id, "FORM_MANAGER")
+						|| !permissionService.hasRole(id, "FORM_APPROVER")
+						|| !permissionService.isObjectRightHolder(Optional.of(form)))) {
+			throw new AccessDeniedException("Not allowed to get form items for form: " + form.getId());
+		}
 		return formService.getFormItems(form);
 	}
 
@@ -202,6 +220,12 @@ public class FormController {
 	@GetMapping("/forms/{id}/flow-forms")
 	public List<AssignedFlowFormDto> getAssignedFlowForms(final @PathVariable Long id) {
 		Form form = getFormOrElseThrow(id);
+		if (performAuthorization() &&
+				(!permissionService.hasRole(id, "FORM_MANAGER")
+						|| !permissionService.hasRole(id, "FORM_APPROVER")
+						|| !permissionService.isObjectRightHolder(Optional.of(form)))) {
+			throw new AccessDeniedException("Not allowed to get flow forms for form: " + form.getId());
+		}
 		return formService.getAssignedFlowForms(form).stream()
 				.map(this::convertToDto)
 				.collect(Collectors.toList());
@@ -217,6 +241,11 @@ public class FormController {
 	public List<AssignedFlowFormDto> setAssignedFlowForms(final @PathVariable Long id,
 														  final @RequestBody @Valid List<AssignedFlowFormDto> flowForms) {
 		Form form = getFormOrElseThrow(id);
+		if (performAuthorization() &&
+				(!permissionService.hasRole(id, "FORM_MANAGER")
+						|| !permissionService.isObjectRightHolder(Optional.of(form)))) {
+			throw new AccessDeniedException("Not allowed to update flow forms for form: " + form.getId());
+		}
 		var entities = flowForms.stream().map(this::convertToEntity).collect(Collectors.toList());
 		return formService.setAssignedFlowForms(form, entities).stream()
 				.map(this::convertToDto)
@@ -231,6 +260,11 @@ public class FormController {
 	@GetMapping("/forms/{id}/modules")
 	public List<AssignedFormModule> getAssignedModules(final @PathVariable Long id) {
 		Form form = getFormOrElseThrow(id);
+		if (performAuthorization() &&
+				(!permissionService.hasRole(id, "FORM_MANAGER")
+						|| !permissionService.isObjectRightHolder(Optional.of(form)))) {
+			throw new AccessDeniedException("Not allowed to get form modules for form: " + form.getId());
+		}
 		return formService.getAssignedModules(form);
 	}
 
@@ -244,6 +278,11 @@ public class FormController {
 	public List<AssignedFormModule> setAssignedModules(final @PathVariable Long id,
 													   final @RequestBody @Valid List<AssignedFormModule> modules) {
 		Form form = getFormOrElseThrow(id);
+		if (performAuthorization() &&
+				(!permissionService.hasRole(id, "FORM_MANAGER")
+						|| !permissionService.isObjectRightHolder(Optional.of(form)))) {
+			throw new AccessDeniedException("Not allowed to changed modules for form: " + form.getId());
+		}
 		if (performAuthorization()) {
 			modules.forEach(m -> {
 				setModule(m);
