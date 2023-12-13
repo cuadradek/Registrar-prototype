@@ -19,6 +19,7 @@ import cz.metacentrum.registrar.dto.SubmittedFormDto;
 import cz.metacentrum.registrar.dto.SubmittedFormSimpleDto;
 import cz.metacentrum.registrar.exception.ValidationException;
 import cz.metacentrum.registrar.exception.FormNotFoundException;
+import cz.metacentrum.registrar.security.PermissionService;
 import cz.metacentrum.registrar.service.FormService;
 import cz.metacentrum.registrar.service.SubmissionService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -64,12 +65,14 @@ public class SubmissionController {
 
 	private final SubmissionService submissionService;
 	private final FormService formService;
+	private final PermissionService permissionService; // TODO: auth rules not implemented yet
 	private final ModelMapper modelMapper;
 
 	@Autowired
-	public SubmissionController(SubmissionService submissionService, FormService formService, ModelMapper modelMapper) {
+	public SubmissionController(SubmissionService submissionService, FormService formService, PermissionService permissionService, ModelMapper modelMapper) {
 		this.submissionService = submissionService;
 		this.formService = formService;
+		this.permissionService = permissionService;
 		this.modelMapper = modelMapper;
 	}
 

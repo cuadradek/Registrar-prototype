@@ -22,6 +22,14 @@ public interface SubmissionService {
 
 	void submitAutoForm(Submission submission, AssignedFlowForm a);
 
+	/**
+	 * Consolidates user submissions to link them into his newly generated submitterId.
+	 * Sets submitterId for all submission with given originalIdentityIdentifier
+	 * and originalIdentityIssuer.
+	 * @param submitterId
+	 * @param originalIdentityIdentifier
+	 * @param originalIdentityIssuer
+	 */
 	void consolidateSubmissions(String submitterId, String originalIdentityIdentifier, String originalIdentityIssuer);
 
 	SubmittedForm createApproval(Approval approval);
