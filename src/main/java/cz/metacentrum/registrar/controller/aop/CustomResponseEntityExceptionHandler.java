@@ -31,7 +31,7 @@ public class CustomResponseEntityExceptionHandler {
 
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	public ResponseEntity<ExceptionResponse> methodArgumentNotValidExceptionHandler(MethodArgumentNotValidException ex, HttpServletRequest httpRequest) {
-		ExceptionResponse response =  new ExceptionResponse(HttpStatus.FORBIDDEN.value(),
+		ExceptionResponse response =  new ExceptionResponse(HttpStatus.BAD_REQUEST.value(),
 				ex.getMessage(), httpRequest.getRequestURI());
 		return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 	}

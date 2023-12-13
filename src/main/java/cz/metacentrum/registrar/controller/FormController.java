@@ -75,6 +75,15 @@ import java.util.stream.Collectors;
 		in = SecuritySchemeIn.HEADER
 )
 @SecurityRequirement(name = "bearerAuth")
+@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "Operation success"),
+		@ApiResponse(responseCode = "403", description = "Invalid query parameters or request body",
+				content = @Content(schema = @Schema(implementation = ExceptionResponse.class))),
+		@ApiResponse(responseCode = "403", description = "Insufficient permission",
+				content = @Content(schema = @Schema(implementation = ExceptionResponse.class))),
+		@ApiResponse(responseCode = "500", description = "Internal error",
+				content = @Content(schema = @Schema(implementation = ExceptionResponse.class)))
+})
 @Validated // necessary when request body is list of objects that need to be validated
 @RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 public class FormController {
@@ -96,10 +105,7 @@ public class FormController {
 		this.environment = environment;
 	}
 
-	@Operation(summary = "Get all forms")
-	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200")
-	})
+	@Operation(summary = "Gets all forms a caller is authorized for.")
 	@GetMapping("/forms")
 	public List<FormDto> getAllForms() {
 		return formService.getAllForms().stream()
@@ -107,9 +113,8 @@ public class FormController {
 				.collect(Collectors.toList());
 	}
 
-	@Operation(summary = "Get form by its id")
+	@Operation(summary = "Gets a form by its id.")
 	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200"),
 			@ApiResponse(responseCode = "404", description = "Form not found",
 					content = @Content(schema = @Schema(implementation = ExceptionResponse.class)))
 	})
@@ -125,6 +130,7 @@ public class FormController {
 				.orElseThrow(() -> new FormNotFoundException(id));
 	}
 
+	@Operation(summary = "Create a form based on the provided data in the request body.")
 	@PostMapping("/forms")
 	public ResponseEntity<FormDto> createForm(final @RequestBody @Valid FormDto formDTO,
 											  @AuthenticationPrincipal RegistrarPrincipal principal) {
@@ -139,17 +145,28 @@ public class FormController {
 		return new ResponseEntity<>(convertToDto(form), HttpStatus.CREATED);
 	}
 
+	@Operation(summary = "Update a form based on the provided data in the request body.")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "404", description = "Form not found",
+					content = @Content(schema = @Schema(implementation = ExceptionResponse.class)))
+	})
 	@PutMapping("/forms")
 	public FormDto updateForm(final @RequestBody @Valid FormDto formDTO) {
 		Form form = formService.updateForm(convertToEntity(formDTO));
 		return convertToDto(form);
 	}
 
+	@Operation(summary = "Delete a form identified by the specified {id}.")
 	@DeleteMapping("/forms/{id}")
 	public void deleteForm(@PathVariable Long id) {
 		formService.deleteForm(id);
 	}
 
+	@Operation(summary = "Gets form items for a form identified by the specified {id}.")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "404", description = "Form not found",
+					content = @Content(schema = @Schema(implementation = ExceptionResponse.class)))
+	})
 	@GetMapping("/forms/{id}/items")
 	public List<FormItem> getFormItems(final @PathVariable Long id) {
 		Form form = getFormOrElseThrow(id);
@@ -160,9 +177,8 @@ public class FormController {
 		return formService.getFormById(id).orElseThrow(() -> new FormNotFoundException(id));
 	}
 
-	@Operation(summary = "Updates and/or creates form items for the form with {id}.")
+	@Operation(summary = "Updates and/or creates given form items for a form identified by the specified {id}.)")
 	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200"),
 			@ApiResponse(responseCode = "404", description = "Form not found",
 					content = @Content(schema = @Schema(implementation = ExceptionResponse.class)))
 	})
@@ -178,6 +194,11 @@ public class FormController {
 		return formService.setFormItems(form, formItems);
 	}
 
+	@Operation(summary = "Gets assigned flow forms for a form identified by the specified {id}.")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "404", description = "Form not found",
+					content = @Content(schema = @Schema(implementation = ExceptionResponse.class)))
+	})
 	@GetMapping("/forms/{id}/flow-forms")
 	public List<AssignedFlowFormDto> getAssignedFlowForms(final @PathVariable Long id) {
 		Form form = getFormOrElseThrow(id);
@@ -186,6 +207,12 @@ public class FormController {
 				.collect(Collectors.toList());
 	}
 
+	@Operation(summary = "Updates, assigns, or removes given form flows for a form identified by the specified {id}. " +
+			"If an already assigned flow is missing in the request body, it will be removed!")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "404", description = "Form not found",
+					content = @Content(schema = @Schema(implementation = ExceptionResponse.class)))
+	})
 	@PutMapping("/forms/{id}/flow-forms")
 	public List<AssignedFlowFormDto> setAssignedFlowForms(final @PathVariable Long id,
 														  final @RequestBody @Valid List<AssignedFlowFormDto> flowForms) {
@@ -196,15 +223,20 @@ public class FormController {
 				.collect(Collectors.toList());
 	}
 
+	@Operation(summary = "Gets assigned form modules for a form identified by the specified {id}.")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "404", description = "Form not found",
+					content = @Content(schema = @Schema(implementation = ExceptionResponse.class)))
+	})
 	@GetMapping("/forms/{id}/modules")
 	public List<AssignedFormModule> getAssignedModules(final @PathVariable Long id) {
 		Form form = getFormOrElseThrow(id);
 		return formService.getAssignedModules(form);
 	}
 
-	@Operation(summary = "Assigns, updates, and unassgins form modules for the form with {id}.")
+	@Operation(summary = "Updates, assigns, or removes given modules for a form identified by the specified {id}. " +
+			"If an already assigned module is missing in the request body, it will be removed!")
 	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200"),
 			@ApiResponse(responseCode = "404", description = "Form not found",
 					content = @Content(schema = @Schema(implementation = ExceptionResponse.class)))
 	})
@@ -234,12 +266,23 @@ public class FormController {
 		}
 	}
 
+	@Operation(summary = "Gets approval groups for a form identified by the specified {id}.")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "404", description = "Form not found",
+					content = @Content(schema = @Schema(implementation = ExceptionResponse.class)))
+	})
 	@GetMapping("/forms/{id}/approval-groups")
 	public List<ApprovalGroup> getApprovalGroups(final @PathVariable Long id) {
 		Form form = getFormOrElseThrow(id);
 		return formService.getApprovalGroups(form);
 	}
 
+	@Operation(summary = "Updates, assigns, or removes given approval groups for a form identified by the specified {id}. " +
+			"If an already assigned group is missing in the request body, it will be removed!")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "404", description = "Form not found",
+					content = @Content(schema = @Schema(implementation = ExceptionResponse.class)))
+	})
 	@PutMapping("/forms/{id}/approval-groups")
 	public List<ApprovalGroup> setApprovalGroups(final @PathVariable Long id,
 												 final @RequestBody @Valid List<ApprovalGroup> groups) {
