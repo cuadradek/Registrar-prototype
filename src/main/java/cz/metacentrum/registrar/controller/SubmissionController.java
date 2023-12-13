@@ -51,7 +51,7 @@ import java.util.stream.Collectors;
 @SecurityRequirement(name = "bearerAuth")
 @ApiResponses(value = {
 		@ApiResponse(responseCode = "200", description = "Operation success"),
-		@ApiResponse(responseCode = "403", description = "Invalid query parameters or request body",
+		@ApiResponse(responseCode = "400", description = "Invalid query parameters or request body",
 				content = @Content(schema = @Schema(implementation = ExceptionResponse.class))),
 		@ApiResponse(responseCode = "403", description = "Insufficient permission",
 				content = @Content(schema = @Schema(implementation = ExceptionResponse.class))),

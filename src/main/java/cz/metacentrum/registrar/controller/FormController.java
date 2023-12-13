@@ -51,10 +51,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
@@ -77,7 +75,7 @@ import java.util.stream.Collectors;
 @SecurityRequirement(name = "bearerAuth")
 @ApiResponses(value = {
 		@ApiResponse(responseCode = "200", description = "Operation success"),
-		@ApiResponse(responseCode = "403", description = "Invalid query parameters or request body",
+		@ApiResponse(responseCode = "400", description = "Invalid query parameters or request body",
 				content = @Content(schema = @Schema(implementation = ExceptionResponse.class))),
 		@ApiResponse(responseCode = "403", description = "Insufficient permission",
 				content = @Content(schema = @Schema(implementation = ExceptionResponse.class))),
@@ -329,21 +327,8 @@ public class FormController {
 		return formService.setApprovalGroups(form, groups);
 	}
 
-	private <T> T convertToDto(Form form, Class<T> tClass) {
-		return modelMapper.map(form, tClass);
-	}
-
 	private FormDto convertToDto(Form form) {
-		FormDto formDto = modelMapper.map(form, FormDto.class);
-		return formDto;
-	}
-
-	private Set<Long> getFormsIds(List<Form> forms) {
-		if (forms == null) return new HashSet<>();
-		return forms
-				.stream()
-				.map(Form::getId)
-				.collect(Collectors.toSet());
+		return modelMapper.map(form, FormDto.class);
 	}
 
 	private AssignedFlowForm convertToEntity(AssignedFlowFormDto dto) {
@@ -358,25 +343,7 @@ public class FormController {
 	}
 
 	private Form convertToEntity(FormDto formDto) {
-		Form form = modelMapper.map(formDto, Form.class);
-
-//		if (!CollectionUtils.isEmpty(formDto.getAssignedFlowForms())) {
-//			form.setAssignedFlowForms(formDto.getAssignedFlowForms().stream()
-//					.map(this::convertToEntity)
-//					.collect(Collectors.toList()));
-//		}
-
-//		if (!CollectionUtils.isEmpty(formDto.getNestedFormsIds())) {
-//			form.setNestedForms(formService.getFormsByIds(formDto.getNestedFormsIds()));
-//		}
-//		if (!CollectionUtils.isEmpty(formDto.getAutosendFormsIds())) {
-//			form.setAutosendForms(formService.getFormsByIds(formDto.getAutosendFormsIds()));
-//		}
-//		if (!CollectionUtils.isEmpty(formDto.getRedirectFormsIds())) {
-//			form.setRedirectForms(formService.getFormsByIds(formDto.getRedirectFormsIds()));
-//		}
-
-		return form;
+		return modelMapper.map(formDto, Form.class);
 	}
 
 	private boolean performAuthorization() {
