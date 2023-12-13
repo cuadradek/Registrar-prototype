@@ -41,6 +41,7 @@ public class FormMessage {
 	@ManyToOne
 	@JoinColumn(name = "form_id")
 	@JsonIgnore
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	private Form form;
 
 	@Enumerated(EnumType.STRING)

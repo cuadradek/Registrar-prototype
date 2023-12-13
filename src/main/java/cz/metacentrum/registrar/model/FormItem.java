@@ -84,6 +84,7 @@ public class FormItem {
 
 	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn(name = "item_id")
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	@NotNull
 	@NotEmpty
 	private List<ItemTexts> texts;

@@ -183,6 +183,7 @@ public class FormServiceImpl implements FormService {
 		var updatingModulesIds = modules.stream().map(AssignedFormModule::getId).collect(Collectors.toSet());
 
 		modules.forEach(assignedModule -> {
+			setModule(assignedModule);
 			if (assignedModule.getId() != null && !existingModulesIds.contains(assignedModule.getId())) {
 				throw new IllegalArgumentException("Cannot change assignment for different form!");
 			}

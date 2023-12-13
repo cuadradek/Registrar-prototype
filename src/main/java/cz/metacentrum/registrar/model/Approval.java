@@ -12,6 +12,8 @@ import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDateTime;
 
@@ -35,6 +37,7 @@ public class Approval {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "submitted_form_id")
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	private SubmittedForm submittedForm;
 
 	@Enumerated(EnumType.STRING)

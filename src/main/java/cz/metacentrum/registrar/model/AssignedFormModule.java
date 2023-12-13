@@ -18,6 +18,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.Map;
 
@@ -36,6 +38,7 @@ public class AssignedFormModule implements Comparable<AssignedFormModule> {
 	@ManyToOne
 	@JoinColumn(name = "form_id")
 	@JsonIgnore
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	private Form form;
 
 	@Transient
@@ -47,6 +50,8 @@ public class AssignedFormModule implements Comparable<AssignedFormModule> {
 	@Fetch(FetchMode.SUBSELECT)
 	@MapKeyColumn(name = "config_option_name")
 	@Column(name = "config_option_value")
+	@JoinColumn(name = "assigned_form_module_id")
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	private Map<String, String> configOptions;
 
 	@Column

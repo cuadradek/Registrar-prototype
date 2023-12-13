@@ -9,6 +9,8 @@ import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @Data
@@ -22,6 +24,7 @@ public class FormItemData {
 
 	@ManyToOne
 	@JoinColumn(name = "form_item_id")
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	private FormItem formItem;
 
 	@Column(name = "item_value")

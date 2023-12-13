@@ -16,6 +16,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.Arrays;
 import java.util.List;
@@ -40,21 +42,27 @@ public class AssignedFlowForm {
 
 	@ManyToOne
 	@JoinColumn(name = "flow_form_id")
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	private Form flowForm;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "main_form_id")
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	private Form mainForm;
 
 	@Enumerated(EnumType.STRING)
 	@ElementCollection(fetch = FetchType.EAGER)
 	@Fetch(FetchMode.SUBSELECT)
-	@CollectionTable(name = "flow_form_form_types", joinColumns = @JoinColumn(name = "assigned_flow_form_id"))
+	@CollectionTable(name = "flow_form_form_types")
+	@JoinColumn(name = "assigned_flow_form_id")
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	private List<Form.FormType> ifFlowFormType = Arrays.asList(Form.FormType.INITIAL, Form.FormType.EXTENSION);
 
 	@Enumerated(EnumType.STRING)
 	@ElementCollection(fetch = FetchType.EAGER)
 	@Fetch(FetchMode.SUBSELECT)
-	@CollectionTable(name = "main_form_form_types", joinColumns = @JoinColumn(name = "assigned_flow_form_id"))
+	@CollectionTable(name = "main_form_form_types")
+	@JoinColumn(name = "assigned_flow_form_id")
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	private List<Form.FormType> ifMainFlowType = Arrays.asList(Form.FormType.INITIAL, Form.FormType.EXTENSION);
 }

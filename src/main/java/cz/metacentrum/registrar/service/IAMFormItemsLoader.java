@@ -52,9 +52,10 @@ public class IAMFormItemsLoader {
 
 	public void validateItem(FormItem item) {
 		String destAttribute = item.getIamDestinationAttribute();
+		if (destAttribute == null) return;
 		var itemModule = formItemModules.get(destAttribute);
 		if (itemModule == null) {
-			throw new IllegalArgumentException("Unsupported form item: " + destAttribute);
+			throw new IllegalArgumentException("Unsupported IAM-specific form item: " + destAttribute);
 		}
 		nullOrContains(itemModule.getIamSourceAttributes(), item.getIamSourceAttribute());
 		nullOrContains(itemModule.getSourceIdentityAttributes(), item.getSourceIdentityAttribute());

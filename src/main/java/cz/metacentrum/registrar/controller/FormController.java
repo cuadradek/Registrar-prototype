@@ -130,17 +130,17 @@ public class FormController {
 
 	@Operation(summary = "Create a form based on the provided data in the request body.")
 	@PostMapping("/forms")
-	public ResponseEntity<FormDto> createForm(final @RequestBody @Valid FormDto formDTO,
-											  @AuthenticationPrincipal RegistrarPrincipal principal) {
+	public FormDto createForm(final @RequestBody @Valid FormDto formDTO,
+							  @AuthenticationPrincipal RegistrarPrincipal principal) {
 		if (performAuthorization() && formDTO.getIamObject() == null && !iamService.canCreateForm(principal.getId())) {
-			throw new AccessDeniedException("Not allowed to create object!");
+			throw new AccessDeniedException("Not allowed to create form!");
 		}
 		if (performAuthorization() && formDTO.getIamObject() != null && !iamService.isObjectRightHolder(principal.getId(), formDTO.getIamObject())) {
-			throw new AccessDeniedException("Not allowed to create object!");
+			throw new AccessDeniedException("Not allowed to create form!");
 		}
 
 		Form form = formService.createForm(convertToEntity(formDTO));
-		return new ResponseEntity<>(convertToDto(form), HttpStatus.CREATED);
+		return convertToDto(form);
 	}
 
 	@Operation(summary = "Update a form based on the provided data in the request body.")

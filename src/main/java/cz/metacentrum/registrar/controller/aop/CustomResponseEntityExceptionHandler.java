@@ -1,6 +1,7 @@
 package cz.metacentrum.registrar.controller.aop;
 
 import cz.metacentrum.registrar.dto.ExceptionResponse;
+import cz.metacentrum.registrar.exception.EntityNotFoundException;
 import cz.metacentrum.registrar.exception.ValidationException;
 import cz.metacentrum.registrar.exception.FormNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -15,8 +16,8 @@ import jakarta.servlet.http.HttpServletRequest;
 @ControllerAdvice
 public class CustomResponseEntityExceptionHandler {
 
-	@ExceptionHandler(FormNotFoundException.class)
-	public ResponseEntity<ExceptionResponse> formNotFoundHandler(FormNotFoundException ex, HttpServletRequest httpRequest) {
+	@ExceptionHandler(EntityNotFoundException.class)
+	public ResponseEntity<ExceptionResponse> formNotFoundHandler(EntityNotFoundException ex, HttpServletRequest httpRequest) {
 		ExceptionResponse response =  new ExceptionResponse(HttpStatus.NOT_FOUND.value(),
 				ex.getMessage(), httpRequest.getRequestURI());
 		return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);

@@ -2,7 +2,7 @@ package cz.metacentrum.registrar.exception;
 
 import java.util.Set;
 
-public class FormNotFoundException extends RuntimeException {
+public class FormNotFoundException extends EntityNotFoundException {
 	public FormNotFoundException(Long id) {
 		super("Could not find form with id: " + id);
 	}

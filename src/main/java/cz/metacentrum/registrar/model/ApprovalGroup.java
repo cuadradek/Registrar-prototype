@@ -10,6 +10,8 @@ import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.UUID;
 
@@ -25,6 +27,7 @@ public class ApprovalGroup implements Comparable<ApprovalGroup> {
 	@ManyToOne
 	@JoinColumn(name = "form_id")
 	@JsonIgnore
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	private Form form;
 
 	@Column
