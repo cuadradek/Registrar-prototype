@@ -2,10 +2,9 @@ package cz.metacentrum.registrar.exception;
 
 import java.util.Set;
 
-// I would change this to checked exception TODO
 public class FormNotFoundException extends RuntimeException {
 	public FormNotFoundException(Long id) {
-		super("Could not find form " + id);
+		super("Could not find form with id: " + id);
 	}
 
 	public FormNotFoundException(Set<Long> ids) {

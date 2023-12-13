@@ -1,5 +1,8 @@
 package cz.metacentrum.registrar.controller;
 
+import cz.metacentrum.registrar.dto.ExceptionResponse;
+import cz.metacentrum.registrar.exception.SubmissionNotFoundException;
+import cz.metacentrum.registrar.exception.SubmittedFormNotFoundException;
 import cz.metacentrum.registrar.model.Approval;
 import cz.metacentrum.registrar.model.Form;
 import cz.metacentrum.registrar.model.FormItem;
@@ -18,6 +21,11 @@ import cz.metacentrum.registrar.exception.ValidationException;
 import cz.metacentrum.registrar.exception.FormNotFoundException;
 import cz.metacentrum.registrar.service.FormService;
 import cz.metacentrum.registrar.service.SubmissionService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -41,6 +49,15 @@ import java.util.stream.Collectors;
 @Tag(name = "Submission service", description = "endpoints for submitting and approving forms")
 @RestController
 @SecurityRequirement(name = "bearerAuth")
+@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "Operation success"),
+		@ApiResponse(responseCode = "403", description = "Invalid query parameters or request body",
+				content = @Content(schema = @Schema(implementation = ExceptionResponse.class))),
+		@ApiResponse(responseCode = "403", description = "Insufficient permission",
+				content = @Content(schema = @Schema(implementation = ExceptionResponse.class))),
+		@ApiResponse(responseCode = "500", description = "Internal error",
+				content = @Content(schema = @Schema(implementation = ExceptionResponse.class)))
+})
 @Validated // necessary when request body is list of objects that need to be validated
 @RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 public class SubmissionController {
@@ -56,14 +73,25 @@ public class SubmissionController {
 		this.modelMapper = modelMapper;
 	}
 
+	@Operation(summary = "Gets a submission by its id.")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "404", description = "Submission not found",
+					content = @Content(schema = @Schema(implementation = ExceptionResponse.class)))
+	})
 	@GetMapping("/submissions/{id}")
 	public SubmissionDto getSubmissionById(@PathVariable Long id) {
 		Optional<Submission> submission = submissionService.findSubmissionById(id);
 		return submission
 				.map(this::convertToDto)
-				.orElseThrow(() -> new FormNotFoundException(id));
+				.orElseThrow(() -> new SubmissionNotFoundException(id));
 	}
 
+	@Operation(summary = "Loads a form prepared for submission. One of the urlSuffix and formId parameters is required " +
+			"to identify the requested form. The redirectUrl parameter is optional to redirect user to the URL after submission.")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "404", description = "Form with given urlSuffix or formId not found",
+					content = @Content(schema = @Schema(implementation = ExceptionResponse.class)))
+	})
 	@GetMapping("/submissions/load")
 	public SubmissionDto loadForm(@RequestParam(required = false) String urlSuffix,
 								  @RequestParam(required = false) Long formId,
@@ -83,14 +111,24 @@ public class SubmissionController {
 		return convertToDto(submissionService.loadSubmission(form, redirectUrl));
 	}
 
+	@Operation(summary = "Gets a submitted form by its id.")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "404", description = "Submitted form not found",
+					content = @Content(schema = @Schema(implementation = ExceptionResponse.class)))
+	})
 	@GetMapping("/submitted-forms/{id}")
 	public SubmittedFormDto getSubmittedFormById(@PathVariable Long id) {
 		Optional<SubmittedForm> submittedForm = submissionService.findSubmittedFormById(id);
 		return submittedForm
 				.map(this::convertToDto)
-				.orElseThrow(() -> new FormNotFoundException(id));
+				.orElseThrow(() -> new SubmittedFormNotFoundException(id));
 	}
 
+	@Operation(summary = "Finds submitted forms by query parameters.")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "404", description = "Form not found for {formId}",
+					content = @Content(schema = @Schema(implementation = ExceptionResponse.class)))
+	})
 	@GetMapping("/submitted-forms")
 	public List<SubmittedFormSimpleDto> getSubmittedForms(@RequestParam(required = false) String submittedBy,
 														  @RequestParam(required = false) Long formId,
@@ -117,6 +155,7 @@ public class SubmissionController {
 				.collect(Collectors.toList());
 	}
 
+	@Operation(summary = "Creates a submission based on the request body.")
 	@PostMapping("/submissions")
 	public SubmissionResultDto createSubmission(final @RequestBody @Valid SubmissionDto submissionDto) {
 		SubmissionResult result = submissionService.createSubmission(convertToEntity(submissionDto));
@@ -128,11 +167,16 @@ public class SubmissionController {
 		return resultDto;
 	}
 
+	@Operation(summary = "Creates an approval based on the request body.")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "404", description = "Submitted form not found for 'submittedFormId' in the request body}",
+					content = @Content(schema = @Schema(implementation = ExceptionResponse.class)))
+	})
 	@PostMapping("/submitted-forms/approval")
 	public SubmittedFormDto makeApprovalDecision(final @RequestBody @Valid CreateApprovalDto approvalDto) {
 		Approval approval = modelMapper.map(approvalDto, Approval.class);
 		SubmittedForm submittedForm = submissionService.findSubmittedFormById(approvalDto.getSubmittedFormId())
-				.orElseThrow(() -> new FormNotFoundException(approvalDto.getSubmittedFormId()));
+				.orElseThrow(() -> new SubmittedFormNotFoundException(approvalDto.getSubmittedFormId()));
 		approval.setSubmittedForm(submittedForm);
 
 		submittedForm = submissionService.createApproval(approval);
