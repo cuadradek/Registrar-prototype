@@ -12,6 +12,7 @@ import cz.metacentrum.registrar.service.RoleService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
 import java.util.List;
 import java.util.Locale;
@@ -19,6 +20,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @Configuration
+@Profile("initial-data")
 class InitialData {
 
 	private static final String EINFRA_LOGIN = "urn:perun:user:attribute-def:def:login-namespace:einfra";

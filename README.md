@@ -21,7 +21,7 @@ docker build -t registrar:2.0-SNAPSHOT .
 ```
 
 ## Run
-Docker-compose will run a docker network consisting of Registrar and PostgreSQL database
+Docker-compose will run a docker network consisting of Registrar and PostgreSQL database.
 ```
 cd .. # docker folder
 vim .env # update .env file - these env variables are necessary!
@@ -29,6 +29,13 @@ docker-compose up
 
 docker-compose rm # to remove stopped service containers
 ```
+
+### Spring profiles
+`SPRING_PROFILES_ACTIVE` property in `.env` file contains list of comma separated profiles. Following profiles are supported:
+- `local` - doesn't check authorization rights, any user can run any endpoint
+- `initial-data` - insert initial data to DB for testing purposes - 2 forms with basic configuration
+
+### REST API requests
 - you can use the Swagger UI for making Registrar API requests:
   http://localhost:8080/swagger-ui/index.html
 - you can make both authenticated and unauthenticated HTTP requests
